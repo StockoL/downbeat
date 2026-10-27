@@ -1,0 +1,44 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Missing out · {{ klass }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>{{ klass }}</h1>
+<nav class="cluster" aria-label="{{ klass }}">
+  <a href="{% url 'class_pupils' klass.pk %}">List</a>
+  <a href="{% url 'class_missing_out' klass.pk %}" aria-current="page">Missing out</a>
+</nav>
+
+<p>Who has had the fewest house points and the fewest turns since {{ since|date:"j F Y" }}, fewest first.</p>
+<form method="get" class="cluster form-row">
+  <div class="field">
+    <label class="label" for="since">Since</label>
+    <input class="input" type="date" id="since" name="since" value="{{ since|date:'Y-m-d' }}">
+  </div>
+  <button class="button" type="submit">Show</button>
+</form>
+
+<div class="table-wrapper">
+  <table class="table" data-density="compact">
+    <thead>
+      <tr>
+        <th scope="col">Pupil</th>
+        <th scope="col" data-align="end">House points</th>
+        <th scope="col" data-align="end">Spoken to</th>
+        <th scope="col" data-align="end">Absent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a></td>
+        <td data-align="end">{{ row.house_points }}</td>
+        <td data-align="end">{{ row.spoken }}</td>
+        <td data-align="end">{{ row.absences|default:"" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

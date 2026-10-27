@@ -879,3 +879,7 @@ ol[role="list"] {
 .today-list__out {
   color: var(--color-text-muted);
 }
+
+.loan-return .input {
+  inline-size: min(18rem, 100%);
+}

@@ -15,7 +15,7 @@
       <strong>{{ loan.item }}</strong>
       <a href="{% url 'pupil_page' loan.pupil.pk %}">{{ loan.pupil }}</a>
       <small>since {{ loan.out_at|date:"j M" }}{% if loan.due %}, due {{ loan.due|date:"j M" }}{% if loan.overdue %} (overdue){% endif %}{% endif %}</small>
-      <form method="post" action="{% url 'loan_return' loan.pk %}" class="cluster">
+      <form method="post" action="{% url 'loan_return' loan.pk %}" class="cluster loan-return">
         {% csrf_token %}
         <label class="visually-hidden" for="condition-{{ loan.pk }}">Condition of {{ loan.item }}</label>
         <input class="input" id="condition-{{ loan.pk }}" name="condition" placeholder="Condition, if worth noting" maxlength="200">

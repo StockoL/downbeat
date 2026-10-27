@@ -5,6 +5,10 @@
 {% block content %}
 <p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
 <h1>{{ klass }}</h1>
+<nav class="cluster" aria-label="{{ klass }}">
+  <a href="{% url 'class_pupils' klass.pk %}" aria-current="page">List</a>
+  <a href="{% url 'class_missing_out' klass.pk %}">Missing out</a>
+</nav>
 <ul class="flow pupil-list" role="list">
   {% for row in rows %}
   <li class="cluster">
