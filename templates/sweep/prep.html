@@ -1,0 +1,53 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Prep · Sweep · Downbeat{% endblock %}
+
+{% block content %}
+<div class="cluster">
+  <h1>Prep</h1>
+  <nav class="cluster" aria-label="Sweep">
+    <a href="{% url 'sweep_home' %}">Sessions</a>
+    <a href="{% url 'prep' %}" aria-current="page">Prep</a>
+  </nav>
+</div>
+<nav class="cluster" aria-label="Day">
+  <a href="?date={{ previous|date:'Y-m-d' }}">‹ {{ previous|date:"D j M" }}</a>
+  <strong>{{ day|date:"l j F" }}</strong>
+  <a href="?date={{ following|date:'Y-m-d' }}">{{ following|date:"D j M" }} ›</a>
+</nav>
+
+{% for session in sessions %}
+<section class="card"><div class="card__body flow">
+  <h2>{{ session.period }} · {{ session.klass }}{% if session.lesson %} <small>{{ session.lesson }}</small>{% endif %}</h2>
+  {% if session.items %}
+  <ul class="flow" role="list">
+    {% for item in session.items %}
+    <li class="cluster prep-item" {% if item.done_at %}data-done{% endif %}>
+      <form method="post" action="{% url 'prep_toggle' item.pk %}">
+        {% csrf_token %}
+        <button class="button prep-item__tick" type="submit" data-variant="ghost" aria-pressed="{% if item.done_at %}true{% else %}false{% endif %}" aria-label="{% if item.done_at %}Not done{% else %}Done{% endif %}: {{ item.text }}">{% if item.done_at %}✓{% else %}○{% endif %}</button>
+      </form>
+      <span class="prep-item__text">{{ item.text }}</span>
+      {% if item.source == "manual" %}
+      <form method="post" action="{% url 'prep_remove' item.pk %}">
+        {% csrf_token %}
+        <button class="button" type="submit" data-variant="ghost" data-size="small" aria-label="Remove {{ item.text }}">✕</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="{% url 'prep_add' session.pk %}" class="cluster form-row">
+    {% csrf_token %}
+    <div class="field">
+      <label class="label visually-hidden" for="add-{{ session.pk }}">Add for {{ session.klass }}</label>
+      <input class="input" type="text" id="add-{{ session.pk }}" name="text" placeholder="Add something to do" maxlength="300">
+    </div>
+    <button class="button" type="submit">Add</button>
+  </form>
+</div></section>
+{% empty %}
+<p>No sessions on this day.</p>
+{% endfor %}
+{% endblock %}

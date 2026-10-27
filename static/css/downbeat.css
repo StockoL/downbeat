@@ -949,3 +949,18 @@ button.room-strip {
   padding: var(--space-2xs) var(--space-xs);
   border-inline-start: 3px solid var(--color-border-strong);
 }
+
+/* --- Prep --- */
+.prep-item {
+  --cluster-align: center;
+}
+
+.prep-item__tick {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+}
+
+.prep-item[data-done] .prep-item__text {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}

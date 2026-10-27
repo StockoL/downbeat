@@ -125,3 +125,24 @@ class SessionReflection(Base):
 
     def __str__(self):
         return self.text[:60] or "Swept"
+
+
+class PrepItem(Base):
+    """The tomorrow view: mostly generated from resources and open actions, plus the teacher's own."""
+
+    RESOURCE = "resource"
+    ACTION = "action"
+    MANUAL = "manual"
+    SOURCES = [(RESOURCE, "Resource"), (ACTION, "Action"), (MANUAL, "Manual")]
+
+    session = models.ForeignKey("timetable.Session", on_delete=models.CASCADE, related_name="prep_items")
+    text = models.CharField(max_length=300)
+    source = models.CharField(max_length=10, choices=SOURCES, default=MANUAL)
+    done_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["source", "created_at"]
+        constraints = [models.UniqueConstraint(fields=["session", "source", "text"], name="one_prep_item_per_text")]
+
+    def __str__(self):
+        return self.text
