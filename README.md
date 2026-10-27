@@ -1,56 +1,37 @@
 # Downbeat
 
-A personal classroom app for a secondary music teacher: seating plans, two-tap notes, lesson plans that carry forward, criteria-based formative observations, and report export. Django on a laptop, PWA on an iPad, pupil data kept local.
+A personal classroom app for a secondary music teacher: seating plans, two-tap notes, lesson plans that carry forward, criteria-based observations and, later, report export. Django runs on the teacher's laptop and holds the only copy of the data; an offline-first PWA on an iPad is the in-room screen. Pupil data never leaves the teacher's own devices.
 
-See `docs/BUILD_ORDER.md` for the data model and phases, `docs/UX.md` for navigation and screens, and `docs/DECISIONS.md` for choices made during the build.
+Everything runs at one of three tempos: **Plan** (desk, before), **Catch** (in the room, during) and **Sweep** (desk, same day, two minutes).
 
-## Installing
+![The room view mid-lesson: seats with badges, flags and group tints, and the lesson's Log](docs/screenshots/04-room-view-laptop.png)
+
+## Quick start
 
 ```
 py -3.12 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
-```
-
-## Using it
-
-```
 .\tools\serve.ps1
 ```
 
-Applies any migrations, then serves Downbeat at http://127.0.0.1:8000 on this laptop only, with debug off. The first visit opens the setup, which creates your account. `.\tools\install-server-task.ps1` starts it whenever you sign in to Windows. To reach it from the iPad, follow `docs/TAILSCALE.md`.
+Open http://127.0.0.1:8000 and follow the first-run setup. To try it with an invented school instead, see [Demo data](docs/DEVELOPMENT.md#demo-data).
 
-## Developing
+## Documentation
 
-```
-$env:DOWNBEAT_DEBUG = "1"
-.venv\Scripts\python manage.py runserver
-```
+| Read this | For |
+| --- | --- |
+| [docs/USER_STORIES.md](docs/USER_STORIES.md) | What the app does and for whom: user stories with MoSCoW priorities and BDD acceptance scenarios |
+| [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) | The user journeys and key features, shown screen by screen |
+| [docs/BUILD_ORDER.md](docs/BUILD_ORDER.md) | The specification: purpose, data model, the six phases and the rules the build must not break |
+| [docs/UX.md](docs/UX.md) | Navigation, user journeys, page inventory and the room view's layout |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How it fits together: apps, the gate, the offline queue and sync, the seating solver |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Running it day to day: the server, the iPad, backups, restore, export and delete |
+| [docs/TAILSCALE.md](docs/TAILSCALE.md) | Step by step: reaching the laptop from the iPad over HTTPS |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Working on the code: setup, demo data, conventions, theme, commits |
+| [docs/TESTING.md](docs/TESTING.md) | The test strategy, how to run the suite, what each file covers, browser and device checks |
+| [docs/DEVLOG.md](docs/DEVLOG.md) | The development log: what was built in each step, what went wrong and what was learnt |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Every choice the spec didn't settle, dated, with its reasoning |
 
-Tests and lint: `.venv\Scripts\python -m pip install -r requirements-dev.txt`, then `.venv\Scripts\python -m pytest` and `.venv\Scripts\ruff check .`. GitHub Actions runs both on every push.
+## Status
 
-## Backups
-
-`.venv\Scripts\python manage.py backup` copies the database to `backups\` (or `DOWNBEAT_BACKUP_DIR`) and keeps the newest 30. For a nightly copy to OneDrive, run once:
-
-```
-.\tools\install-backup-task.ps1 -Dest "$env:OneDrive\Downbeat backups"
-```
-
-To restore, stop the server and copy a backup over `db.sqlite3`. Settings → Data also has "Back up now", a full JSON export and "Delete everything".
-
-## Demo data
-
-A disposable school for building and trying things out, kept in its own database so the real one stays empty:
-
-```
-$env:DOWNBEAT_DB = "demo.sqlite3"
-.venv\Scripts\python manage.py migrate
-.venv\Scripts\python manage.py seed_demo
-.venv\Scripts\python manage.py runserver
-```
-
-Sign in as `demo` / `demo-downbeat`. `seed_demo --reset` wipes and rebuilds it (it refuses to run on `db.sqlite3`). Close the terminal, or `Remove-Item Env:DOWNBEAT_DB`, to go back to the real database.
-
-## Theme
-
-The theme in `static/theme/` is built from LooseLeaf's tokens by `node tools/build-theme.mjs ../looseleaf-ui static/theme`; a bundle exported from the LooseLeaf configurator can replace it.
+Phases 1 to 4 are complete. Phase 5 (assessment) is in progress: the assessment frame and observations from the seat are built; hinge checks, feedback and the exemplar bank are next. See [docs/DEVLOG.md](docs/DEVLOG.md).
