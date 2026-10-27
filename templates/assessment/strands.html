@@ -1,0 +1,14 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Strands · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Strands</h1>
+<p>The strands components belong to: performing, composing, listening, or whatever the department uses.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save strands</button>
+</form>
+{% endblock %}

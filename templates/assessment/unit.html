@@ -1,0 +1,47 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Components · {{ unit }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'scheme' unit.scheme.pk %}">← {{ unit.scheme }}</a></p>
+<h1>{{ unit }}</h1>
+<nav class="cluster" aria-label="{{ unit }}">
+  <a href="{% url 'unit' unit.pk %}">Lessons</a>
+  <a href="{% url 'unit_assessment' unit.pk %}" aria-current="page">Components and codes</a>
+</nav>
+
+{% if not has_strands %}
+<p>Components belong to strands, which are set up in <a href="{% url 'strands' %}">Settings → Strands</a>.</p>
+{% else %}
+<form method="post" class="flow">
+  {% csrf_token %}
+  <section class="flow">
+    <h2>Components</h2>
+    <p class="field__hint">Three to six things this unit sets out to see, in words a pupil would recognise. The default next step is attached to every observation unless you change it.</p>
+    {{ components.management_form }}
+    {% for f in components %}{% include "partials/form_row.html" with form=f %}{% endfor %}
+  </section>
+  <section class="flow">
+    <h2>Feedback codes</h2>
+    <p class="field__hint">Numbered, for a whole-class slide: "3 = keep the pulse steady when you add the fill".</p>
+    {{ codes.management_form }}
+    {% for f in codes %}{% include "partials/form_row.html" with form=f %}{% endfor %}
+  </section>
+  <button class="button" type="submit" data-variant="primary">Save</button>
+</form>
+
+<section class="card"><div class="card__body flow">
+  <h2>Share</h2>
+  <p>Components and codes as a file another teacher can import.</p>
+  <div class="cluster">
+    <a class="button" href="{% url 'components_export' unit.pk %}">Download criteria file</a>
+    <form method="post" action="{% url 'components_import' unit.pk %}" enctype="multipart/form-data" class="cluster">
+      {% csrf_token %}
+      <label class="label" for="criteria-file">Import</label>
+      <input class="input" type="file" id="criteria-file" name="file" accept=".json,application/json" required>
+      <button class="button" type="submit">Add from file</button>
+    </form>
+  </div>
+</div></section>
+{% endif %}
+{% endblock %}

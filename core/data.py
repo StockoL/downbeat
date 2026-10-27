@@ -13,6 +13,7 @@ from django.core.management import call_command
 from django.db import connection, transaction
 from django.utils import timezone
 
+from assessment.models import Band, Component, FeedbackCode, Strand
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
 from plans.models import ActivityStatus, LessonPlan, PlanActivity, PrepItem, Resource, Scheme, SessionReflection, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
@@ -25,6 +26,8 @@ APP_MODELS = [
     PrepItem, SessionReflection, ActivityStatus, ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance,
     # seating and sessions
     SeatAssignment, SeatingPlan, Session, Slot, Seat, Room,
+    # assessment
+    FeedbackCode, Component, Strand, Band,
     # plans
     Resource, PlanActivity, LessonPlan, Unit, Scheme,
     # pupils' records
@@ -32,7 +35,7 @@ APP_MODELS = [
     # the frame
     Class, Pupil, NoteType, Timetable,
 ]
-EXPORT_APPS = ["timetable", "rooms", "notes", "pupils", "plans"]
+EXPORT_APPS = ["timetable", "rooms", "notes", "pupils", "plans", "assessment"]
 BACKUP_GLOB = "downbeat-*.sqlite3"
 
 

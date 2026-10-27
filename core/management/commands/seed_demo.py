@@ -19,6 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from assessment.models import Band, Component, FeedbackCode, Strand
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
@@ -285,6 +286,26 @@ class Command(BaseCommand):
                 SpokenTo.objects.create(session=session, pupil=pupil)
             for pupil in rng.sample(pupils, min(2, len(pupils))):
                 SessionAttendance.objects.create(session=session, pupil=pupil, present=False)
+
+        # Assessment frame: the department's strands and bands, and each unit's components.
+        strands = {name: Strand.objects.create(name=name, order=i) for i, name in enumerate(["Performing", "Composing", "Listening"])}
+        for i, name in enumerate(["Developing", "Secure", "Expert"]):
+            Band.objects.create(name=name, order=i)
+        for year, rows in [
+            (8, [("Keeps a steady pulse in the twelve-bar", "Performing", "Play along with the click track"),
+                 ("Plays a walking bass that fits the chords", "Performing", "Add the fifth on beat three"),
+                 ("Improvises using the blues scale", "Composing", "Start and end phrases on the root"),
+                 ("Hears and names the chord changes", "Listening", "Count the bars before each change")]),
+            (9, [("Plays a riff in time with the band", "Performing", "Lock in with the drummer's snare"),
+                 ("Layers a second riff that fits", "Composing", "Leave space for the first riff"),
+                 ("Spots how a riff is varied", "Listening", "Listen for what stays the same")]),
+        ]:
+            made = []
+            for order, (text, strand, step) in enumerate(rows):
+                made.append(Component.objects.create(unit=units[year], order=order, text=text, strand=strands[strand],
+                                                     next_step_default=step, cumulative_of=made[0] if order == 1 else None))
+            FeedbackCode.objects.create(unit=units[year], number=1, text="Count in before you start", component=made[0])
+            FeedbackCode.objects.create(unit=units[year], number=2, text="Leave space between phrases", component=made[-1])
 
         last_monday = today - datetime.timedelta(days=today.weekday() + 7)
         fill_from_unit(classes["8X Mu"], units[8], from_date=last_monday)

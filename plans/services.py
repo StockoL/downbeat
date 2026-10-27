@@ -1,3 +1,5 @@
+import json
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -8,7 +10,7 @@ from .models import LessonPlan, PlanActivity, Resource, Unit
 
 @transaction.atomic
 def duplicate_unit(unit, scheme=None):
-    """A copy of a unit with its lessons, activities and resources, as the start of next year's version."""
+    """A copy of a unit with its lessons, activities, resources, components and codes: next year's start."""
     copy = Unit.objects.create(
         scheme=scheme or unit.scheme, name=f"{unit.name} (copy)", order=unit.order + 1,
         lessons_planned=unit.lessons_planned, assessment_notes=unit.assessment_notes, purpose=unit.purpose,
@@ -26,6 +28,10 @@ def duplicate_unit(unit, scheme=None):
                      copies=r.copies, setup_note=r.setup_note)
             for r in lesson.resources.all()
         ])
+    # Components and feedback codes travel the same way a shared criteria file does.
+    from assessment import criteria
+
+    criteria.import_into(copy, json.dumps(criteria.export(unit)))
     return copy
 
 

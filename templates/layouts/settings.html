@@ -14,6 +14,8 @@
       <li><a href="{% url 'goals' %}" {% if section == "goals" %}aria-current="page"{% endif %}>Goals</a></li>
       <li><a href="{% url 'checklist' %}" {% if section == "checklist" %}aria-current="page"{% endif %}>Lesson checklist</a></li>
       <li><a href="{% url 'rotation_list' %}" {% if section == "rotations" %}aria-current="page"{% endif %}>Rotations</a></li>
+      <li><a href="{% url 'strands' %}" {% if section == "strands" %}aria-current="page"{% endif %}>Strands</a></li>
+      <li><a href="{% url 'bands' %}" {% if section == "bands" %}aria-current="page"{% endif %}>Bands</a></li>
       <li><a href="{% url 'flag_types' %}" {% if section == "flags" %}aria-current="page"{% endif %}>Flags</a></li>
       <li><a href="{% url 'room_list' %}" {% if section == "rooms" %}aria-current="page"{% endif %}>Rooms</a></li>
       <li><a href="{% url 'data_page' %}" {% if section == "data" %}aria-current="page"{% endif %}>Data</a></li>

@@ -1,0 +1,14 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Bands · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Bands</h1>
+<p>The words summative judgements use (Developing, Secure, Expert; 1 to 4; anything). Entered by you, never computed.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save bands</button>
+</form>
+{% endblock %}

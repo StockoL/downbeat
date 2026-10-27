@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "notes",
     "pupils",
     "plans",
+    "assessment",
 ]
 
 MIDDLEWARE = [
