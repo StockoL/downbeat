@@ -1,0 +1,6 @@
+{% comment %}One form laid out as a wrapping row: for formsets where each form is a line.{% endcomment %}
+{% if form.non_field_errors %}<div class="alert" data-status="danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+<div class="cluster form-row">
+  {% for field in form.visible_fields %}{{ field.as_field_group }}{% endfor %}
+  {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+</div>

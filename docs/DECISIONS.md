@@ -13,3 +13,9 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. Navigation shows only areas that exist.** The desk navbar lists Today and Settings in Phase 1 (Plan once the seating editor exists). Sweep and Pupils appear when their phases build them, so no link leads to an empty page.
 
 **27 Oct 2026. Checklist items and flag types are not in the Phase 1 first-run setup.** BUILD_ORDER's Phase 1 paragraph says the setup creates "the timetable, note types, checklist items and flag types", but ChecklistItem and FlagType are Phase 3 tables, the project conventions say not to scaffold later phases' models, and the kickoff says no flags. The setup wizard gains those steps in Phase 3.
+
+**27 Oct 2026. First-run setup is one page, saved atomically.** The rule is "if no Timetable exists, redirect to setup". A multi-page wizard that saved the timetable first would release the redirect before note types and a room existed. One page with three sections (timetable and periods, note types, first room) saves everything in one transaction or nothing. Blank spare rows are ignored; at least one period and one note type are required. Placeholders show examples but no value is pre-filled.
+
+**27 Oct 2026. The active timetable is the newest one.** The data model says "one active timetable; keep old ones for history" without an active field. `Timetable.active()` returns the most recently created, so no extra column is needed. A new timetable is made active by creating it.
+
+**27 Oct 2026. Note type icon is a short text field.** An emoji or symbol the teacher types (★, ✎, ⚠). No icon library and no images; it renders as the seat badge.

@@ -1,0 +1,48 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Set up · Downbeat{% endblock %}
+
+{% block nav %}{% endblock %}
+
+{% block content %}
+<div class="center flow">
+  <h1>Set up Downbeat</h1>
+  <p>Three things before the first lesson. Everything here can be changed later in Settings.</p>
+
+  <form method="post" class="flow">
+    {% csrf_token %}
+
+    <section class="card"><div class="card__body flow">
+      <h2>Timetable</h2>
+      {{ timetable_form }}
+      <fieldset class="fieldset flow">
+        <legend class="legend">Periods</legend>
+        <p class="field__hint">Leave spare rows blank.</p>
+        {{ periods.management_form }}
+        {% if periods.non_form_errors %}<div class="alert" data-status="danger" role="alert">{{ periods.non_form_errors|join:" " }}</div>{% endif %}
+        {% for form in periods %}
+          {% include "partials/form_row.html" %}
+        {% endfor %}
+      </fieldset>
+    </div></section>
+
+    <section class="card"><div class="card__body flow">
+      <h2>Note types</h2>
+      <p>The buttons on the note sheet, in this order. Five or six is plenty; free text is always added last.</p>
+      {{ note_types.management_form }}
+      {% if note_types.non_form_errors %}<div class="alert" data-status="danger" role="alert">{{ note_types.non_form_errors|join:" " }}</div>{% endif %}
+      {% for form in note_types %}
+        {% include "partials/form_row.html" %}
+      {% endfor %}
+    </div></section>
+
+    <section class="card"><div class="card__body flow">
+      <h2>First room</h2>
+      <p>Seats are placed in the room editor afterwards.</p>
+      {{ room_form }}
+    </div></section>
+
+    <button class="button" type="submit" data-variant="primary" data-size="large">Save and start</button>
+  </form>
+</div>
+{% endblock %}

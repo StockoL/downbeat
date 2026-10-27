@@ -18,6 +18,9 @@ INSTALLED_APPS = [
     "django.forms",
     "django_looseleaf",
     "core",
+    "timetable",
+    "rooms",
+    "notes",
 ]
 
 MIDDLEWARE = [
@@ -27,6 +30,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.FirstRunMiddleware",
 ]
 
 ROOT_URLCONF = "downbeat.urls"

@@ -59,3 +59,12 @@
     border-inline-start: 1px solid var(--color-border);
   }
 }
+
+/* --- Formset rows: fields share a line and sit on a common baseline. --- */
+.form-row {
+  --cluster-align: end;
+}
+
+.form-row > .field {
+  flex: 1 1 8rem;
+}

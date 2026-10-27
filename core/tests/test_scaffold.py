@@ -14,7 +14,7 @@ def test_base_is_abstract_with_uuid_and_timestamps():
     assert Base._meta.get_field("updated_at").auto_now
 
 
-def test_desk_layout_renders(client):
+def test_desk_layout_renders(client, timetable):
     response = client.get("/settings/")
     assert response.status_code == 200
     assert b"htmx.min.js" in response.content
