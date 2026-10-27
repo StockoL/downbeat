@@ -1,0 +1,16 @@
+{% comment %}Open actions for this class, this lesson's and those carried from earlier ones.{% endcomment %}
+<header class="note-sheet__head cluster">
+  <h2 class="note-sheet__name">Actions · {{ session.klass }}</h2>
+  <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+</header>
+<ol class="flow sheet-list" role="list">
+  {% for note in actions %}
+  <li class="cluster">
+    <span class="sheet-list__when">{% if note.session_id == session.pk %}Today{% else %}{{ note.session.date|date:"j M" }}{% endif %}</span>
+    <span class="sheet-list__what">{{ note.pupil|default:"Class" }} · {{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
+    <button type="button" class="button" hx-post="{% url 'action_done' note.pk %}" hx-vals='{"session": "{{ session.pk }}"}' hx-swap="none">Done</button>
+  </li>
+  {% empty %}
+  <li class="sheet-list__when">Nothing open.</li>
+  {% endfor %}
+</ol>

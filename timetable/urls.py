@@ -1,5 +1,7 @@
 from django.urls import path
 
+from notes import settings_views as note_settings
+
 from . import views
 
 urlpatterns = [
@@ -18,4 +20,5 @@ urlpatterns = [
     path("sessions/generate/", views.session_generate, name="session_generate"),
     path("sessions/<uuid:pk>/", views.session_edit, name="session_edit"),
     path("sessions/<uuid:pk>/delete/", views.session_delete, name="session_delete"),
+    path("note-types/", note_settings.note_types, name="note_types"),
 ]

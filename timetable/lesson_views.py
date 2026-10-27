@@ -3,6 +3,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from notes import services as notes
 from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 
 from .models import Session, Timetable
@@ -42,12 +43,29 @@ def room_view(request, pk):
     else:
         elsewhere = SeatingPlan.objects.filter(klass=session.klass).exclude(room=room).select_related("room").first()
 
+    unseated = [p for p in session.klass.pupils.all() if p.pk not in {s.pk for s in seated.values()}]
+    pupil_ids = [p.pk for p in seated.values()] + [p.pk for p in unseated]
+    badges = notes.badges(session, pupil_ids)
+    unread = notes.unread(pupil_ids)
+    seats = []
+    for seat in room.seats.all():
+        pupil = seated.get(seat.id)
+        seats.append({
+            "seat": seat, "pupil": pupil,
+            "badges": badges.get(pupil.pk, []) if pupil else [],
+            "unread": unread.get(pupil.pk, 0) if pupil else 0,
+        })
+
     return render(request, "timetable/room_view.html", {
         "session": session,
         "room": room,
         "plan": plan,
         "elsewhere": elsewhere,
-        "seats": [{"seat": seat, "pupil": seated.get(seat.id)} for seat in room.seats.all()],
+        "seats": seats,
+        "unseated": [{"pupil": p, "badges": badges.get(p.pk, []), "unread": unread.get(p.pk, 0)} for p in unseated],
+        "log": notes.log(session),
+        "undo_count": notes.undo_count(request, session),
+        "actions_count": len(notes.actions(session)),
         "next": next_session(session, timetable),
         "seat_width": SEAT_WIDTH,
         "seat_height": SEAT_HEIGHT,

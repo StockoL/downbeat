@@ -249,4 +249,7 @@ def session_edit(request, pk):
 
 @require_POST
 def session_delete(request, pk):
-    return _delete(request, get_object_or_404(Session, pk=pk), "session_list", "")
+    return _delete(
+        request, get_object_or_404(Session, pk=pk), "session_list",
+        "This session has notes. Mark it cancelled instead, so the notes keep their lesson.",
+    )

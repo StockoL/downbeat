@@ -1,0 +1,39 @@
+{% comment %}
+The note sheet. One tap on a type records a note and closes the sheet. Free text, last,
+is the only button that opens a field. No past notes here: they are behind the counter.
+{% endcomment %}
+<header class="note-sheet__head cluster">
+  <h2 class="note-sheet__name">{{ pupil }}</h2>
+  {% if unread %}
+  <button type="button" class="note-sheet__unread" hx-get="{% url 'inbox' session.pk pupil.pk %}" hx-target="#sheet-body"
+          aria-label="{{ unread }} open note{{ unread|pluralize }} for {{ pupil }}">{{ unread }}</button>
+  {% endif %}
+  {% if badges %}<span class="note-sheet__badges" aria-label="This lesson">{% for icon in badges %}<span>{{ icon }}</span>{% endfor %}</span>{% endif %}
+  <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+</header>
+
+{% if free_text %}
+<form class="flow" hx-post="{% url 'note_add' session.pk %}" hx-swap="none">
+  <input type="hidden" name="pupil" value="{{ pupil.pk }}">
+  <div class="field">
+    <label class="label" for="note-text">Note</label>
+    <textarea class="textarea" id="note-text" name="text" rows="3" autofocus></textarea>
+  </div>
+  <label class="choice"><input class="choice__input" type="checkbox" name="actionable"> Needs action</label>
+  <button class="button" type="submit" data-variant="primary" data-size="large">Save</button>
+</form>
+{% else %}
+<div class="note-sheet__buttons">
+  {% for note_type in note_types %}
+  <button type="button" class="button" data-size="large"
+          hx-post="{% url 'note_add' session.pk %}" hx-swap="none"
+          hx-vals='{"pupil": "{{ pupil.pk }}", "note_type": "{{ note_type.pk }}"}'>
+    {% if note_type.icon %}<span aria-hidden="true">{{ note_type.icon }}</span> {% endif %}{{ note_type.label }}
+  </button>
+  {% endfor %}
+  <button type="button" class="button" data-size="large" data-variant="ghost"
+          hx-get="{% url 'note_sheet' session.pk pupil.pk %}?free" hx-target="#sheet-body">
+    <span aria-hidden="true">✎</span> Free text
+  </button>
+</div>
+{% endif %}

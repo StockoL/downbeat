@@ -1,0 +1,5 @@
+{% comment %}A seat's note marks: this lesson's badges, and the inbox count as a small dot.{% endcomment %}
+<span class="seat__marks" id="marks-{{ pupil.pk }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if badges %}<span class="seat__badges" aria-hidden="true">{% for icon in badges %}{{ icon }}{% endfor %}</span>{% endif %}
+  {% if unread %}<span class="seat__unread" aria-label="{{ unread }} open">{{ unread }}</span>{% endif %}
+</span>

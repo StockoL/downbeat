@@ -250,6 +250,20 @@ function initPlanEditor(wrapper) {
 /* --- Room view ------------------------------------------------------------ */
 
 function initRoomView(root) {
+  // Sheets rise over the room and never leave it. HTMX fills #sheet-body; this opens and closes it.
+  const sheet = document.getElementById("sheet");
+  const body = document.getElementById("sheet-body");
+  const close = () => sheet.open && sheet.close();
+
+  document.body.addEventListener("htmx:afterSwap", (event) => {
+    if (event.detail.target === body && !sheet.open) sheet.showModal();
+  });
+  document.body.addEventListener("closeSheet", close);
+  sheet.addEventListener("click", (event) => {
+    if (event.target === sheet || event.target.closest("[data-close-sheet]")) close();
+  });
+  sheet.addEventListener("close", () => body.replaceChildren());
+
   document.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() !== "n" || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target.closest("input, textarea, select, [contenteditable]")) return;

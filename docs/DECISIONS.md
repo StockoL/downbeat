@@ -61,3 +61,19 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. The plan strip shows the period and its times until Phase 4.** There are no lesson plans yet, so the strip reads "P3 · 10:50–11:50". It becomes current-and-next activity, and the Log/Plan flip, when PlanActivity exists.
 
 **27 Oct 2026. The picker button arrives with the picker (step 8).** The bottom bar in step 6 carries the Today link, session name and next session. No control appears before it does something.
+
+**27 Oct 2026. Free text is a Note with no type.** Note.note_type is nullable; an empty type means free text, shown with ✎. The free-text form has a "Needs action" tick, the only choice in the whole note flow, because it is already the one form allowed.
+
+**27 Oct 2026. Note leaves out the fields later phases need.** Group (Phase 3), voice_path and transcript (no voice notes yet) and promoted_to_mis_at (Phase 6) are added when their features are built, so the Phase 1 table holds nothing unused.
+
+**27 Oct 2026. "Unread" counts a pupil's open actions.** The teacher writes every note, so nothing is literally unread. The counter on the note sheet's name and the dot on the seat show that pupil's actionable notes not yet done, from any lesson. Tapping the counter opens the inbox (all their notes, newest first); nothing else in the room shows past notes.
+
+**27 Oct 2026. Seat badges are this lesson's notes.** A seat shows the icons of notes made for that pupil in this session, so the room shows what has happened this lesson and resets each lesson.
+
+**27 Oct 2026. Notes go to a bin, with undo.** Each Log line has a one-tap remove, which sets a `deleted_at` (a field the data model doesn't list, added so removal is recoverable). An Undo button appears in the Log heading and reverses the last ten adds or removes this lesson, held in the browser session like seating undo. Removed notes vanish from every view.
+
+**27 Oct 2026. Actions carry forward by query.** The Actions sheet lists open actionable notes from this session and from every earlier session with the same class (by date and period order). When a carried note is listed in a later session, `carried_to_session` is set to it, recording where it landed. Done is one tap. The bottom-bar counter is neutral: "Actions" alone when nothing is open, with a plain number otherwise.
+
+**27 Oct 2026. Sessions and note types with notes are protected.** A session with notes can't be deleted (mark it cancelled instead), and a note type that has been used can't be deleted (rename it), so no note loses its lesson or its meaning.
+
+**27 Oct 2026. Unseated pupils are still reachable in the room.** Pupils in the class without a seat in this plan show as a row of names under the room, with the same tap-for-the-sheet behaviour. Otherwise a blank plan or a new pupil would leave someone impossible to note.

@@ -1,0 +1,5 @@
+{% comment %}Bottom-bar counter for open actions. Neutral: a count, never a warning.{% endcomment %}
+<button type="button" id="actions-button" class="button" data-variant="ghost"
+        hx-get="{% url 'actions_sheet' session.pk %}" hx-target="#sheet-body"{% if oob %} hx-swap-oob="true"{% endif %}>
+  Actions{% if actions_count %} <span class="room-bar__count">{{ actions_count }}</span>{% endif %}
+</button>

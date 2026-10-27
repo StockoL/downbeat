@@ -1,0 +1,15 @@
+{% comment %}A pupil's notes, newest first, over the note sheet. Read only.{% endcomment %}
+<header class="note-sheet__head cluster">
+  <button type="button" class="button" data-variant="ghost" hx-get="{% url 'note_sheet' session.pk pupil.pk %}" hx-target="#sheet-body">‹ Back</button>
+  <h2 class="note-sheet__name">{{ pupil }}</h2>
+  <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+</header>
+<ol class="flow sheet-list" role="list">
+  {% for note in notes %}
+  <li>
+    <span class="sheet-list__when">{{ note.session.date|date:"j M" }} · {{ note.session.klass }}</span>
+    <span>{{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
+    {% if note.actionable %}<span class="sheet-list__state">{% if note.done_at %}done{% else %}open{% endif %}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ol>

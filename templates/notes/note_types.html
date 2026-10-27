@@ -1,0 +1,14 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Note types · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Note types</h1>
+<p>The buttons on the note sheet. House points come first, then by order. Free text is always added last.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save note types</button>
+</form>
+{% endblock %}
