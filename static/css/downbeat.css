@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Downbeat: rules LooseLeaf's compositions and blocks don't cover.
+   Semantic tokens only; container queries, not viewport queries.
+   ========================================================================== */
+
+/* --- Room layout: canvas and panel side by side on a desk-width screen,
+       canvas full width with the panel below it otherwise. --- */
+.room {
+  container: room / inline-size;
+  min-block-size: 100dvh;
+}
+
+.room-layout {
+  display: grid;
+  grid-template-areas:
+    "canvas"
+    "panel"
+    "bar";
+  grid-template-rows: 1fr auto auto;
+  min-block-size: 100dvh;
+  font-size: var(--step-1);
+}
+
+.room-layout__canvas {
+  grid-area: canvas;
+  min-block-size: 0;
+  overflow: auto;
+  background: var(--color-surface-sunken);
+}
+
+.room-layout__panel {
+  grid-area: panel;
+  overflow: auto;
+  padding: var(--space-s);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.room-layout__bar {
+  grid-area: bar;
+  position: sticky;
+  inset-block-end: 0;
+  padding: var(--space-2xs) var(--space-s);
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
+@container room (min-width: 64rem) {
+  .room-layout {
+    grid-template-areas:
+      "canvas panel"
+      "bar bar";
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr auto;
+    block-size: 100dvh;
+  }
+
+  .room-layout__panel {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--color-border);
+  }
+}

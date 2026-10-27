@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Django
+*.sqlite3
+*.sqlite3-journal
+/media/
+/recordings/
+/staticfiles/
+.env
+
+# Local
+docs/DECISIONS.local.md
+.DS_Store
+Thumbs.db

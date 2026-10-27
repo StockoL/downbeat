@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% comment %}
+Catch tempo: the room view and nothing else. Canvas, one panel (Log or Plan), bottom bar.
+Sheets open over the room and never navigate away from it.
+{% endcomment %}
+
+{% block body_class %}room{% endblock %}
+
+{% block layout %}
+<div class="room-layout">
+  <main class="room-layout__canvas" id="main">
+    {% block canvas %}{% endblock %}
+  </main>
+  <aside class="room-layout__panel" aria-label="Lesson panel">
+    {% block panel %}{% endblock %}
+  </aside>
+  <footer class="room-layout__bar">
+    {% block bar %}{% endblock %}
+  </footer>
+</div>
+{% block sheets %}{% endblock %}
+{% endblock %}

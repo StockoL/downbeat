@@ -1,0 +1,304 @@
+{
+  "$version": "2.0.0",
+  "$generated": "2026-10-27T20:34:02.700Z",
+  "_comment": "Single source of truth for LooseLeaf UI. $utopia and $palette are inputs: the neutral, action, accent, status, step and space groups are derived from them at build time (scripts/tokens-core.mjs). Do not hand-edit derived values; change the inputs, or add an explicit value to a derived group to override it. Everything else is a semantic (tier 2) token named by purpose. Run npm run build after editing; see docs/TOKENS.md for the generated reference.",
+  "$utopia": {
+    "minViewport": 320,
+    "maxViewport": 1240,
+    "type": {
+      "minBase": 16,
+      "maxBase": 18,
+      "minRatio": 1.2,
+      "maxRatio": 1.25,
+      "stepsBelow": 1,
+      "stepsAbove": 5
+    },
+    "space": {
+      "minBase": 16,
+      "maxBase": 18,
+      "multipliers": {
+        "3xs": 0.25,
+        "2xs": 0.5,
+        "xs": 0.75,
+        "s": 1,
+        "m": 1.5,
+        "l": 2,
+        "xl": 3,
+        "2xl": 4,
+        "3xl": 6
+      },
+      "pairs": [
+        "s-m",
+        "m-l",
+        "l-xl"
+      ]
+    }
+  },
+  "$palette": {
+    "neutral": {
+      "hue": 270,
+      "chroma": 0.18
+    },
+    "action": {
+      "hue": 270,
+      "chroma": 0.18
+    },
+    "accent": {
+      "hue": 270,
+      "chroma": 0.18
+    },
+    "status": {
+      "success": {
+        "hue": 145
+      },
+      "warning": {
+        "hue": 70
+      },
+      "danger": {
+        "hue": 25
+      },
+      "info": {
+        "hue": 240
+      }
+    },
+    "lightness": {
+      "ramp": [
+        1,
+        0.985,
+        0.97,
+        0.92,
+        0.87,
+        0.71,
+        0.56,
+        0.44,
+        0.37,
+        0.27,
+        0.21,
+        0.13
+      ],
+      "status": {
+        "light": {
+          "base": 0.55,
+          "surface": 0.97,
+          "border": 0.88,
+          "text": 0.35
+        },
+        "dark": {
+          "base": 0.7,
+          "surface": 0.22,
+          "border": 0.35,
+          "text": 0.85
+        }
+      }
+    }
+  },
+  "color": {
+    "$purpose": "Semantic colour roles. The only colour tokens blocks may use.",
+    "surface": {
+      "light": "{neutral.0}",
+      "dark": "{neutral.950}"
+    },
+    "surface-raised": {
+      "light": "{neutral.0}",
+      "dark": "{neutral.900}"
+    },
+    "surface-sunken": {
+      "light": "{neutral.100}",
+      "dark": "{neutral.800}"
+    },
+    "text": {
+      "light": "{neutral.900}",
+      "dark": "{neutral.100}"
+    },
+    "text-muted": {
+      "light": "{neutral.500}",
+      "dark": "{neutral.400}"
+    },
+    "text-inverse": {
+      "light": "{neutral.0}",
+      "dark": "{neutral.950}"
+    },
+    "border": {
+      "light": "{neutral.200}",
+      "dark": "{neutral.700}"
+    },
+    "border-strong": {
+      "light": "{neutral.300}",
+      "dark": "{neutral.600}"
+    },
+    "link": "{color.action}",
+    "action": "{action.500}",
+    "action-hover": "{action.600}",
+    "action-text": "{neutral.0}",
+    "accent": "{accent.500}",
+    "focus": "{color.action}",
+    "backdrop": "rgb(0 0 0 / 0.5)",
+    "status-success": {
+      "light": "{success.base}",
+      "dark": "{success.base-dark}"
+    },
+    "status-success-surface": {
+      "light": "{success.surface-light}",
+      "dark": "{success.surface-dark}"
+    },
+    "status-success-border": {
+      "light": "{success.border-light}",
+      "dark": "{success.border-dark}"
+    },
+    "status-success-text": {
+      "light": "{success.text-light}",
+      "dark": "{success.text-dark}"
+    },
+    "status-warning": {
+      "light": "{warning.base}",
+      "dark": "{warning.base-dark}"
+    },
+    "status-warning-surface": {
+      "light": "{warning.surface-light}",
+      "dark": "{warning.surface-dark}"
+    },
+    "status-warning-border": {
+      "light": "{warning.border-light}",
+      "dark": "{warning.border-dark}"
+    },
+    "status-warning-text": {
+      "light": "{warning.text-light}",
+      "dark": "{warning.text-dark}"
+    },
+    "status-danger": {
+      "light": "{danger.base}",
+      "dark": "{danger.base-dark}"
+    },
+    "status-danger-surface": {
+      "light": "{danger.surface-light}",
+      "dark": "{danger.surface-dark}"
+    },
+    "status-danger-border": {
+      "light": "{danger.border-light}",
+      "dark": "{danger.border-dark}"
+    },
+    "status-danger-text": {
+      "light": "{danger.text-light}",
+      "dark": "{danger.text-dark}"
+    },
+    "status-info": {
+      "light": "{info.base}",
+      "dark": "{info.base-dark}"
+    },
+    "status-info-surface": {
+      "light": "{info.surface-light}",
+      "dark": "{info.surface-dark}"
+    },
+    "status-info-border": {
+      "light": "{info.border-light}",
+      "dark": "{info.border-dark}"
+    },
+    "status-info-text": {
+      "light": "{info.text-light}",
+      "dark": "{info.text-dark}"
+    }
+  },
+  "gutter": {
+    "$value": "{space.s}",
+    "$purpose": "Default gap inside compositions."
+  },
+  "region-space": {
+    "$value": "{space.xl}",
+    "$purpose": "Vertical padding of a page section."
+  },
+  "flow-space": {
+    "$value": "1em",
+    "$purpose": "Default rhythm in .flow; scales with the local font size."
+  },
+  "inset": {
+    "$purpose": "Padding inside blocks.",
+    "control": "{space.2xs} {space.s}",
+    "surface": "{space.m}"
+  },
+  "text": {
+    "$purpose": "Body text sizes.",
+    "body": "{step.0}",
+    "small": "{step.-1}",
+    "lead": "{step.1}"
+  },
+  "heading": {
+    "1": "{step.5}",
+    "2": "{step.4}",
+    "3": "{step.3}",
+    "4": "{step.2}",
+    "$purpose": "Heading sizes; h5 and h6 reuse --text-body."
+  },
+  "font": {
+    "$purpose": "Font family stacks. Brand-neutral placeholders; override per project.",
+    "body": "system-ui, sans-serif",
+    "heading": "system-ui, sans-serif",
+    "mono": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace"
+  },
+  "weight": {
+    "$purpose": "Font weights.",
+    "regular": 400,
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700
+  },
+  "leading": {
+    "$purpose": "Line heights.",
+    "tight": 1.1,
+    "body": 1.5
+  },
+  "radius": {
+    "$purpose": "Corner radii by what is being rounded.",
+    "control": "4px",
+    "surface": "8px",
+    "pill": "999px"
+  },
+  "shadow": {
+    "$purpose": "Elevation. Raised: dropdowns, card hover. Overlay: modal, offcanvas.",
+    "raised": {
+      "light": "0 10px 25px -5px rgb(0 0 0 / 0.1)",
+      "dark": "0 10px 25px -5px rgb(0 0 0 / 0.5)"
+    },
+    "overlay": {
+      "light": "0 10px 25px rgb(0 0 0 / 0.15)",
+      "dark": "0 10px 25px rgb(0 0 0 / 0.6)"
+    }
+  },
+  "duration": {
+    "$purpose": "Motion durations.",
+    "quick": "150ms",
+    "base": "250ms",
+    "slow": "400ms"
+  },
+  "ease": {
+    "$purpose": "Motion easing curves.",
+    "standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "spring": "cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+  },
+  "layer": {
+    "$purpose": "Stacking order. Dialogs use the top layer and need no token.",
+    "raised": 10,
+    "nav": 50,
+    "popover": 100
+  },
+  "button": {
+    "$purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action).",
+    "default-bg": "transparent",
+    "default-text": "{color.text}",
+    "default-border": "{color.border}",
+    "default-bg-hover": "{color.surface-sunken}",
+    "default-border-hover": "{color.border-strong}"
+  },
+  "link": {
+    "$purpose": "Decoration of unstyled anchors: underlined always, or only on hover.",
+    "decoration": "underline",
+    "decoration-hover": "underline"
+  },
+  "measure": {
+    "$value": "60ch",
+    "$purpose": "Typographic reading width (.center, prose)."
+  },
+  "wrapper-max": {
+    "$value": "80rem",
+    "$purpose": "Site-wide page section width (.wrapper)."
+  }
+}

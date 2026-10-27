@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load looseleaf %}
+{% comment %}Desk tempo: Plan, Sweep, Pupils and Settings. Ordinary pages, list and detail, no modals.{% endcomment %}
+
+{% block body_class %}desk{% endblock %}
+
+{% block layout %}
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="navbar">
+  <a class="navbar__brand" href="{% url 'today' %}">Downbeat</a>
+  <button class="navbar__toggle button" type="button" data-variant="ghost" aria-expanded="false" aria-controls="nav-menu">Menu</button>
+  <nav class="navbar__menu" id="nav-menu" aria-label="Main">
+    {% block nav %}
+    <a class="navbar__link" href="{% url 'today' %}" {% if nav == "today" %}aria-current="page"{% endif %}>Today</a>
+    <a class="navbar__link" href="{% url 'settings' %}" {% if nav == "settings" %}aria-current="page"{% endif %}>Settings</a>
+    {% endblock %}
+    <button class="button" type="button" data-variant="ghost" data-theme-toggle>Theme</button>
+  </nav>
+</header>
+<main id="main" class="wrapper region flow">
+  {% ll_messages %}
+  {% block content %}{% endblock %}
+</main>
+{% endblock %}

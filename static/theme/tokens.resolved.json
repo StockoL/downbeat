@@ -1,0 +1,1273 @@
+{
+  "$version": "2.0.0",
+  "$generated": "2026-10-27T20:34:02.700Z",
+  "neutral.0": {
+    "name": "--neutral-0",
+    "tier": 1,
+    "light": "#ffffff",
+    "dark": "#ffffff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.50": {
+    "name": "--neutral-50",
+    "tier": 1,
+    "light": "#f8faff",
+    "dark": "#f8faff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.100": {
+    "name": "--neutral-100",
+    "tier": 1,
+    "light": "#f1f5ff",
+    "dark": "#f1f5ff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.200": {
+    "name": "--neutral-200",
+    "tier": 1,
+    "light": "#dae4ff",
+    "dark": "#dae4ff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.300": {
+    "name": "--neutral-300",
+    "tier": 1,
+    "light": "#c4d3ff",
+    "dark": "#c4d3ff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.400": {
+    "name": "--neutral-400",
+    "tier": 1,
+    "light": "#7d9bff",
+    "dark": "#7d9bff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.500": {
+    "name": "--neutral-500",
+    "tier": 1,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.600": {
+    "name": "--neutral-600",
+    "tier": 1,
+    "light": "#3042b4",
+    "dark": "#3042b4",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.700": {
+    "name": "--neutral-700",
+    "tier": 1,
+    "light": "#212b9c",
+    "dark": "#212b9c",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.800": {
+    "name": "--neutral-800",
+    "tier": 1,
+    "light": "#11007a",
+    "dark": "#11007a",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.900": {
+    "name": "--neutral-900",
+    "tier": 1,
+    "light": "#090056",
+    "dark": "#090056",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "neutral.950": {
+    "name": "--neutral-950",
+    "tier": 1,
+    "light": "#020029",
+    "dark": "#020029",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
+  },
+  "action.500": {
+    "name": "--action-500",
+    "tier": 1,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw action hue (500 and its 600 hover step), derived from $palette.action."
+  },
+  "action.600": {
+    "name": "--action-600",
+    "tier": 1,
+    "light": "#3042b4",
+    "dark": "#3042b4",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw action hue (500 and its 600 hover step), derived from $palette.action."
+  },
+  "accent.500": {
+    "name": "--accent-500",
+    "tier": 1,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw accent hue (500 and its 600 hover step), derived from $palette.accent."
+  },
+  "accent.600": {
+    "name": "--accent-600",
+    "tier": 1,
+    "light": "#3042b4",
+    "dark": "#3042b4",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw accent hue (500 and its 600 hover step), derived from $palette.accent."
+  },
+  "success.base": {
+    "name": "--success-base",
+    "tier": 1,
+    "light": "#278733",
+    "dark": "#278733",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.surface-light": {
+    "name": "--success-surface-light",
+    "tier": 1,
+    "light": "#e6fce6",
+    "dark": "#e6fce6",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.border-light": {
+    "name": "--success-border-light",
+    "tier": 1,
+    "light": "#b9e5b9",
+    "dark": "#b9e5b9",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.text-light": {
+    "name": "--success-text-light",
+    "tier": 1,
+    "light": "#00480e",
+    "dark": "#00480e",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.base-dark": {
+    "name": "--success-base-dark",
+    "tier": 1,
+    "light": "#5bb661",
+    "dark": "#5bb661",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.surface-dark": {
+    "name": "--success-surface-dark",
+    "tier": 1,
+    "light": "#0f1f0f",
+    "dark": "#0f1f0f",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.border-dark": {
+    "name": "--success-border-dark",
+    "tier": 1,
+    "light": "#1e4420",
+    "dark": "#1e4420",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "success.text-dark": {
+    "name": "--success-text-dark",
+    "tier": 1,
+    "light": "#9be39d",
+    "dark": "#9be39d",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw success status colours for both schemes, derived from $palette.status.success."
+  },
+  "warning.base": {
+    "name": "--warning-base",
+    "tier": 1,
+    "light": "#9d6300",
+    "dark": "#9d6300",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.surface-light": {
+    "name": "--warning-surface-light",
+    "tier": 1,
+    "light": "#fff3e6",
+    "dark": "#fff3e6",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.border-light": {
+    "name": "--warning-border-light",
+    "tier": 1,
+    "light": "#f8d0a2",
+    "dark": "#f8d0a2",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.text-light": {
+    "name": "--warning-text-light",
+    "tier": 1,
+    "light": "#533200",
+    "dark": "#533200",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.base-dark": {
+    "name": "--warning-base-dark",
+    "tier": 1,
+    "light": "#d98b09",
+    "dark": "#d98b09",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.surface-dark": {
+    "name": "--warning-surface-dark",
+    "tier": 1,
+    "light": "#261706",
+    "dark": "#261706",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.border-dark": {
+    "name": "--warning-border-dark",
+    "tier": 1,
+    "light": "#533201",
+    "dark": "#533201",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "warning.text-dark": {
+    "name": "--warning-text-dark",
+    "tier": 1,
+    "light": "#ffc075",
+    "dark": "#ffc075",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw warning status colours for both schemes, derived from $palette.status.warning."
+  },
+  "danger.base": {
+    "name": "--danger-base",
+    "tier": 1,
+    "light": "#b94642",
+    "dark": "#b94642",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.surface-light": {
+    "name": "--danger-surface-light",
+    "tier": 1,
+    "light": "#fff2f0",
+    "dark": "#fff2f0",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.border-light": {
+    "name": "--danger-border-light",
+    "tier": 1,
+    "light": "#ffc8c3",
+    "dark": "#ffc8c3",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.text-light": {
+    "name": "--danger-text-light",
+    "tier": 1,
+    "light": "#6c1517",
+    "dark": "#6c1517",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.base-dark": {
+    "name": "--danger-base-dark",
+    "tier": 1,
+    "light": "#ed756e",
+    "dark": "#ed756e",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.surface-dark": {
+    "name": "--danger-surface-dark",
+    "tier": 1,
+    "light": "#2a1312",
+    "dark": "#2a1312",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.border-dark": {
+    "name": "--danger-border-dark",
+    "tier": 1,
+    "light": "#5c2926",
+    "dark": "#5c2926",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "danger.text-dark": {
+    "name": "--danger-text-dark",
+    "tier": 1,
+    "light": "#ffbab3",
+    "dark": "#ffbab3",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw danger status colours for both schemes, derived from $palette.status.danger."
+  },
+  "info.base": {
+    "name": "--info-base",
+    "tier": 1,
+    "light": "#0079b3",
+    "dark": "#0079b3",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.surface-light": {
+    "name": "--info-surface-light",
+    "tier": 1,
+    "light": "#ecf7ff",
+    "dark": "#ecf7ff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.border-light": {
+    "name": "--info-border-light",
+    "tier": 1,
+    "light": "#b1deff",
+    "dark": "#b1deff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.text-light": {
+    "name": "--info-text-light",
+    "tier": 1,
+    "light": "#003f60",
+    "dark": "#003f60",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.base-dark": {
+    "name": "--info-base-dark",
+    "tier": 1,
+    "light": "#26a9f1",
+    "dark": "#26a9f1",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.surface-dark": {
+    "name": "--info-surface-dark",
+    "tier": 1,
+    "light": "#081d2a",
+    "dark": "#081d2a",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.border-dark": {
+    "name": "--info-border-dark",
+    "tier": 1,
+    "light": "#083f5d",
+    "dark": "#083f5d",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "info.text-dark": {
+    "name": "--info-text-dark",
+    "tier": 1,
+    "light": "#9cd6ff",
+    "dark": "#9cd6ff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw info status colours for both schemes, derived from $palette.status.info."
+  },
+  "step.-1": {
+    "name": "--step--1",
+    "tier": 1,
+    "light": "clamp(0.83rem, 0.81rem + 0.12vw, 0.9rem)",
+    "dark": "clamp(0.83rem, 0.81rem + 0.12vw, 0.9rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.0": {
+    "name": "--step-0",
+    "tier": 1,
+    "light": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "dark": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.1": {
+    "name": "--step-1",
+    "tier": 1,
+    "light": "clamp(1.2rem, 1.13rem + 0.36vw, 1.41rem)",
+    "dark": "clamp(1.2rem, 1.13rem + 0.36vw, 1.41rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.2": {
+    "name": "--step-2",
+    "tier": 1,
+    "light": "clamp(1.44rem, 1.33rem + 0.55vw, 1.76rem)",
+    "dark": "clamp(1.44rem, 1.33rem + 0.55vw, 1.76rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.3": {
+    "name": "--step-3",
+    "tier": 1,
+    "light": "clamp(1.73rem, 1.56rem + 0.82vw, 2.2rem)",
+    "dark": "clamp(1.73rem, 1.56rem + 0.82vw, 2.2rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.4": {
+    "name": "--step-4",
+    "tier": 1,
+    "light": "clamp(2.07rem, 1.84rem + 1.17vw, 2.75rem)",
+    "dark": "clamp(2.07rem, 1.84rem + 1.17vw, 2.75rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "step.5": {
+    "name": "--step-5",
+    "tier": 1,
+    "light": "clamp(2.49rem, 2.16rem + 1.64vw, 3.43rem)",
+    "dark": "clamp(2.49rem, 2.16rem + 1.64vw, 3.43rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid type steps, derived from $utopia.type."
+  },
+  "space.3xs": {
+    "name": "--space-3xs",
+    "tier": 1,
+    "light": "clamp(0.25rem, 0.24rem + 0.05vw, 0.28rem)",
+    "dark": "clamp(0.25rem, 0.24rem + 0.05vw, 0.28rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.2xs": {
+    "name": "--space-2xs",
+    "tier": 1,
+    "light": "clamp(0.5rem, 0.48rem + 0.11vw, 0.56rem)",
+    "dark": "clamp(0.5rem, 0.48rem + 0.11vw, 0.56rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.xs": {
+    "name": "--space-xs",
+    "tier": 1,
+    "light": "clamp(0.75rem, 0.72rem + 0.16vw, 0.84rem)",
+    "dark": "clamp(0.75rem, 0.72rem + 0.16vw, 0.84rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.s": {
+    "name": "--space-s",
+    "tier": 1,
+    "light": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "dark": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.m": {
+    "name": "--space-m",
+    "tier": 1,
+    "light": "clamp(1.5rem, 1.43rem + 0.33vw, 1.69rem)",
+    "dark": "clamp(1.5rem, 1.43rem + 0.33vw, 1.69rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.l": {
+    "name": "--space-l",
+    "tier": 1,
+    "light": "clamp(2rem, 1.91rem + 0.43vw, 2.25rem)",
+    "dark": "clamp(2rem, 1.91rem + 0.43vw, 2.25rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.xl": {
+    "name": "--space-xl",
+    "tier": 1,
+    "light": "clamp(3rem, 2.87rem + 0.65vw, 3.38rem)",
+    "dark": "clamp(3rem, 2.87rem + 0.65vw, 3.38rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.2xl": {
+    "name": "--space-2xl",
+    "tier": 1,
+    "light": "clamp(4rem, 3.83rem + 0.87vw, 4.5rem)",
+    "dark": "clamp(4rem, 3.83rem + 0.87vw, 4.5rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.3xl": {
+    "name": "--space-3xl",
+    "tier": 1,
+    "light": "clamp(6rem, 5.74rem + 1.3vw, 6.75rem)",
+    "dark": "clamp(6rem, 5.74rem + 1.3vw, 6.75rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.s-m": {
+    "name": "--space-s-m",
+    "tier": 1,
+    "light": "clamp(1rem, 0.76rem + 1.2vw, 1.69rem)",
+    "dark": "clamp(1rem, 0.76rem + 1.2vw, 1.69rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.m-l": {
+    "name": "--space-m-l",
+    "tier": 1,
+    "light": "clamp(1.5rem, 1.24rem + 1.3vw, 2.25rem)",
+    "dark": "clamp(1.5rem, 1.24rem + 1.3vw, 2.25rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "space.l-xl": {
+    "name": "--space-l-xl",
+    "tier": 1,
+    "light": "clamp(2rem, 1.52rem + 2.39vw, 3.38rem)",
+    "dark": "clamp(2rem, 1.52rem + 2.39vw, 3.38rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Raw Utopia fluid space scale and one-up pairs, derived from $utopia.space."
+  },
+  "color.surface": {
+    "name": "--color-surface",
+    "tier": 2,
+    "light": "#ffffff",
+    "dark": "#020029",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.surface-raised": {
+    "name": "--color-surface-raised",
+    "tier": 2,
+    "light": "#ffffff",
+    "dark": "#090056",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.surface-sunken": {
+    "name": "--color-surface-sunken",
+    "tier": 2,
+    "light": "#f1f5ff",
+    "dark": "#11007a",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.text": {
+    "name": "--color-text",
+    "tier": 2,
+    "light": "#090056",
+    "dark": "#f1f5ff",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.text-muted": {
+    "name": "--color-text-muted",
+    "tier": 2,
+    "light": "#4d68dc",
+    "dark": "#7d9bff",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.text-inverse": {
+    "name": "--color-text-inverse",
+    "tier": 2,
+    "light": "#ffffff",
+    "dark": "#020029",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.border": {
+    "name": "--color-border",
+    "tier": 2,
+    "light": "#dae4ff",
+    "dark": "#212b9c",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.border-strong": {
+    "name": "--color-border-strong",
+    "tier": 2,
+    "light": "#c4d3ff",
+    "dark": "#3042b4",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.link": {
+    "name": "--color-link",
+    "tier": 2,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.action": {
+    "name": "--color-action",
+    "tier": 2,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.action-hover": {
+    "name": "--color-action-hover",
+    "tier": 2,
+    "light": "#3042b4",
+    "dark": "#3042b4",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.action-text": {
+    "name": "--color-action-text",
+    "tier": 2,
+    "light": "#ffffff",
+    "dark": "#ffffff",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.accent": {
+    "name": "--color-accent",
+    "tier": 2,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.focus": {
+    "name": "--color-focus",
+    "tier": 2,
+    "light": "#4d68dc",
+    "dark": "#4d68dc",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.backdrop": {
+    "name": "--color-backdrop",
+    "tier": 2,
+    "light": "rgb(0 0 0 / 0.5)",
+    "dark": "rgb(0 0 0 / 0.5)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-success": {
+    "name": "--color-status-success",
+    "tier": 2,
+    "light": "#278733",
+    "dark": "#5bb661",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-success-surface": {
+    "name": "--color-status-success-surface",
+    "tier": 2,
+    "light": "#e6fce6",
+    "dark": "#0f1f0f",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-success-border": {
+    "name": "--color-status-success-border",
+    "tier": 2,
+    "light": "#b9e5b9",
+    "dark": "#1e4420",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-success-text": {
+    "name": "--color-status-success-text",
+    "tier": 2,
+    "light": "#00480e",
+    "dark": "#9be39d",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-warning": {
+    "name": "--color-status-warning",
+    "tier": 2,
+    "light": "#9d6300",
+    "dark": "#d98b09",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-warning-surface": {
+    "name": "--color-status-warning-surface",
+    "tier": 2,
+    "light": "#fff3e6",
+    "dark": "#261706",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-warning-border": {
+    "name": "--color-status-warning-border",
+    "tier": 2,
+    "light": "#f8d0a2",
+    "dark": "#533201",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-warning-text": {
+    "name": "--color-status-warning-text",
+    "tier": 2,
+    "light": "#533200",
+    "dark": "#ffc075",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-danger": {
+    "name": "--color-status-danger",
+    "tier": 2,
+    "light": "#b94642",
+    "dark": "#ed756e",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-danger-surface": {
+    "name": "--color-status-danger-surface",
+    "tier": 2,
+    "light": "#fff2f0",
+    "dark": "#2a1312",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-danger-border": {
+    "name": "--color-status-danger-border",
+    "tier": 2,
+    "light": "#ffc8c3",
+    "dark": "#5c2926",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-danger-text": {
+    "name": "--color-status-danger-text",
+    "tier": 2,
+    "light": "#6c1517",
+    "dark": "#ffbab3",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-info": {
+    "name": "--color-status-info",
+    "tier": 2,
+    "light": "#0079b3",
+    "dark": "#26a9f1",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-info-surface": {
+    "name": "--color-status-info-surface",
+    "tier": 2,
+    "light": "#ecf7ff",
+    "dark": "#081d2a",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-info-border": {
+    "name": "--color-status-info-border",
+    "tier": 2,
+    "light": "#b1deff",
+    "dark": "#083f5d",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "color.status-info-text": {
+    "name": "--color-status-info-text",
+    "tier": 2,
+    "light": "#003f60",
+    "dark": "#9cd6ff",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Semantic colour roles. The only colour tokens blocks may use."
+  },
+  "gutter": {
+    "name": "--gutter",
+    "tier": 2,
+    "light": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "dark": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Default gap inside compositions."
+  },
+  "region-space": {
+    "name": "--region-space",
+    "tier": 2,
+    "light": "clamp(3rem, 2.87rem + 0.65vw, 3.38rem)",
+    "dark": "clamp(3rem, 2.87rem + 0.65vw, 3.38rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Vertical padding of a page section."
+  },
+  "flow-space": {
+    "name": "--flow-space",
+    "tier": 2,
+    "light": "1em",
+    "dark": "1em",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Default rhythm in .flow; scales with the local font size."
+  },
+  "inset.control": {
+    "name": "--inset-control",
+    "tier": 2,
+    "light": "clamp(0.5rem, 0.48rem + 0.11vw, 0.56rem) clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "dark": "clamp(0.5rem, 0.48rem + 0.11vw, 0.56rem) clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Padding inside blocks."
+  },
+  "inset.surface": {
+    "name": "--inset-surface",
+    "tier": 2,
+    "light": "clamp(1.5rem, 1.43rem + 0.33vw, 1.69rem)",
+    "dark": "clamp(1.5rem, 1.43rem + 0.33vw, 1.69rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Padding inside blocks."
+  },
+  "text.body": {
+    "name": "--text-body",
+    "tier": 2,
+    "light": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "dark": "clamp(1rem, 0.96rem + 0.22vw, 1.13rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Body text sizes."
+  },
+  "text.small": {
+    "name": "--text-small",
+    "tier": 2,
+    "light": "clamp(0.83rem, 0.81rem + 0.12vw, 0.9rem)",
+    "dark": "clamp(0.83rem, 0.81rem + 0.12vw, 0.9rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Body text sizes."
+  },
+  "text.lead": {
+    "name": "--text-lead",
+    "tier": 2,
+    "light": "clamp(1.2rem, 1.13rem + 0.36vw, 1.41rem)",
+    "dark": "clamp(1.2rem, 1.13rem + 0.36vw, 1.41rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Body text sizes."
+  },
+  "heading.1": {
+    "name": "--heading-1",
+    "tier": 2,
+    "light": "clamp(2.49rem, 2.16rem + 1.64vw, 3.43rem)",
+    "dark": "clamp(2.49rem, 2.16rem + 1.64vw, 3.43rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Heading sizes; h5 and h6 reuse --text-body."
+  },
+  "heading.2": {
+    "name": "--heading-2",
+    "tier": 2,
+    "light": "clamp(2.07rem, 1.84rem + 1.17vw, 2.75rem)",
+    "dark": "clamp(2.07rem, 1.84rem + 1.17vw, 2.75rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Heading sizes; h5 and h6 reuse --text-body."
+  },
+  "heading.3": {
+    "name": "--heading-3",
+    "tier": 2,
+    "light": "clamp(1.73rem, 1.56rem + 0.82vw, 2.2rem)",
+    "dark": "clamp(1.73rem, 1.56rem + 0.82vw, 2.2rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Heading sizes; h5 and h6 reuse --text-body."
+  },
+  "heading.4": {
+    "name": "--heading-4",
+    "tier": 2,
+    "light": "clamp(1.44rem, 1.33rem + 0.55vw, 1.76rem)",
+    "dark": "clamp(1.44rem, 1.33rem + 0.55vw, 1.76rem)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Heading sizes; h5 and h6 reuse --text-body."
+  },
+  "font.body": {
+    "name": "--font-body",
+    "tier": 2,
+    "light": "system-ui, sans-serif",
+    "dark": "system-ui, sans-serif",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font family stacks. Brand-neutral placeholders; override per project."
+  },
+  "font.heading": {
+    "name": "--font-heading",
+    "tier": 2,
+    "light": "system-ui, sans-serif",
+    "dark": "system-ui, sans-serif",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font family stacks. Brand-neutral placeholders; override per project."
+  },
+  "font.mono": {
+    "name": "--font-mono",
+    "tier": 2,
+    "light": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace",
+    "dark": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font family stacks. Brand-neutral placeholders; override per project."
+  },
+  "weight.regular": {
+    "name": "--weight-regular",
+    "tier": 2,
+    "light": "400",
+    "dark": "400",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font weights."
+  },
+  "weight.medium": {
+    "name": "--weight-medium",
+    "tier": 2,
+    "light": "500",
+    "dark": "500",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font weights."
+  },
+  "weight.semibold": {
+    "name": "--weight-semibold",
+    "tier": 2,
+    "light": "600",
+    "dark": "600",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font weights."
+  },
+  "weight.bold": {
+    "name": "--weight-bold",
+    "tier": 2,
+    "light": "700",
+    "dark": "700",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Font weights."
+  },
+  "leading.tight": {
+    "name": "--leading-tight",
+    "tier": 2,
+    "light": "1.1",
+    "dark": "1.1",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Line heights."
+  },
+  "leading.body": {
+    "name": "--leading-body",
+    "tier": 2,
+    "light": "1.5",
+    "dark": "1.5",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Line heights."
+  },
+  "radius.control": {
+    "name": "--radius-control",
+    "tier": 2,
+    "light": "4px",
+    "dark": "4px",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Corner radii by what is being rounded."
+  },
+  "radius.surface": {
+    "name": "--radius-surface",
+    "tier": 2,
+    "light": "8px",
+    "dark": "8px",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Corner radii by what is being rounded."
+  },
+  "radius.pill": {
+    "name": "--radius-pill",
+    "tier": 2,
+    "light": "999px",
+    "dark": "999px",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Corner radii by what is being rounded."
+  },
+  "shadow.raised": {
+    "name": "--shadow-raised",
+    "tier": 2,
+    "light": "0 10px 25px -5px rgb(0 0 0 / 0.1)",
+    "dark": "0 10px 25px -5px rgb(0 0 0 / 0.5)",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Elevation. Raised: dropdowns, card hover. Overlay: modal, offcanvas."
+  },
+  "shadow.overlay": {
+    "name": "--shadow-overlay",
+    "tier": 2,
+    "light": "0 10px 25px rgb(0 0 0 / 0.15)",
+    "dark": "0 10px 25px rgb(0 0 0 / 0.6)",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Elevation. Raised: dropdowns, card hover. Overlay: modal, offcanvas."
+  },
+  "duration.quick": {
+    "name": "--duration-quick",
+    "tier": 2,
+    "light": "150ms",
+    "dark": "150ms",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Motion durations."
+  },
+  "duration.base": {
+    "name": "--duration-base",
+    "tier": 2,
+    "light": "250ms",
+    "dark": "250ms",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Motion durations."
+  },
+  "duration.slow": {
+    "name": "--duration-slow",
+    "tier": 2,
+    "light": "400ms",
+    "dark": "400ms",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Motion durations."
+  },
+  "ease.standard": {
+    "name": "--ease-standard",
+    "tier": 2,
+    "light": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "dark": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Motion easing curves."
+  },
+  "ease.spring": {
+    "name": "--ease-spring",
+    "tier": 2,
+    "light": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    "dark": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Motion easing curves."
+  },
+  "layer.raised": {
+    "name": "--layer-raised",
+    "tier": 2,
+    "light": "10",
+    "dark": "10",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Stacking order. Dialogs use the top layer and need no token."
+  },
+  "layer.nav": {
+    "name": "--layer-nav",
+    "tier": 2,
+    "light": "50",
+    "dark": "50",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Stacking order. Dialogs use the top layer and need no token."
+  },
+  "layer.popover": {
+    "name": "--layer-popover",
+    "tier": 2,
+    "light": "100",
+    "dark": "100",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Stacking order. Dialogs use the top layer and need no token."
+  },
+  "button.default-bg": {
+    "name": "--button-default-bg",
+    "tier": 2,
+    "light": "transparent",
+    "dark": "transparent",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
+  },
+  "button.default-text": {
+    "name": "--button-default-text",
+    "tier": 2,
+    "light": "#090056",
+    "dark": "#f1f5ff",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
+  },
+  "button.default-border": {
+    "name": "--button-default-border",
+    "tier": 2,
+    "light": "#dae4ff",
+    "dark": "#212b9c",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
+  },
+  "button.default-bg-hover": {
+    "name": "--button-default-bg-hover",
+    "tier": 2,
+    "light": "#f1f5ff",
+    "dark": "#11007a",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
+  },
+  "button.default-border-hover": {
+    "name": "--button-default-border-hover",
+    "tier": 2,
+    "light": "#c4d3ff",
+    "dark": "#3042b4",
+    "themed": true,
+    "overridden": false,
+    "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
+  },
+  "link.decoration": {
+    "name": "--link-decoration",
+    "tier": 2,
+    "light": "underline",
+    "dark": "underline",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Decoration of unstyled anchors: underlined always, or only on hover."
+  },
+  "link.decoration-hover": {
+    "name": "--link-decoration-hover",
+    "tier": 2,
+    "light": "underline",
+    "dark": "underline",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Decoration of unstyled anchors: underlined always, or only on hover."
+  },
+  "measure": {
+    "name": "--measure",
+    "tier": 2,
+    "light": "60ch",
+    "dark": "60ch",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Typographic reading width (.center, prose)."
+  },
+  "wrapper-max": {
+    "name": "--wrapper-max",
+    "tier": 2,
+    "light": "80rem",
+    "dark": "80rem",
+    "themed": false,
+    "overridden": false,
+    "purpose": "Site-wide page section width (.wrapper)."
+  }
+}

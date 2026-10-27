@@ -1,0 +1,17 @@
+{% load looseleaf static %}<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    {% looseleaf_meta %}
+    <title>{% block title %}Downbeat{% endblock %}</title>
+    {% looseleaf_theme %}
+    {% looseleaf_css %}
+    <link rel="stylesheet" href="{% static 'css/downbeat.css' %}">
+    {% looseleaf_js %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% block layout %}{% endblock %}
+  </body>
+</html>
