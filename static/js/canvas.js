@@ -2,6 +2,7 @@
 // One module for every page that draws a room. Each canvas declares its mode:
 //   data-canvas="room"  room editor: move seats, paint zones, place the teacher
 //   data-canvas="plan"  seating plan editor: drag pupils onto seats, swap, lock, bin, undo
+//   data-canvas="view"  room view: taps only, nothing moves; N goes to the next session
 // Coordinates are canvas units (the room's width and height), never pixels.
 
 const DRAG_THRESHOLD = 5; // pixels a press must travel before it counts as a drag
@@ -246,7 +247,18 @@ function initPlanEditor(wrapper) {
   });
 }
 
-const modes = { room: initRoomEditor, plan: initPlanEditor };
+/* --- Room view ------------------------------------------------------------ */
+
+function initRoomView(root) {
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() !== "n" || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.target.closest("input, textarea, select, [contenteditable]")) return;
+    if (document.querySelector("dialog[open]")) return;
+    if (root.dataset.nextUrl) window.location.assign(root.dataset.nextUrl);
+  });
+}
+
+const modes = { room: initRoomEditor, plan: initPlanEditor, view: initRoomView };
 
 for (const root of document.querySelectorAll("[data-canvas]")) {
   modes[root.dataset.canvas]?.(root);

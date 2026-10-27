@@ -1,0 +1,57 @@
+{% extends "layouts/room.html" %}
+{% load static %}
+
+{% block title %}{{ session.period }} · {{ session.klass }} · Downbeat{% endblock %}
+
+{% block head %}<script type="module" src="{% static 'js/canvas.js' %}"></script>{% endblock %}
+
+{% block canvas %}
+{% if not plan and seats %}
+<form class="room-offer cluster" method="post" action="{% url 'seating_create' %}">
+  {% csrf_token %}
+  <input type="hidden" name="klass" value="{{ session.klass.pk }}">
+  <input type="hidden" name="room" value="{{ room.pk }}">
+  <input type="hidden" name="next" value="{{ request.path }}">
+  <span>{{ session.klass }} hasn't been seated in {{ room }}.</span>
+  <button class="button" type="submit">{% if elsewhere %}Seat by zone from {{ elsewhere.room }}{% else %}Start a blank plan{% endif %}</button>
+</form>
+{% endif %}
+
+<div class="canvas" data-canvas="view"
+     data-width="{{ room.canvas_width }}" data-height="{{ room.canvas_height }}"
+     data-seat-width="{{ seat_width }}" data-seat-height="{{ seat_height }}"
+     {% if next %}data-next-url="{% url 'room_view' next.pk %}"{% endif %}
+     style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
+  {% for item in seats %}
+  {% if item.pupil %}
+  <button type="button" class="seat" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}">
+    <span class="seat__name">{{ item.pupil }}</span>
+  </button>
+  {% else %}
+  <div class="seat" data-empty aria-hidden="true" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}"></div>
+  {% endif %}
+  {% endfor %}
+  {% if room.teacher_x is not None %}
+  <div class="teacher-marker" aria-hidden="true" style="--x: {{ room.teacher_x }}; --y: {{ room.teacher_y }}">Teacher</div>
+  {% endif %}
+</div>
+{% if not seats %}<p class="room-offer">{{ room }} has no seats yet. They are placed in <a href="{% url 'room_edit' room.pk %}">Settings → Rooms</a>.</p>{% endif %}
+{% endblock %}
+
+{% block panel %}
+<p class="room-strip">{{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}</p>
+<section class="flow" aria-labelledby="log-heading">
+  <h2 id="log-heading" class="room-panel__heading">Log</h2>
+  <ol class="room-log flow" id="log" role="list"></ol>
+</section>
+{% endblock %}
+
+{% block bar %}
+<nav class="cluster room-bar" aria-label="Lesson">
+  <a class="button" data-variant="ghost" href="{% url 'today' %}?list">Today</a>
+  <strong class="room-bar__session">{{ session.period }} · {{ session.klass }}</strong>
+  {% if next %}
+  <a class="button room-bar__next" href="{% url 'room_view' next.pk %}" aria-keyshortcuts="N">Next: {{ next.period }} · {{ next.klass }} ›</a>
+  {% endif %}
+</nav>
+{% endblock %}

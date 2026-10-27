@@ -51,3 +51,13 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. The plan in force is chosen by date.** `SeatingPlan.current` picks the class's plan for the room whose active_from is on or before the date and whose active_to is empty or on or after it, newest first. Phase 1 gives new plans active_from of today and no end; duplicate-to-reshuffle (Phase 3) will use the dates.
 
 **27 Oct 2026. The canvas is capped at the screen height.** A canvas never grows taller than the viewport minus page chrome, so the whole room and the unseated list are on screen together while dragging.
+
+**27 Oct 2026. Today redirects only when a session is live; `?list` always shows the list.** A session is live when now falls inside its period and it isn't cancelled. Outside lessons Today shows the day in period order (not alphabetical, so P10 follows P9), with the current or next one outlined. The room view's "Today" link adds `?list`, so the teacher can always reach the list mid-lesson without being bounced back.
+
+**27 Oct 2026. Next session means the next one that isn't cancelled.** Later the same day first, then the following days (up to 60 days ahead). The N key and the "Next ›" button in the bar both go there. N lives in canvas.js's room-view mode, keeping to two hand-written JS modules, and is ignored while typing or while a sheet is open.
+
+**27 Oct 2026. The room view's no-plan offer is one quiet line.** When the class has no plan for the session's room, a single muted line above the canvas offers "Seat by zone from M2" (or "Start a blank plan") as one tap that returns to the room view. It isn't red and doesn't count anything, and the room view works without it: unseated seats are simply empty.
+
+**27 Oct 2026. The plan strip shows the period and its times until Phase 4.** There are no lesson plans yet, so the strip reads "P3 · 10:50–11:50". It becomes current-and-next activity, and the Log/Plan flip, when PlanActivity exists.
+
+**27 Oct 2026. The picker button arrives with the picker (step 8).** The bottom bar in step 6 carries the Today link, session name and next session. No control appears before it does something.

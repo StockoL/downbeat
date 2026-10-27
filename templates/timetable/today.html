@@ -1,0 +1,25 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Today · Downbeat{% endblock %}
+
+{% block content %}
+<h1>{{ now|date:"l j F" }}</h1>
+
+{% if sessions %}
+<ol class="flow today-list" role="list">
+  {% for session in sessions %}
+  <li class="today-list__item card" {% if session == current %}data-current{% endif %} {% if session.status == "cancelled" %}data-cancelled{% endif %}>
+    <a class="card__body cluster" href="{% url 'room_view' session.pk %}">
+      <span class="today-list__time">{{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}</span>
+      <strong>{{ session.klass }}</strong>
+      <span>{{ session.room }}</span>
+      {% if session.klass.kind == "co_curricular" %}<span class="badge">Co-curricular</span>{% endif %}
+      {% if session.status != "planned" %}<span class="badge">{{ session.get_status_display }}</span>{% endif %}
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>Nothing timetabled today.{% if upcoming %} Next: <a href="{% url 'room_view' upcoming.pk %}">{{ upcoming.klass }}, {{ upcoming.date|date:"l j F" }} {{ upcoming.period }}</a>.{% endif %}</p>
+{% endif %}
+{% endblock %}
