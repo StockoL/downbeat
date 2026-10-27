@@ -39,7 +39,7 @@ def today(request):
 
 
 def room_view(request, pk):
-    session = get_object_or_404(Session.objects.select_related("klass", "room"), pk=pk)
+    session = get_object_or_404(Session.objects.select_related("klass", "room", "lesson__unit"), pk=pk)
     timetable = Timetable.active()
     session.start, session.end = timetable.period_times(session.period)
     room = session.room
@@ -61,6 +61,7 @@ def room_view(request, pk):
         "seats": [{"seat": seat, "pupil": seated.get(seat.id), **marks(seated.get(seat.id))} for seat in room.seats.all()],
         "unseated": [{"pupil": p, **marks(p)} for p in unseated],
         "groups": active_groups(session.klass),
+        "lesson": session.lesson,
         "state": lesson_state(session),
         "note_types": sheet_types(),
         "next": next_session(session, timetable),

@@ -116,7 +116,7 @@
   }
 
   /* At desk width the log is always shown, whatever the sheet's state. */
-  .room-layout__panel[data-state="closed"] > :not(.room-layout__handle, .room-strip) {
+  .room-layout__panel[data-state="closed"] > :not(.room-layout__handle, .room-strip, [hidden]) {
     display: block;
   }
 }
@@ -891,4 +891,40 @@ ol[role="list"] {
 
 .form-row > .field:has(input[type="text"]) {
   flex-grow: 4;
+}
+
+/* --- The strip and the plan panel --- */
+button.room-strip {
+  inline-size: 100%;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.plan-activities {
+  display: grid;
+  gap: var(--space-3xs);
+  padding: 0;
+  counter-reset: activity;
+}
+
+.plan-activities > li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: var(--space-3xs) var(--space-2xs);
+  border-radius: var(--radius-control);
+}
+
+.plan-activities > li[aria-current] {
+  background: var(--color-surface-sunken);
+  font-weight: 700;
+}
+
+/* Compositions like .flow set a display value, which would override the hidden attribute. */
+.room-layout__panel [hidden],
+.note-sheet [hidden] {
+  display: none;
 }

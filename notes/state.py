@@ -4,7 +4,10 @@ and picker from. The page holds it, applies the device's unsent operations on to
 it again after each successful sync, so the laptop stays the source of truth.
 """
 
+import datetime
 from collections import Counter
+
+from django.utils import timezone
 
 from pupils.services import active_groups
 from rooms.seating import seating_for
@@ -66,6 +69,7 @@ def lesson_state(session):
         "ticked": ticked,
         "missed": [str(pk) for pk in services.missed_last_time(session)],
         "out": [str(pk) for pk in out_of(session)],
+        "plan": _plan(session),
     }
 
 
@@ -79,4 +83,22 @@ def _note(note):
         "actionable": note.actionable,
         "done": note.done_at is not None,
         "at": note.created_at.isoformat(),
+    }
+
+
+def _plan(session):
+    """The lesson's plan as the panel and strip use it, with the period's start so the page can tell the time."""
+    if session.lesson_id is None:
+        return None
+    from timetable.models import Timetable
+
+    start, _ = Timetable.active().period_times(session.period)
+    starts_at = timezone.make_aware(datetime.datetime.combine(session.date, start)) if start else None
+    lesson = session.lesson
+    return {
+        "title": str(lesson),
+        "objective": lesson.objective,
+        "activities": [{"id": str(a.pk), "text": a.text, "minutes": a.minutes} for a in lesson.activities.all()],
+        "homework": lesson.homework,
+        "start": starts_at.isoformat() if starts_at else None,
     }

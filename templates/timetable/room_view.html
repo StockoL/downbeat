@@ -69,7 +69,13 @@ device's unsent captures applied on top, so it works the same with or without a 
 {% endblock %}
 
 {% block panel %}
+{% if lesson %}
+<button type="button" class="room-strip" data-action="flip" aria-controls="log-panel plan-panel" data-strip>
+  {{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}
+</button>
+{% else %}
 <p class="room-strip">{{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}</p>
+{% endif %}
 <section id="log-panel" class="flow" aria-labelledby="log-heading">
   <div class="cluster room-log__head">
     <h2 id="log-heading" class="room-panel__heading">Log</h2>
@@ -77,6 +83,19 @@ device's unsent captures applied on top, so it works the same with or without a 
   </div>
   <ol class="room-log flow" id="log" role="list"></ol>
 </section>
+{% if lesson %}
+<section id="plan-panel" class="flow" aria-labelledby="plan-heading" hidden>
+  <h2 id="plan-heading" class="room-panel__heading">{{ lesson }}</h2>
+  <p>{{ lesson.objective }}</p>
+  <ol class="plan-activities" role="list">
+    {% for activity in lesson.activities.all %}
+    <li data-activity="{{ activity.pk }}"><span>{{ activity.text }}</span> <small>{{ activity.minutes }} min</small></li>
+    {% endfor %}
+  </ol>
+  {% if lesson.homework %}<p><strong>Homework:</strong> {{ lesson.homework }}</p>{% endif %}
+  {% for resource in lesson.resources.all %}{% if resource.setup_note %}<p><small>{{ resource.title }}: {{ resource.setup_note }}</small></p>{% endif %}{% endfor %}
+</section>
+{% endif %}
 {% endblock %}
 
 {% block bar %}
@@ -198,6 +217,7 @@ device's unsent captures applied on top, so it works the same with or without a 
     <dt><kbd>A</kbd></dt><dd>Actions</dd>
     <dt><kbd>U</kbd></dt><dd>Undo the last note change</dd>
     <dt><kbd>L</kbd></dt><dd>Show or hide the log (narrow screens)</dd>
+    <dt><kbd>Tab</kbd></dt><dd>Flip between Log and Plan (when nothing else is selected)</dd>
     <dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>In a pupil's sheet: that note type</dd>
     <dt><kbd>S</kbd> <kbd>X</kbd> <kbd>F</kbd></dt><dd>In a pupil's sheet: spoken to, absent, free text</dd>
     <dt><kbd>Esc</kbd></dt><dd>Close the sheet</dd>

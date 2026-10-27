@@ -448,6 +448,7 @@ function initRoomView(root) {
     }));
 
     document.querySelector("[data-actions-count]").textContent = s.actions.length || "";
+    renderStrip(s);
 
     // Goals: lessons with at least one note of the type, this one included once it has one.
     const goalsSlot = document.querySelector("[data-goals]");
@@ -467,6 +468,59 @@ function initRoomView(root) {
     if (sheet.open && body.dataset.sheet === "checklist") fillChecklist(s);
     if (sheet.open && body.dataset.sheet === "register") fillRegister(s);
   }
+
+  /* The panel: Log or Plan, with the strip summarising whichever isn't showing. ---------- */
+
+  const strip = document.querySelector("[data-strip]");
+  const logPanel = document.getElementById("log-panel");
+  const planPanel = document.getElementById("plan-panel");
+  let showingPlan = false;
+
+  /** Where the lesson has got to by the clock: the activity now, from the period's start and the minutes. */
+  function whereWeAre(plan, now = Date.now()) {
+    if (!plan?.start || !plan.activities.length) return null;
+    const elapsed = Math.floor((now - Date.parse(plan.start)) / 60000);
+    if (elapsed < 0) return { before: true, elapsed, index: 0 };
+    let total = 0;
+    for (const [index, activity] of plan.activities.entries()) {
+      total += activity.minutes;
+      if (elapsed < total) return { index, elapsed };
+    }
+    return { index: plan.activities.length - 1, elapsed, over: true };
+  }
+
+  function renderStrip(s) {
+    if (!strip) return;
+    const plan = s.plan;
+    const at = whereWeAre(plan);
+    if (showingPlan) {
+      const last = [...s.notes].sort(byTime).at(-1);
+      strip.textContent = last ? `Log: ${whoOf(s, last)} · ${describe(s, last)}` : "Log";
+      strip.setAttribute("aria-label", "Show the log");
+    } else {
+      const now = at && plan.activities[at.index];
+      const next = at && plan.activities[at.index + 1];
+      if (!at) strip.textContent = plan.objective;
+      else if (at.before) strip.textContent = `First: ${now.text}`;
+      else strip.textContent = [`Now: ${now.text} · ${at.elapsed} min in`, next ? `Next: ${next.text}` : ""].filter(Boolean).join("  ·  ");
+      strip.setAttribute("aria-label", `${strip.textContent}. Show the plan`);
+    }
+    for (const item of planPanel?.querySelectorAll("[data-activity]") ?? []) {
+      const current = at && !at.before && plan.activities[at.index]?.id === item.dataset.activity;
+      if (current) item.setAttribute("aria-current", "step");
+      else item.removeAttribute("aria-current");
+    }
+  }
+
+  function flip() {
+    if (!planPanel) return;
+    showingPlan = !showingPlan;
+    planPanel.hidden = !showingPlan;
+    logPanel.hidden = showingPlan;
+    renderStrip(view());
+  }
+
+  if (strip) setInterval(() => renderStrip(view()), 30000);
 
   /* Sheets ----------------------------------------------------------------- */
 
@@ -704,6 +758,9 @@ function initRoomView(root) {
       case "shortcuts":
         show("tpl-shortcuts", "shortcuts");
         break;
+      case "flip":
+        flip();
+        break;
       case "done":
         submit({ type: "action.done", note: target.dataset.note });
         break;
@@ -796,6 +853,12 @@ function initRoomView(root) {
   const SHEET_KEYS = { s: "spoken", x: "absent", f: "free-text" };
 
   document.addEventListener("keydown", (event) => {
+    // Tab flips Log and Plan, but only when nothing has focus, so keyboard navigation still works.
+    if (event.key === "Tab" && !event.shiftKey && planPanel && !sheet.open && document.activeElement === document.body) {
+      event.preventDefault();
+      flip();
+      return;
+    }
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target.closest("input, textarea, select, [contenteditable]")) return;
     const key = event.key.toLowerCase();

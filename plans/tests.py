@@ -114,3 +114,23 @@ def test_set_and_clear_a_sessions_lesson(client, timetable, klass, room, blues):
     client.post(f"/plan/sessions/{session.pk}/lesson/", {"lesson": ""})
     session.refresh_from_db()
     assert session.lesson is None
+
+
+# --- The plan in the room ---
+
+def test_room_view_carries_the_plan_and_offers_the_flip(client, timetable, klass, room, blues):
+    lesson = blues.lessons.get(order=2)
+    session = Session.objects.create(date=datetime.date(2026, 11, 2), period="P1", klass=klass, room=room, lesson=lesson)
+    html = client.get(f"/room/{session.pk}/").content.decode()
+    assert 'data-action="flip"' in html and 'id="plan-panel"' in html and "Riff in pairs" in html
+    plan = client.get(f"/room/{session.pk}/state/").json()["plan"]
+    assert plan["objective"] == "Blues lesson 2"
+    assert [(a["text"], a["minutes"]) for a in plan["activities"]] == [("Warm-up", 5), ("Riff in pairs", 20)]
+    assert plan["start"].startswith("2026-11-02T08:50")
+
+
+def test_a_session_without_a_lesson_has_no_plan_and_no_flip(client, timetable, klass, room):
+    session = Session.objects.create(date=datetime.date(2026, 11, 2), period="P1", klass=klass, room=room)
+    html = client.get(f"/room/{session.pk}/").content.decode()
+    assert 'data-action="flip"' not in html and 'id="plan-panel"' not in html
+    assert client.get(f"/room/{session.pk}/state/").json()["plan"] is None
