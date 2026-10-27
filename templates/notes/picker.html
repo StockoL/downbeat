@@ -1,0 +1,29 @@
+{% comment %}
+The random picker: one name, large. Each draw records spoken-to. Draws from those not yet
+spoken to unless the toggle says whole class; absentees are never drawn.
+{% endcomment %}
+<header class="note-sheet__head cluster">
+  <h2 class="note-sheet__name">Picker</h2>
+  <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+</header>
+{% if picked %}
+<button type="button" class="picker__name" aria-live="polite"
+        hx-post="{% url 'pick' session.pk %}" hx-vals='{"whole_class": "{{ whole_class|yesno:'1,0' }}"}' hx-target="#sheet-body">
+  {{ picked }}
+  <span class="picker__hint">Tap to draw again</span>
+</button>
+{% else %}
+<p class="picker__name" aria-live="polite">No one to pick</p>
+{% endif %}
+<div class="cluster picker__controls">
+  <button type="button" class="button" aria-pressed="{{ whole_class|yesno:'true,false' }}"
+          hx-post="{% url 'pick' session.pk %}" hx-vals='{"whole_class": "{{ whole_class|yesno:'0,1' }}"}' hx-target="#sheet-body">
+    {% if whole_class %}Whole class{% else %}Not yet spoken to{% endif %}
+  </button>
+  {% if picked %}
+  <button type="button" class="button" data-variant="ghost"
+          hx-post="{% url 'pick' session.pk %}" hx-vals='{"whole_class": "{{ whole_class|yesno:'1,0' }}", "absent": "{{ picked.pk }}"}' hx-target="#sheet-body">
+    {{ picked.first_name }} is absent
+  </button>
+  {% endif %}
+</div>

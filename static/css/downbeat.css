@@ -447,3 +447,57 @@
 .room-bar__count {
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Seat states, read from the marks inside the seat. They combine without text. --- */
+.seat:has(.seat__marks[data-spoken]) {
+  opacity: 0.5;
+}
+
+.seat:has(.seat__marks[data-missed]) {
+  border-width: 3px;
+  border-color: var(--color-accent);
+}
+
+.seat:has(.seat__marks[data-absent]) {
+  opacity: 0.35;
+  background: var(--color-surface-sunken);
+}
+
+.seat:has(.seat__marks[data-absent]) .seat__name {
+  text-decoration: line-through;
+}
+
+/* --- Note sheet toggles --- */
+.note-sheet__toggles .button[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+/* --- Picker: one name, large --- */
+.picker__name {
+  display: grid;
+  place-items: center;
+  gap: var(--space-2xs);
+  inline-size: 100%;
+  min-block-size: 10rem;
+  padding: var(--space-m);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--step-5);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.picker__hint {
+  color: var(--color-text-muted);
+  font-size: var(--step-0);
+  font-weight: 400;
+}
+
+.picker__controls .button[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}

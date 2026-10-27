@@ -10,21 +10,20 @@ from . import services
 from .models import Note, NoteType
 
 
-def room_update(request, session, pupils=(), *, close_sheet=False, sheet=None):
+def room_update(request, session, pupils=(), *, close_sheet=False, sheet=None, sheet_main=None, **sheet_context):
     """
     Out-of-band fragments that keep the room view in step after a change: the log,
-    the touched pupils' seat marks and the actions counter. Optionally the sheet's content.
+    the touched pupils' seat marks and the actions counter. Optionally a template for the sheet.
     """
-    pupil_ids = [p.pk for p in pupils]
-    badges = services.badges(session, pupil_ids)
-    unread = services.unread(pupil_ids)
     context = {
         "session": session,
         "log": services.log(session),
         "undo_count": services.undo_count(request, session),
-        "marks": [{"pupil": p, "badges": badges.get(p.pk, []), "unread": unread.get(p.pk, 0)} for p in pupils],
+        "states": services.seat_states(session, pupils),
         "actions_count": len(services.actions(session)),
         "sheet": sheet,
+        "sheet_main": sheet_main,
+        **sheet_context,
     }
     response = render(request, "notes/_room_update.html", context)
     if close_sheet:
@@ -35,11 +34,11 @@ def room_update(request, session, pupils=(), *, close_sheet=False, sheet=None):
 def note_sheet(request, session_pk, pupil_pk):
     session = get_object_or_404(Session, pk=session_pk)
     pupil = get_object_or_404(Pupil, pk=pupil_pk)
+    state = services.seat_states(session, [pupil])[0]
     return render(request, "notes/sheet.html", {
         "session": session,
         "pupil": pupil,
-        "badges": services.badges(session, [pupil.pk]).get(pupil.pk, []),
-        "unread": services.unread([pupil.pk]).get(pupil.pk, 0),
+        "state": state,
         "note_types": services.sheet_types(),
         "free_text": request.GET.get("free") is not None,
     })
@@ -98,5 +97,45 @@ def action_done(request, pk):
     note.save(update_fields=["done_at", "updated_at"])
     return room_update(
         request, session, [note.pupil] if note.pupil else [],
-        sheet={"template": "notes/actions.html", "actions": services.actions(session)},
+        sheet="notes/actions.html", actions=services.actions(session),
+    )
+
+
+@require_POST
+def spoken_toggle(request, session_pk):
+    """The one-tap toggle at the top of the note sheet. Closes the sheet."""
+    session = get_object_or_404(Session, pk=session_pk)
+    pupil = get_object_or_404(Pupil, pk=request.POST.get("pupil"))
+    services.toggle_spoken(session, pupil)
+    return room_update(request, session, [pupil], close_sheet=True)
+
+
+@require_POST
+def absent_toggle(request, session_pk):
+    session = get_object_or_404(Session, pk=session_pk)
+    pupil = get_object_or_404(Pupil, pk=request.POST.get("pupil"))
+    services.toggle_absent(session, pupil)
+    return room_update(request, session, [pupil], close_sheet=True)
+
+
+@require_POST
+def pick(request, session_pk):
+    """
+    Draw a name and record spoken-to. "absent" first marks the last drawn pupil absent and
+    takes back their draw, so a name called to an empty chair costs one tap.
+    """
+    session = get_object_or_404(Session, pk=session_pk)
+    whole_class = request.POST.get("whole_class") == "1"
+    touched = []
+    if request.POST.get("absent"):
+        away = get_object_or_404(Pupil, pk=request.POST["absent"])
+        services.undraw(session, away)
+        if away.pk not in services.absent(session):
+            services.toggle_absent(session, away)
+        touched.append(away)
+    pupil = services.draw(session, whole_class=whole_class)
+    if pupil:
+        touched.append(pupil)
+    return room_update(
+        request, session, touched, sheet_main="notes/picker.html", picked=pupil, whole_class=whole_class,
     )

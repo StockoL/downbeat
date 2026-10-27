@@ -1,14 +1,15 @@
 """What the room view shows of notes, and the changes made from it."""
 
+import random
 from collections import defaultdict
 
 from django.db.models import Count
 from django.utils import timezone
 
-from timetable.models import Timetable
-from timetable.services import period_order
+from timetable.models import SessionAttendance, Timetable
+from timetable.services import period_order, previous_session
 
-from .models import Note, NoteType
+from .models import Note, NoteType, SpokenTo
 
 UNDO_LIMIT = 10
 
@@ -99,3 +100,82 @@ def undo(request, session):
 
 def undo_count(request, session):
     return len(request.session.get(f"note-undo:{session.pk}", []))
+
+
+# --- Spoken to, absence and the picker ---------------------------------------
+
+def spoken(session):
+    return set(session.spoken_to.values_list("pupil_id", flat=True))
+
+
+def absent(session):
+    return set(session.attendance.filter(present=False).values_list("pupil_id", flat=True))
+
+
+def missed_last_time(session):
+    """
+    Pupils of this class with no spoken-to row in the previous session with the class.
+    Empty if spoken-to wasn't used at all last time, so an unused feature never highlights everyone.
+    """
+    previous = previous_session(session, Timetable.active())
+    if previous is None:
+        return set()
+    had_turn = spoken(previous)
+    if not had_turn:
+        return set()
+    return set(session.klass.pupils.values_list("id", flat=True)) - had_turn
+
+
+def seat_states(session, pupils):
+    """Everything a seat shows about each pupil, keyed in the order given."""
+    ids = [p.pk for p in pupils]
+    icons = badges(session, ids)
+    counts = unread(ids)
+    spoke, away, missed = spoken(session), absent(session), missed_last_time(session)
+    return [
+        {
+            "pupil": p, "badges": icons.get(p.pk, []), "unread": counts.get(p.pk, 0),
+            "spoken": p.pk in spoke, "absent": p.pk in away, "missed": p.pk in missed,
+        }
+        for p in pupils
+    ]
+
+
+def toggle_spoken(session, pupil):
+    """Tap once to record, again to take it back. Returns whether they are now spoken to."""
+    rows = SpokenTo.objects.filter(session=session, pupil=pupil)
+    if rows.exists():
+        rows.delete()
+        return False
+    SpokenTo.objects.create(session=session, pupil=pupil)
+    return True
+
+
+def toggle_absent(session, pupil):
+    """Returns whether the pupil is now marked absent."""
+    row, _ = SessionAttendance.objects.get_or_create(session=session, pupil=pupil)
+    row.present = not row.present
+    row.save(update_fields=["present", "updated_at"])
+    return not row.present
+
+
+def draw(session, whole_class=False, rng=random):
+    """
+    Pick a present pupil and record a spoken-to row. By default only those not yet spoken to
+    this lesson; once everyone has had a turn, the whole class again. Returns the pupil or None.
+    """
+    away, spoke = absent(session), spoken(session)
+    present = [p for p in session.klass.pupils.all() if p.pk not in away]
+    pool = present if whole_class else [p for p in present if p.pk not in spoke] or present
+    if not pool:
+        return None
+    pupil = rng.choice(pool)
+    SpokenTo.objects.create(session=session, pupil=pupil)
+    return pupil
+
+
+def undraw(session, pupil):
+    """Take back the latest spoken-to row for a pupil, for a draw that landed on someone absent."""
+    row = SpokenTo.objects.filter(session=session, pupil=pupil).order_by("-created_at").first()
+    if row:
+        row.delete()

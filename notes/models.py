@@ -56,3 +56,17 @@ class Note(Base):
     @property
     def icon(self):
         return (self.note_type.icon if self.note_type else "") or "✎"
+
+
+class SpokenTo(Base):
+    """One row per tap or picker draw."""
+
+    session = models.ForeignKey("timetable.Session", on_delete=models.CASCADE, related_name="spoken_to")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="spoken_to")
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name_plural = "spoken to"
+
+    def __str__(self):
+        return f"{self.pupil} in {self.session}"

@@ -126,3 +126,17 @@ class Session(Base):
 
     def __str__(self):
         return f"{self.period} · {self.klass}"
+
+
+class SessionAttendance(Base):
+    """Absence for this session, so the picker skips the pupil. Not a replacement for the school register."""
+
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="attendance")
+    pupil = models.ForeignKey(Pupil, on_delete=models.CASCADE, related_name="attendance")
+    present = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["session", "pupil"], name="one_attendance_per_pupil_per_session")]
+
+    def __str__(self):
+        return f"{self.pupil} {'present' if self.present else 'absent'} in {self.session}"

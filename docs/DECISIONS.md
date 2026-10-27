@@ -77,3 +77,13 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. Sessions and note types with notes are protected.** A session with notes can't be deleted (mark it cancelled instead), and a note type that has been used can't be deleted (rename it), so no note loses its lesson or its meaning.
 
 **27 Oct 2026. Unseated pupils are still reachable in the room.** Pupils in the class without a seat in this plan show as a row of names under the room, with the same tap-for-the-sheet behaviour. Otherwise a blank plan or a new pupil would leave someone impossible to note.
+
+**27 Oct 2026. SessionAttendance comes forward from Phase 3.** The picker has to skip absentees, which needs somewhere to record them. The data model's SessionAttendance (session, pupil, present) is added now, in the timetable app. It isn't a register: no row means present. Absence is a toggle beside "Spoken to" at the top of the note sheet (two taps, closes the sheet); an absent seat is faded and its name struck through.
+
+**27 Oct 2026. Spoken to is a toggle.** One tap on "Spoken to" adds a row and closes the sheet; tapping it again on a dimmed pupil removes this lesson's rows, so a mistaken tap is undone the same way it was made.
+
+**27 Oct 2026. "Missed last time" uses the class's previous lesson, and only if spoken-to was used in it.** The highlight (a thicker accent edge) goes to pupils with no spoken-to row in the class's last non-cancelled session. If that session has no spoken-to rows at all, nobody is highlighted, so a lesson where the feature wasn't used doesn't light up the whole class the next time.
+
+**27 Oct 2026. The picker records on every draw and offers "is absent".** Each draw, including "tap to draw again", writes a spoken-to row, as the spec says. Because a name called to an empty chair would otherwise leave a wrong row, the picker shows "<name> is absent": one tap marks them absent, takes back that draw, and draws again. The default pool is present pupils not yet spoken to; when everyone has had a turn it draws from all present pupils. A toggle switches to the whole class. Unseated pupils are included, since the picker draws from the class, not the seats.
+
+**27 Oct 2026. Seat states are data attributes on the seat's marks, styled with `:has()`.** Spoken to, absent and missed are flags on the marks element inside each seat, so the one out-of-band swap that already updates badges keeps every state current without re-rendering seats.

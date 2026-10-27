@@ -43,18 +43,13 @@ def room_view(request, pk):
     else:
         elsewhere = SeatingPlan.objects.filter(klass=session.klass).exclude(room=room).select_related("room").first()
 
-    unseated = [p for p in session.klass.pupils.all() if p.pk not in {s.pk for s in seated.values()}]
-    pupil_ids = [p.pk for p in seated.values()] + [p.pk for p in unseated]
-    badges = notes.badges(session, pupil_ids)
-    unread = notes.unread(pupil_ids)
+    seated_ids = {p.pk for p in seated.values()}
+    unseated = [p for p in session.klass.pupils.all() if p.pk not in seated_ids]
+    states = {s["pupil"].pk: s for s in notes.seat_states(session, list(seated.values()) + unseated)}
     seats = []
     for seat in room.seats.all():
         pupil = seated.get(seat.id)
-        seats.append({
-            "seat": seat, "pupil": pupil,
-            "badges": badges.get(pupil.pk, []) if pupil else [],
-            "unread": unread.get(pupil.pk, 0) if pupil else 0,
-        })
+        seats.append({"seat": seat, "pupil": pupil, "state": states[pupil.pk] if pupil else None})
 
     return render(request, "timetable/room_view.html", {
         "session": session,
@@ -62,7 +57,7 @@ def room_view(request, pk):
         "plan": plan,
         "elsewhere": elsewhere,
         "seats": seats,
-        "unseated": [{"pupil": p, "badges": badges.get(p.pk, []), "unread": unread.get(p.pk, 0)} for p in unseated],
+        "unseated": [{"pupil": p, "state": states[p.pk]} for p in unseated],
         "log": notes.log(session),
         "undo_count": notes.undo_count(request, session),
         "actions_count": len(notes.actions(session)),

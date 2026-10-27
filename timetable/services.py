@@ -69,3 +69,15 @@ def next_session(session, timetable, horizon_days=60):
     ).exclude(status=Session.CANCELLED).exclude(pk=session.pk).select_related("klass", "room")
     candidates = sorted((s for s in later if rank(s) > rank(session)), key=rank)
     return candidates[0] if candidates else None
+
+
+def previous_session(session, timetable, horizon_days=60):
+    """The last session with the same class before this one that wasn't cancelled."""
+    order = period_order(timetable)
+    rank = lambda s: (s.date, order.get(s.period, len(order)), s.period)
+    earlier = Session.objects.filter(
+        klass_id=session.klass_id, date__lte=session.date,
+        date__gte=session.date - datetime.timedelta(days=horizon_days),
+    ).exclude(status=Session.CANCELLED).exclude(pk=session.pk)
+    candidates = sorted((s for s in earlier if rank(s) < rank(session)), key=rank)
+    return candidates[-1] if candidates else None

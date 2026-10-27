@@ -2,13 +2,19 @@
 The note sheet. One tap on a type records a note and closes the sheet. Free text, last,
 is the only button that opens a field. No past notes here: they are behind the counter.
 {% endcomment %}
+<div class="cluster note-sheet__toggles">
+  <button type="button" class="button" data-size="large" aria-pressed="{{ state.spoken|yesno:'true,false' }}"
+          hx-post="{% url 'spoken_toggle' session.pk %}" hx-vals='{"pupil": "{{ pupil.pk }}"}' hx-swap="none">Spoken to</button>
+  <button type="button" class="button" data-size="large" data-variant="ghost" aria-pressed="{{ state.absent|yesno:'true,false' }}"
+          hx-post="{% url 'absent_toggle' session.pk %}" hx-vals='{"pupil": "{{ pupil.pk }}"}' hx-swap="none">Absent</button>
+</div>
 <header class="note-sheet__head cluster">
   <h2 class="note-sheet__name">{{ pupil }}</h2>
-  {% if unread %}
+  {% if state.unread %}
   <button type="button" class="note-sheet__unread" hx-get="{% url 'inbox' session.pk pupil.pk %}" hx-target="#sheet-body"
-          aria-label="{{ unread }} open note{{ unread|pluralize }} for {{ pupil }}">{{ unread }}</button>
+          aria-label="{{ state.unread }} open note{{ state.unread|pluralize }} for {{ pupil }}">{{ state.unread }}</button>
   {% endif %}
-  {% if badges %}<span class="note-sheet__badges" aria-label="This lesson">{% for icon in badges %}<span>{{ icon }}</span>{% endfor %}</span>{% endif %}
+  {% if state.badges %}<span class="note-sheet__badges" aria-label="This lesson">{% for icon in state.badges %}<span>{{ icon }}</span>{% endfor %}</span>{% endif %}
   <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
 </header>
 
