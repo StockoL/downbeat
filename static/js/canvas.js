@@ -1,6 +1,7 @@
 // The seating canvas: free-placed seats, pointer-event drag, zones.
 // One module for every page that draws a room. Each canvas declares its mode:
 //   data-canvas="room"  room editor: move seats, paint zones, place the teacher
+//   data-canvas="plan"  seating plan editor: drag pupils onto seats, swap, lock, bin, undo
 // Coordinates are canvas units (the room's width and height), never pixels.
 
 const DRAG_THRESHOLD = 5; // pixels a press must travel before it counts as a drag
@@ -25,6 +26,46 @@ export async function post(url, data = {}) {
 const snap = (value) => Math.round(value / SNAP) * SNAP;
 const clamp = (value, low, high) => Math.max(low, Math.min(value, high));
 
+/**
+ * Press, drag and release on elements matching `selector` inside `container`.
+ * A press that never travels DRAG_THRESHOLD is a tap. `move` gets pixel deltas
+ * and the element's canvas position when the press began.
+ */
+function onPress(container, selector, { tap, move, drop }) {
+  container.addEventListener("pointerdown", (event) => {
+    const el = event.target.closest(selector);
+    if (!el || !container.contains(el) || event.button !== 0) return;
+    event.preventDefault();
+    const start = { x: event.clientX, y: event.clientY };
+    const origin = { x: Number(el.dataset.x), y: Number(el.dataset.y) };
+    let dragging = false;
+    el.setPointerCapture(event.pointerId);
+
+    const onMove = (e) => {
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      if (!dragging && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      if (!dragging) {
+        dragging = true;
+        el.classList.add("is-dragging");
+      }
+      move?.(el, dx, dy, origin, e);
+    };
+    const onUp = (e) => {
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      el.classList.remove("is-dragging");
+      if (e.type === "pointercancel") drop?.(el, e, true);
+      else if (dragging) drop?.(el, e, false);
+      else tap?.(el, e);
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+  });
+}
+
 /** Size and placement shared by every mode. */
 class Canvas {
   constructor(root) {
@@ -47,56 +88,18 @@ class Canvas {
     el.style.setProperty("--y", y);
   }
 
-  /**
-   * Press, drag and release on elements matching `selector`.
-   * A press that never travels DRAG_THRESHOLD is a tap. `move` gets canvas-unit deltas
-   * and the element's position when the press began.
-   */
-  onDrag(selector, { tap, move, drop }) {
-    this.root.addEventListener("pointerdown", (event) => {
-      const el = event.target.closest(selector);
-      if (!el || !this.root.contains(el) || event.button !== 0) return;
-      event.preventDefault();
-      const start = { x: event.clientX, y: event.clientY };
-      const origin = { x: Number(el.dataset.x), y: Number(el.dataset.y) };
-      const scale = this.unitsPerPixel();
-      let dragging = false;
-      el.setPointerCapture(event.pointerId);
-
-      const onMove = (e) => {
-        const dx = e.clientX - start.x;
-        const dy = e.clientY - start.y;
-        if (!dragging && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
-        if (!dragging) {
-          dragging = true;
-          el.classList.add("is-dragging");
-        }
-        move?.(el, dx * scale, dy * scale, origin, e);
-      };
-      const onUp = (e) => {
-        el.removeEventListener("pointermove", onMove);
-        el.removeEventListener("pointerup", onUp);
-        el.removeEventListener("pointercancel", onUp);
-        el.classList.remove("is-dragging");
-        if (e.type === "pointercancel") return;
-        if (dragging) drop?.(el, e);
-        else tap?.(el, e);
-      };
-      el.addEventListener("pointermove", onMove);
-      el.addEventListener("pointerup", onUp);
-      el.addEventListener("pointercancel", onUp);
-    });
-  }
-
   /** Drag an element across the canvas, snapped and kept inside the edges. */
   movable(selector, { size, save, tap }) {
-    this.onDrag(selector, {
+    onPress(this.root, selector, {
       tap,
       move: (el, dx, dy, origin) => {
         const [w, h] = size(el);
-        this.place(el, clamp(snap(origin.x + dx), 0, this.width - w), clamp(snap(origin.y + dy), 0, this.height - h));
+        const scale = this.unitsPerPixel();
+        const x = clamp(snap(origin.x + dx * scale), 0, this.width - w);
+        const y = clamp(snap(origin.y + dy * scale), 0, this.height - h);
+        this.place(el, x, y);
       },
-      drop: save,
+      drop: (el) => save(el),
     });
   }
 }
@@ -181,7 +184,69 @@ function initRoomEditor(root) {
   panel.querySelector("[data-action=deselect]").addEventListener("click", () => select(null));
 }
 
-const modes = { room: initRoomEditor };
+/* --- Seating plan editor -------------------------------------------------- */
+
+// The server owns the plan: every drop, lock or undo posts and gets the board back
+// re-rendered, so the page can never disagree with the database.
+function initPlanEditor(wrapper) {
+  let ghost = null;
+  let over = null;
+
+  async function send(url, data) {
+    const response = await fetch(url, {
+      method: "POST",
+      body: new URLSearchParams(data),
+      headers: { "X-CSRFToken": csrfToken() },
+    });
+    wrapper.innerHTML = await response.text();
+  }
+
+  const board = () => wrapper.querySelector(".plan-board");
+
+  function target(event) {
+    return document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-drop]") ?? null;
+  }
+
+  function highlight(el) {
+    if (over === el) return;
+    over?.classList.remove("is-over");
+    over = el;
+    over?.classList.add("is-over");
+  }
+
+  onPress(wrapper, "[data-pupil]", {
+    tap: (el) => {
+      if (el.matches(".seat")) send(board().dataset.lockUrl, { seat: el.dataset.seat });
+    },
+    move: (el, dx, dy, origin, event) => {
+      if (!ghost) {
+        ghost = document.createElement("div");
+        ghost.className = "drag-ghost";
+        ghost.textContent = el.querySelector(".seat__name")?.textContent ?? el.textContent;
+        document.body.append(ghost);
+      }
+      ghost.style.setProperty("--pointer-x", `${event.clientX}px`);
+      ghost.style.setProperty("--pointer-y", `${event.clientY}px`);
+      highlight(target(event));
+    },
+    drop: (el, event, cancelled) => {
+      ghost?.remove();
+      ghost = null;
+      const drop = cancelled ? null : target(event);
+      highlight(null);
+      if (!drop || drop === el) return;
+      const seat = drop.dataset.drop === "bin" ? "bin" : drop.dataset.seat;
+      if (seat === "bin" && !el.matches(".seat")) return; // already unseated
+      send(board().dataset.moveUrl, { pupil: el.dataset.pupil, seat });
+    },
+  });
+
+  wrapper.addEventListener("click", (event) => {
+    if (event.target.closest("[data-action=undo]")) send(board().dataset.undoUrl);
+  });
+}
+
+const modes = { room: initRoomEditor, plan: initPlanEditor };
 
 for (const root of document.querySelectorAll("[data-canvas]")) {
   modes[root.dataset.canvas]?.(root);

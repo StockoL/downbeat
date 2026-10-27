@@ -12,6 +12,7 @@
   <nav class="navbar__menu" id="nav-menu" aria-label="Main">
     {% block nav %}
     <a class="navbar__link" href="{% url 'today' %}" {% if nav == "today" %}aria-current="page"{% endif %}>Today</a>
+    <a class="navbar__link" href="{% url 'plan_home' %}" {% if nav == "plan" %}aria-current="page"{% endif %}>Plan</a>
     <a class="navbar__link" href="{% url 'settings' %}" {% if nav == "settings" %}aria-current="page"{% endif %}>Settings</a>
     {% endblock %}
     <button class="button" type="button" data-variant="ghost" data-theme-toggle>Theme</button>

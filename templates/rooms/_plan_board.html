@@ -1,0 +1,34 @@
+{% comment %}The seating editor's working area. Re-rendered by the server after every change.{% endcomment %}
+<div class="plan-board" data-move-url="{% url 'seating_move' plan.pk %}" data-lock-url="{% url 'seating_lock' plan.pk %}" data-undo-url="{% url 'seating_undo' plan.pk %}">
+  <p class="plan-board__message" role="status" aria-live="polite">{{ message }}</p>
+
+  <div class="sidebar" data-side="right">
+  <div class="canvas"
+       data-width="{{ room.canvas_width }}" data-height="{{ room.canvas_height }}"
+       data-seat-width="{{ seat_width }}" data-seat-height="{{ seat_height }}"
+       style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
+    {% for item in seats %}{% with seat=item.seat a=item.assignment %}
+    <button type="button" class="seat" data-drop="seat" data-seat="{{ seat.pk }}"
+            {% if a %}data-pupil="{{ a.pupil_id }}" data-locked="{{ a.locked|yesno:'true,false' }}" aria-label="{{ a.pupil }}{% if a.locked %}, locked{% endif %}"{% else %}data-empty aria-label="Empty seat {{ seat.label }}"{% endif %}
+            style="--x: {{ seat.x }}; --y: {{ seat.y }}">
+      {% if a %}<span class="seat__name">{{ a.pupil }}</span>{% if a.locked %}<span class="seat__lock" aria-hidden="true">🔒</span>{% endif %}
+      {% else %}<span class="seat__meta">{{ seat.label }}</span>{% endif %}
+    </button>
+    {% endwith %}{% endfor %}
+    {% if room.teacher_x is not None %}
+    <div class="teacher-marker" aria-hidden="true" style="--x: {{ room.teacher_x }}; --y: {{ room.teacher_y }}">Teacher</div>
+    {% endif %}
+  </div>
+
+  <div class="flow plan-board__tray">
+    <section class="plan-board__unseated flow" data-drop="bin" aria-label="Not seated">
+      <h2>Not seated ({{ unseated|length }})</h2>
+      <ul class="cluster" role="list">
+        {% for pupil in unseated %}<li><span class="pupil-chip" data-pupil="{{ pupil.pk }}">{{ pupil }}</span></li>{% endfor %}
+      </ul>
+    </section>
+    <div class="plan-board__bin" data-drop="bin">Bin: drop here to unseat</div>
+    <button class="button" type="button" data-action="undo" {% if not undo_count %}disabled{% endif %}>Undo{% if undo_count %} ({{ undo_count }}){% endif %}</button>
+  </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Plan · Downbeat{% endblock %}
+
+{% block content %}
+<h1>Plan</h1>
+<h2>Seating</h2>
+{% if not classes %}
+<p>Add classes in <a href="{% url 'class_list' %}">Settings</a> first.</p>
+{% endif %}
+<div class="grid">
+  {% for klass in classes %}
+  <section class="card"><div class="card__body flow">
+    <h3>{{ klass }}</h3>
+    {% if klass.seating_plans.all %}
+    <ul role="list" class="flow">
+      {% for plan in klass.seating_plans.all %}
+      <li><a href="{% url 'seating_edit' plan.pk %}">{{ plan.room }}</a>{% if plan.name %} <small>{{ plan.name }}</small>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if rooms %}
+    <form method="post" action="{% url 'seating_create' %}" class="cluster form-row">
+      {% csrf_token %}
+      <input type="hidden" name="klass" value="{{ klass.pk }}">
+      <div class="field">
+        <label class="label" for="room-{{ klass.pk }}">New plan in</label>
+        <select class="select" id="room-{{ klass.pk }}" name="room">
+          {% for room in rooms %}<option value="{{ room.pk }}">{{ room }}</option>{% endfor %}
+        </select>
+      </div>
+      <button class="button" type="submit">Create</button>
+    </form>
+    {% endif %}
+  </div></section>
+  {% endfor %}
+</div>
+{% endblock %}

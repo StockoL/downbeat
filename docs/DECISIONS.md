@@ -41,3 +41,13 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. Zones are the five fixed choices from the data model.** Front, back, side, carpet, keyboard, or none. They are painted with a brush (choose a zone, tap seats) and show as text in the editor only; the room view doesn't display zones.
 
 **27 Oct 2026. `DOWNBEAT_DB` overrides the database path.** Lets a throwaway database be used for browser checks without touching the real one.
+
+**27 Oct 2026. Seating plans are edited under Plan; tap locks.** The Plan area in Phase 1 is one page of class cards, each listing its plans by room with a "new plan in…" picker. In the seating editor a pupil is dragged from the unseated list or from a seat; dropping on a seated pupil swaps them, or sends them back to the list if the dragged pupil wasn't seated. Tapping a seated pupil locks or unlocks them. A locked seat refuses to give up or take a pupil. The server re-renders the board after every change, so the page can't drift from the database.
+
+**27 Oct 2026. The recycle bin is a drop target; undo lives in the browser session.** Dropping a pupil on the bin (or the unseated list) unseats them. Every move, swap, unseat and lock pushes a snapshot of the touched seats, before the change, onto an undo stack of ten per plan, held in the Django session rather than a new table. Undo is for a desk editing session; nothing in the data model needs it to survive a restart.
+
+**27 Oct 2026. The no-plan fallback copies by zone, ordered from the teacher.** When a class has no plan for a room, a new one copies from the class's most recent plan in another room. Each seated pupil goes to a free seat of the same zone (no zone counts as a zone), and within a zone pupils keep their order outwards from the teacher marker (top to bottom if no marker), so front stays front even when the two rooms face different ways. Pupils with no matching seat are left unseated for the sweep. Locks aren't copied. No class plan elsewhere means a blank plan.
+
+**27 Oct 2026. The plan in force is chosen by date.** `SeatingPlan.current` picks the class's plan for the room whose active_from is on or before the date and whose active_to is empty or on or after it, newest first. Phase 1 gives new plans active_from of today and no end; duplicate-to-reshuffle (Phase 3) will use the dates.
+
+**27 Oct 2026. The canvas is capped at the screen height.** A canvas never grows taller than the viewport minus page chrome, so the whole room and the unseated list are on screen together while dragging.

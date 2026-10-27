@@ -1,0 +1,20 @@
+{% extends "layouts/desk.html" %}
+{% load static %}
+
+{% block title %}{{ plan.klass }} in {{ room }} · Plan · Downbeat{% endblock %}
+
+{% block head %}<script type="module" src="{% static 'js/canvas.js' %}"></script>{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'plan_home' %}">← Plan</a></p>
+<h1>{{ plan.klass }} in {{ room }}</h1>
+<p>Drag a pupil onto a seat; drop on someone to swap. Tap a seated pupil to lock them in place. Drop on the bin to unseat.</p>
+{% csrf_token %}
+<div data-canvas="plan">
+  {% include "rooms/_plan_board.html" %}
+</div>
+<form method="post" action="{% url 'seating_delete' plan.pk %}" onsubmit="return confirm('Delete this seating plan?')">
+  {% csrf_token %}
+  <button class="button" type="submit" data-variant="danger">Delete plan</button>
+</form>
+{% endblock %}

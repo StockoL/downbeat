@@ -76,6 +76,8 @@
   container-type: inline-size;
   position: relative;
   inline-size: 100%;
+  /* never taller than the screen allows, so a whole room is visible while dragging */
+  max-inline-size: calc((var(--canvas-max-block, 100dvh - 10rem)) * var(--canvas-w) / var(--canvas-h));
   aspect-ratio: var(--canvas-w) / var(--canvas-h);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-surface);
@@ -135,4 +137,93 @@
   color: var(--color-text-muted);
   font-size: var(--seat-font);
   cursor: grab;
+}
+
+/* --- Seating plan editor --- */
+.plan-board {
+  display: grid;
+  gap: var(--space-s);
+}
+
+.plan-board__message:empty {
+  display: none;
+}
+
+.seat[data-empty] {
+  border-style: dashed;
+  background: transparent;
+}
+
+.seat[data-locked="true"] {
+  border-width: 2px;
+  border-color: var(--color-text);
+}
+
+.seat__lock {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0.15em;
+  font-size: 0.7em;
+}
+
+.seat.is-over,
+[data-drop="bin"].is-over {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.plan-board .sidebar {
+  --sidebar-target-width: 16rem;
+  --sidebar-align: start;
+}
+
+.plan-board__unseated {
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-surface);
+}
+
+.plan-board__unseated > ul {
+  --cluster-space: var(--space-2xs);
+  padding: 0;
+}
+
+.plan-board__bin {
+  display: grid;
+  place-content: center;
+  min-block-size: 44px;
+  padding: var(--space-xs) var(--space-s);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-surface);
+  color: var(--color-text-muted);
+}
+
+.pupil-chip {
+  display: inline-block;
+  min-block-size: 44px;
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.drag-ghost {
+  position: fixed;
+  inset-inline-start: var(--pointer-x);
+  inset-block-start: var(--pointer-y);
+  translate: -50% -50%;
+  z-index: 10;
+  padding: 0.4em 0.8em;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-overlay);
+  pointer-events: none;
+}
+
+.plan-board__unseated > h2 {
+  font-size: var(--step-1);
 }
