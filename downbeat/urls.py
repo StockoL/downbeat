@@ -9,6 +9,7 @@ urlpatterns = [
     path("sync/", sync_ops, name="sync"),
     path("plan/", include("rooms.plan_urls")),
     path("plan/", include("plans.urls")),
+    path("sweep/", include("plans.sweep_urls")),
     path("pupils/", include("pupils.urls")),
     path("settings/flags/", flag_types, name="flag_types"),
     path("settings/", include("timetable.urls")),

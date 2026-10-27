@@ -69,7 +69,7 @@ device's unsent captures applied on top, so it works the same with or without a 
 {% endblock %}
 
 {% block panel %}
-{% if lesson %}
+{% if lesson or carried_in %}
 <button type="button" class="room-strip" data-action="flip" aria-controls="log-panel plan-panel" data-strip>
   {{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}
 </button>
@@ -83,10 +83,17 @@ device's unsent captures applied on top, so it works the same with or without a 
   </div>
   <ol class="room-log flow" id="log" role="list"></ol>
 </section>
-{% if lesson %}
+{% if lesson or carried_in %}
 <section id="plan-panel" class="flow" aria-labelledby="plan-heading" hidden>
-  <h2 id="plan-heading" class="room-panel__heading">{{ lesson }}</h2>
-  <p>{{ lesson.objective }}</p>
+  <h2 id="plan-heading" class="room-panel__heading">{% if lesson %}{{ lesson }}{% else %}Carried forward{% endif %}</h2>
+  {% if lesson %}<p>{{ lesson.objective }}</p>{% endif %}
+  {% if carried_in %}
+  <div class="plan-carried flow">
+    {% if lesson %}<h3 class="room-panel__heading">Carried forward</h3>{% endif %}
+    <ul role="list">{% for item in carried_in %}<li>{{ item.plan_activity.text }} <small>from {{ item.session.date|date:"D j M" }}</small></li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  {% if lesson %}
   <ol class="plan-activities" role="list">
     {% for activity in lesson.activities.all %}
     <li data-activity="{{ activity.pk }}"><span>{{ activity.text }}</span> <small>{{ activity.minutes }} min</small></li>
@@ -94,6 +101,7 @@ device's unsent captures applied on top, so it works the same with or without a 
   </ol>
   {% if lesson.homework %}<p><strong>Homework:</strong> {{ lesson.homework }}</p>{% endif %}
   {% for resource in lesson.resources.all %}{% if resource.setup_note %}<p><small>{{ resource.title }}: {{ resource.setup_note }}</small></p>{% endif %}{% endfor %}
+  {% endif %}
 </section>
 {% endif %}
 {% endblock %}

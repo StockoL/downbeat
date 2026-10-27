@@ -7,6 +7,7 @@ from django.utils.text import slugify
 
 from notes.services import sheet_types
 from notes.state import lesson_state
+from plans.sweep import carried_into
 from pupils.services import active_groups, flag_colours, group_tints
 from rooms.cover import cover_pdf
 from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
@@ -62,6 +63,7 @@ def room_view(request, pk):
         "unseated": [{"pupil": p, **marks(p)} for p in unseated],
         "groups": active_groups(session.klass),
         "lesson": session.lesson,
+        "carried_in": carried_into(session),
         "state": lesson_state(session),
         "note_types": sheet_types(),
         "next": next_session(session, timetable),

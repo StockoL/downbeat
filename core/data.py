@@ -14,7 +14,7 @@ from django.db import connection, transaction
 from django.utils import timezone
 
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
-from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
+from plans.models import ActivityStatus, LessonPlan, PlanActivity, Resource, Scheme, SessionReflection, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, SessionAttendance, Slot, Timetable
@@ -22,7 +22,7 @@ from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, Ses
 # Every Downbeat table, children before parents, so deleting in this order never trips a protected key.
 APP_MODELS = [
     # what happened in lessons
-    ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance,
+    SessionReflection, ActivityStatus, ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance,
     # seating and sessions
     SeatAssignment, SeatingPlan, Session, Slot, Seat, Room,
     # plans

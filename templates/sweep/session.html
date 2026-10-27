@@ -1,0 +1,82 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Sweep · {{ session.period }} {{ session.klass }} · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'sweep_home' %}?date={{ session.date|date:'Y-m-d' }}">← Sweep</a></p>
+<h1>{{ session.klass }} · {{ session.date|date:"D j M" }} {{ session.period }}</h1>
+{% if session.lesson %}<p>{{ session.lesson }}: {{ session.lesson.objective }}</p>{% endif %}
+
+{% if carried_in %}
+<section class="card"><div class="card__body flow">
+  <h2>Carried into this lesson</h2>
+  <ul class="flow" role="list">
+    {% for item in carried_in %}<li>{{ item.plan_activity.text }} <small>from {{ item.session.date|date:"D j M" }}, {{ item.get_status_display|lower }}</small></li>{% endfor %}
+  </ul>
+</div></section>
+{% endif %}
+
+<form method="post" class="flow sweep">
+  {% csrf_token %}
+
+  {% if activities %}
+  <section class="flow">
+    <h2>1 · Activities</h2>
+    {% for item in activities %}
+    <fieldset class="fieldset sweep__activity">
+      <legend class="legend">{{ item.activity.text }} <small>{{ item.activity.minutes }} min</small></legend>
+      <div class="choice-group" data-variant="segmented">
+        {% for value, label in statuses %}
+        <label class="choice"><input class="choice__input" type="radio" name="status-{{ item.activity.pk }}" value="{{ value }}" {% if item.status == value %}checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </div>
+      {% if next %}
+      <label class="choice sweep__carry"><input class="choice__input" type="checkbox" name="carry" value="{{ item.activity.pk }}" {% if item.carried or not item.status %}checked{% endif %}> If unfinished, carry to {{ next.date|date:"D j M" }}</label>
+      {% endif %}
+    </fieldset>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <section class="flow">
+    <h2>2 · Caught</h2>
+    {% if notes %}
+    <ul class="flow" role="list">
+      {% for note in notes %}
+      <li class="cluster">
+        <label class="choice"><input class="choice__input" type="checkbox" name="bin" value="{{ note.pk }}"> Bin</label>
+        <span>{{ note.created_at|time:"H:i" }} · {{ note.pupil|default:note.group|default:"Class" }} · {{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
+        {% if note.group %}
+        <button class="button" type="submit" form="give-{{ note.pk }}" data-variant="ghost" data-size="small">Give to each member</button>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nothing caught.</p>
+    {% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>3 · Reflection</h2>
+    <div class="field">
+      <label class="label" for="text">One line</label>
+      <textarea class="textarea" id="text" name="text" rows="2">{{ reflection.text }}</textarea>
+    </div>
+    <fieldset class="fieldset">
+      <legend class="legend">Tags</legend>
+      <div class="cluster">
+        {% for value, label in tags %}
+        <label class="choice"><input class="choice__input" type="checkbox" name="tags" value="{{ value }}" {% if value in chosen_tags %}checked{% endif %}> {{ value }} {{ label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+  </section>
+
+  <button class="button" type="submit" data-variant="primary" data-size="large">Save sweep</button>
+</form>
+
+{% for note in notes %}{% if note.group %}
+<form id="give-{{ note.pk }}" method="post" action="{% url 'give_to_members' note.pk %}" hidden>{% csrf_token %}</form>
+{% endif %}{% endfor %}
+{% endblock %}

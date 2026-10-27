@@ -87,18 +87,27 @@ def _note(note):
 
 
 def _plan(session):
-    """The lesson's plan as the panel and strip use it, with the period's start so the page can tell the time."""
-    if session.lesson_id is None:
-        return None
+    """
+    The lesson's plan as the panel and strip use it, with the period's start so the page can tell
+    the time, and what was carried in from earlier lessons. None when there is neither.
+    """
+    from plans.sweep import carried_into
     from timetable.models import Timetable
 
+    carried = [
+        {"text": c.plan_activity.text, "from": f"{c.session.date:%a} {c.session.date.day} {c.session.date:%b}"}
+        for c in carried_into(session)
+    ]
+    lesson = session.lesson
+    if lesson is None and not carried:
+        return None
     start, _ = Timetable.active().period_times(session.period)
     starts_at = timezone.make_aware(datetime.datetime.combine(session.date, start)) if start else None
-    lesson = session.lesson
     return {
-        "title": str(lesson),
-        "objective": lesson.objective,
-        "activities": [{"id": str(a.pk), "text": a.text, "minutes": a.minutes} for a in lesson.activities.all()],
-        "homework": lesson.homework,
+        "title": str(lesson) if lesson else "Carried forward",
+        "objective": lesson.objective if lesson else "",
+        "activities": [{"id": str(a.pk), "text": a.text, "minutes": a.minutes} for a in lesson.activities.all()] if lesson else [],
+        "homework": lesson.homework if lesson else "",
         "start": starts_at.isoformat() if starts_at else None,
+        "carried": carried,
     }

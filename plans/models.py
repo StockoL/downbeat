@@ -81,3 +81,47 @@ class Resource(Base):
 
     def __str__(self):
         return self.title
+
+
+class ActivityStatus(Base):
+    """Set in the sweep. An unfinished activity can be carried to the class's next session."""
+
+    DONE = "done"
+    PARTIAL = "partial"
+    NOT_REACHED = "not_reached"
+    STATUSES = [(DONE, "Done"), (PARTIAL, "Partly"), (NOT_REACHED, "Not reached")]
+
+    session = models.ForeignKey("timetable.Session", on_delete=models.CASCADE, related_name="activity_statuses")
+    plan_activity = models.ForeignKey(PlanActivity, on_delete=models.CASCADE, related_name="statuses")
+    status = models.CharField(max_length=12, choices=STATUSES)
+    carried_to_session = models.ForeignKey(
+        "timetable.Session", on_delete=models.SET_NULL, null=True, blank=True, related_name="carried_activities",
+    )
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["session", "plan_activity"], name="one_status_per_activity_per_session")]
+
+
+# Tags for a reflection: the Teachers' Standards, short.
+REFLECTION_TAGS = [
+    ("TS1", "High expectations"),
+    ("TS2", "Progress"),
+    ("TS3", "Subject knowledge"),
+    ("TS4", "Planning"),
+    ("TS5", "Adaptive teaching"),
+    ("TS6", "Assessment"),
+    ("TS7", "Behaviour"),
+    ("TS8", "Wider responsibilities"),
+]
+
+
+class SessionReflection(Base):
+    """One or two lines from the sweep. Its existence marks the session as swept."""
+
+    session = models.OneToOneField("timetable.Session", on_delete=models.CASCADE, related_name="reflection")
+    text = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    spawned_goal = models.ForeignKey("notes.Goal", on_delete=models.SET_NULL, null=True, blank=True, related_name="spawned_from")
+
+    def __str__(self):
+        return self.text[:60] or "Swept"

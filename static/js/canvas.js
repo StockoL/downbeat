@@ -500,7 +500,11 @@ function initRoomView(root) {
     } else {
       const now = at && plan.activities[at.index];
       const next = at && plan.activities[at.index + 1];
-      if (!at) strip.textContent = plan.objective;
+      if (!at) {
+        strip.textContent = plan.carried.length
+          ? `Carried forward: ${plan.carried.map((c) => c.text).join(", ")}`
+          : plan.objective;
+      }
       else if (at.before) strip.textContent = `First: ${now.text}`;
       else strip.textContent = [`Now: ${now.text} · ${at.elapsed} min in`, next ? `Next: ${next.text}` : ""].filter(Boolean).join("  ·  ");
       strip.setAttribute("aria-label", `${strip.textContent}. Show the plan`);

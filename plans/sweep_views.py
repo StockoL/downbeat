@@ -1,0 +1,83 @@
+"""Sweep (desk, same day): today's sessions, and each session's two-minute sweep."""
+
+import datetime
+
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from notes.models import Note
+from timetable.models import Session, Timetable
+from timetable.services import sessions_on
+
+from . import sweep
+from .models import REFLECTION_TAGS, ActivityStatus, SessionReflection
+
+
+def sweep_home(request):
+    """A day's sessions as cards with a tick once swept; the first unswept one is highlighted."""
+    try:
+        day = datetime.date.fromisoformat(request.GET["date"])
+    except (KeyError, ValueError):
+        day = timezone.localdate()
+    sessions = [s for s in sessions_on(day, Timetable.active()) if s.status != Session.CANCELLED]
+    swept = set(SessionReflection.objects.filter(session__in=sessions).values_list("session_id", flat=True))
+    for session in sessions:
+        session.swept = session.pk in swept
+    first = next((s for s in sessions if not s.swept), None)
+    return render(request, "sweep/home.html", {
+        "nav": "sweep", "tab": "sweep", "day": day, "sessions": sessions, "first": first,
+        "yesterday": day - datetime.timedelta(days=1), "tomorrow": day + datetime.timedelta(days=1),
+    })
+
+
+def session_sweep(request, pk):
+    session = get_object_or_404(Session.objects.select_related("klass", "lesson__unit"), pk=pk)
+    if request.method == "POST":
+        activity_ids = [str(a.pk) for a in session.lesson.activities.all()] if session.lesson else []
+        statuses = {a: request.POST[f"status-{a}"] for a in activity_ids if request.POST.get(f"status-{a}")}
+        tags = [t for t in request.POST.getlist("tags") if t in dict(REFLECTION_TAGS)]
+        target = sweep.save_sweep(
+            session, statuses, set(request.POST.getlist("carry")), request.POST.getlist("bin"),
+            request.POST.get("text", ""), tags,
+        )
+        carried = session.activity_statuses.filter(carried_to_session__isnull=False).count()
+        if carried and target:
+            messages.success(request, f"Swept. {carried} activit{'y' if carried == 1 else 'ies'} carried to {target.date:%a %d %b}.")
+        else:
+            messages.success(request, "Swept.")
+        return redirect(f"{_home(session)}")
+
+    statuses = {s.plan_activity_id: s for s in session.activity_statuses.all()}
+    activities = []
+    for activity in session.lesson.activities.all() if session.lesson else []:
+        status = statuses.get(activity.pk)
+        activities.append({"activity": activity, "status": status.status if status else "", "carried": bool(status and status.carried_to_session_id)})
+    reflection = SessionReflection.objects.filter(session=session).first()
+    return render(request, "sweep/session.html", {
+        "nav": "sweep",
+        "session": session,
+        "activities": activities,
+        "statuses": ActivityStatus.STATUSES,
+        "notes": session.notes.live().select_related("pupil", "group", "note_type"),
+        "next": sweep.next_for_class(session),
+        "carried_in": sweep.carried_into(session),
+        "reflection": reflection,
+        "tags": REFLECTION_TAGS,
+        "chosen_tags": reflection.tags if reflection else [],
+    })
+
+
+def _home(session):
+    from django.urls import reverse
+
+    return f"{reverse('sweep_home')}?date={session.date.isoformat()}"
+
+
+@require_POST
+def give_to_members(request, pk):
+    note = get_object_or_404(Note.objects.select_related("group", "session"), pk=pk, group__isnull=False)
+    made = sweep.give_to_members(note)
+    messages.success(request, f"Given to {made} member{'s' if made != 1 else ''}.")
+    return redirect("session_sweep", pk=note.session_id)
