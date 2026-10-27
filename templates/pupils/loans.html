@@ -1,0 +1,64 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Loans · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>Loans</h1>
+
+<section class="flow">
+  <h2>Out</h2>
+  {% if out %}
+  <ul class="flow" role="list">
+    {% for loan in out %}
+    <li class="cluster form-row">
+      <strong>{{ loan.item }}</strong>
+      <a href="{% url 'pupil_page' loan.pupil.pk %}">{{ loan.pupil }}</a>
+      <small>since {{ loan.out_at|date:"j M" }}{% if loan.due %}, due {{ loan.due|date:"j M" }}{% if loan.overdue %} (overdue){% endif %}{% endif %}</small>
+      <form method="post" action="{% url 'loan_return' loan.pk %}" class="cluster">
+        {% csrf_token %}
+        <label class="visually-hidden" for="condition-{{ loan.pk }}">Condition of {{ loan.item }}</label>
+        <input class="input" id="condition-{{ loan.pk }}" name="condition" placeholder="Condition, if worth noting" maxlength="200">
+        <button class="button" type="submit">Returned</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>Nothing is out.</p>
+  {% endif %}
+</section>
+
+<div class="switcher">
+  <section class="card"><div class="card__body flow">
+    <h2>Lend</h2>
+    {% if lend.fields.item.queryset.exists %}
+    <form method="post" class="flow">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="lend">
+      {{ lend }}
+      <button class="button" type="submit" data-variant="primary">Lend</button>
+    </form>
+    {% else %}
+    <p>Everything is out, or no equipment has been added yet.</p>
+    {% endif %}
+  </div></section>
+
+  <section class="card"><div class="card__body flow">
+    <h2>Add equipment</h2>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="item">
+      {{ item_form }}
+      <button class="button" type="submit">Add</button>
+    </form>
+  </div></section>
+</div>
+
+{% if on_shelf %}
+<section class="flow">
+  <h2>On the shelf</h2>
+  <p>{% for item in on_shelf %}{{ item }}{% if item.condition_note %} <small>({{ item.condition_note }})</small>{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+</section>
+{% endif %}
+{% endblock %}

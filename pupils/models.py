@@ -123,3 +123,39 @@ class GroupMember(Base):
 
     def __str__(self):
         return f"{self.pupil} in {self.group}"
+
+
+class LoanItem(Base):
+    """Equipment the department lends."""
+
+    KINDS = [("headphones", "Headphones"), ("ukulele", "Ukulele"), ("cable", "Cable"), ("other", "Other")]
+
+    name = models.CharField(max_length=60)
+    kind = models.CharField(max_length=12, choices=KINDS, default="other")
+    identifier = models.CharField(max_length=40, blank=True, help_text="A number or label on the item.")
+    condition_note = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["kind", "identifier", "name"]
+
+    def __str__(self):
+        return f"{self.name} {self.identifier}".strip()
+
+
+class Loan(Base):
+    item = models.ForeignKey(LoanItem, on_delete=models.CASCADE, related_name="loans")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="loans")
+    out_at = models.DateTimeField()
+    due = models.DateField(null=True, blank=True)
+    returned_at = models.DateTimeField(null=True, blank=True)
+    condition_on_return = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["-out_at"]
+        constraints = [
+            # An item can only be out to one pupil at a time.
+            models.UniqueConstraint(fields=["item"], condition=models.Q(returned_at__isnull=True), name="one_open_loan_per_item"),
+        ]
+
+    def __str__(self):
+        return f"{self.item} to {self.pupil}"

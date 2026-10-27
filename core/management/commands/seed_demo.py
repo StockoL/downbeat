@@ -21,7 +21,7 @@ from django.utils import timezone
 
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
-from pupils.models import FlagType, Group, GroupMember, PupilFlag, Relationship
+from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
@@ -212,6 +212,15 @@ class Command(BaseCommand):
         learners = [p for p in Pupil.objects.filter(lessons_in_school=True)][:5]
         for index, pupil in enumerate(learners):
             PupilRotation.objects.create(pupil=pupil, rotation=violin, slot_index=index)
+
+        # The department's loan cupboard: two things out, one of them overdue.
+        items = [LoanItem.objects.create(name="Headphones", kind="headphones", identifier=str(n)) for n in range(1, 7)]
+        items += [LoanItem.objects.create(name="Ukulele", kind="ukulele", identifier=str(n)) for n in range(1, 3)]
+        borrowers = rng.sample(list(Pupil.objects.all()), 2)
+        Loan.objects.create(item=items[0], pupil=borrowers[0], out_at=timezone.now() - datetime.timedelta(days=9),
+                            due=today - datetime.timedelta(days=2))
+        Loan.objects.create(item=items[6], pupil=borrowers[1], out_at=timezone.now() - datetime.timedelta(days=1),
+                            due=today + datetime.timedelta(days=6))
 
         # Last week to the end of next week; this week is week A.
         monday = today - datetime.timedelta(days=today.weekday())

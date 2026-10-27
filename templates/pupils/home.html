@@ -3,7 +3,7 @@
 {% block title %}Pupils · Downbeat{% endblock %}
 
 {% block content %}
-<h1>Pupils</h1>
+<div class="cluster"><h1>Pupils</h1> <a href="{% url 'loans' %}">Loans</a></div>
 <div class="grid">
   {% for klass in classes %}
   <a class="card" href="{% url 'class_pupils' klass.pk %}"><div class="card__body">

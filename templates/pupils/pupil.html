@@ -13,6 +13,7 @@
   {% for klass in classes %} · <a href="{% url 'class_pupils' klass.pk %}">{{ klass }}</a>{% endfor %}
   {% if pupil.instrument %} · {{ pupil.instrument }}{% if pupil.instrument_teacher %} with {{ pupil.instrument_teacher }}{% endif %}{% endif %}
 </p>
+{% if loans %}<p>Has: {% for loan in loans %}{{ loan.item }}{% if loan.due %} (due {{ loan.due|date:"j M" }}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %} · <a href="{% url 'loans' %}">Loans</a></p>{% endif %}
 {% if pupil.remember %}<p class="pupil-remember">{{ pupil.remember|linebreaksbr }}</p>{% endif %}
 
 <div class="switcher">

@@ -61,6 +61,7 @@ def pupil_page(request, pk):
         "relationships": [{"r": r, "other": r.other(pupil)} for r in Relationship.involving(pupil)],
         "relationship_form": relationship_form if relationship_form.fields["other"].queryset.exists() else None,
         "notes": notes,
+        "loans": pupil.loans.filter(returned_at__isnull=True).select_related("item"),
     })
 
 
