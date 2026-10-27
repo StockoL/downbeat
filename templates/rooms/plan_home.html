@@ -3,15 +3,15 @@
 {% block title %}Plan · Downbeat{% endblock %}
 
 {% block content %}
-<h1>Plan</h1>
-<h2>Seating</h2>
+<div class="cluster"><h1>Plan</h1> <a href="{% url 'schemes' %}">Schemes of work</a></div>
+<h2>Classes</h2>
 {% if not classes %}
 <p>Add classes in <a href="{% url 'class_list' %}">Settings</a> first.</p>
 {% endif %}
 <div class="grid">
   {% for klass in classes %}
-  <section class="card"><div class="card__body flow">
-    <div class="cluster"><h3>{{ klass }}</h3> <a href="{% url 'class_groups' klass.pk %}">Groups</a></div>
+  <section class="card" id="class-{{ klass.pk }}"><div class="card__body flow">
+    <div class="cluster"><h3>{{ klass }}</h3> <a href="{% url 'class_lessons' klass.pk %}">Lessons</a> <a href="{% url 'class_groups' klass.pk %}">Groups</a></div>
     {% if klass.seating_plans.all %}
     <ul role="list" class="flow">
       {% for plan in klass.seating_plans.all %}

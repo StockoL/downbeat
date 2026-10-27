@@ -1,0 +1,36 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ lesson }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'unit' lesson.unit.pk %}">← {{ lesson.unit }}</a></p>
+<h1>{{ lesson }}</h1>
+
+<form method="post" class="flow">
+  {% csrf_token %}
+  <div class="switcher">
+    <section class="flow">
+      {{ form }}
+    </section>
+
+    <section class="flow">
+      <h2>Activities <small>{{ total_minutes }} min</small></h2>
+      <p class="field__hint">In order. Unfinished ones are offered to the class's next lesson after the sweep.</p>
+      {{ activities.management_form }}
+      {% if activities.non_form_errors %}<div class="alert" data-status="danger" role="alert">{{ activities.non_form_errors|join:" " }}</div>{% endif %}
+      {% for f in activities %}{% include "partials/form_row.html" with form=f %}{% endfor %}
+
+      <h2>Resources</h2>
+      <p class="field__hint">A path or link for each. Files stay where they are; Downbeat never uploads them. Ticked "Print" ones appear in Prep the day before.</p>
+      {{ resources.management_form }}
+      {% for f in resources %}{% include "partials/form_row.html" with form=f %}{% endfor %}
+    </section>
+  </div>
+  <button class="button" type="submit" data-variant="primary">Save lesson</button>
+</form>
+
+<form method="post" action="{% url 'lesson_delete' lesson.pk %}" onsubmit="return confirm('Delete this lesson?')">
+  {% csrf_token %}
+  <button class="button" type="submit" data-variant="danger">Delete lesson</button>
+</form>
+{% endblock %}

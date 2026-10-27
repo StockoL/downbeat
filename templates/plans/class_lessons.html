@@ -1,0 +1,54 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Lessons · {{ klass }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'plan_home' %}">← Plan</a></p>
+<h1>{{ klass }}</h1>
+{% include "plans/_class_tabs.html" with tab="lessons" %}
+
+{% if units %}
+<form method="post" action="{% url 'class_fill' klass.pk %}" class="cluster form-row">
+  {% csrf_token %}
+  <div class="field">
+    <label class="label" for="fill-unit">Plan the coming lessons from</label>
+    <select class="select" id="fill-unit" name="unit">
+      {% for unit in units %}<option value="{{ unit.pk }}">{{ unit.scheme }} · {{ unit }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="button" type="submit">Fill in order</button>
+</form>
+<p class="field__hint">Gives each coming session without a lesson the unit's next lesson, carrying on from the last one taught.</p>
+{% else %}
+<p>Lessons are written in <a href="{% url 'schemes' %}">schemes of work</a>.</p>
+{% endif %}
+
+<div class="table-wrapper">
+  <table class="table" data-density="compact">
+    <thead><tr><th scope="col">When</th><th scope="col">Lesson</th><th scope="col"><span class="visually-hidden">Change</span></th></tr></thead>
+    <tbody>
+      {% for session in sessions %}
+      <tr {% if session.date < today %}class="past"{% endif %}>
+        <td>{{ session.date|date:"D j M" }} {{ session.period }}{% if session.status != "planned" %} <small>{{ session.get_status_display }}</small>{% endif %}</td>
+        <td>{% if session.lesson %}<a href="{% url 'lesson' session.lesson.pk %}">{{ session.lesson }}: {{ session.lesson.objective }}</a>{% endif %}</td>
+        <td>
+          <form method="post" action="{% url 'session_set_lesson' session.pk %}" class="cluster">
+            {% csrf_token %}
+            <label class="visually-hidden" for="lesson-{{ session.pk }}">Lesson for {{ session.date|date:"D j M" }}</label>
+            <select class="select" id="lesson-{{ session.pk }}" name="lesson">
+              <option value="">No lesson</option>
+              {% for unit in units %}<optgroup label="{{ unit.scheme }} · {{ unit }}">
+                {% for l in unit.lessons.all %}<option value="{{ l.pk }}" {% if session.lesson_id == l.pk %}selected{% endif %}>L{{ l.order }}: {{ l.objective }}</option>{% endfor %}
+              </optgroup>{% endfor %}
+            </select>
+            <button class="button" type="submit" data-size="small">Set</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No sessions in the next six weeks. They're generated in Settings → Sessions.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

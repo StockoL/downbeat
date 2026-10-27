@@ -116,6 +116,7 @@ class Session(Base):
     period = models.CharField(max_length=20)
     room = models.ForeignKey("rooms.Room", on_delete=models.PROTECT, related_name="sessions")
     klass = models.ForeignKey(Class, on_delete=models.PROTECT, related_name="sessions", verbose_name="class")
+    lesson = models.ForeignKey("plans.LessonPlan", on_delete=models.SET_NULL, null=True, blank=True, related_name="sessions")
     status = models.CharField(max_length=10, choices=STATUSES, default=PLANNED)
 
     class Meta:

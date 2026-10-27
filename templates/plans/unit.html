@@ -1,0 +1,45 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ unit }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'scheme' unit.scheme.pk %}">← {{ unit.scheme }}</a></p>
+<h1>{{ unit }}</h1>
+
+<div class="switcher">
+  <section class="flow">
+    <h2>Lessons</h2>
+    {% if lessons %}
+    <ol class="flow" role="list">
+      {% for lesson in lessons %}
+      <li><a href="{% url 'lesson' lesson.pk %}">L{{ lesson.order }}: {{ lesson.objective }}</a>
+        <small>{{ lesson.activities.all|length }} activit{{ lesson.activities.all|length|pluralize:"y,ies" }}{% for r in lesson.resources.all %}{% if r.needs_print %} · prints {{ r.title }}{% endif %}{% endfor %}</small></li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+    <form method="post" action="{% url 'unit_add_lesson' unit.pk %}">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="primary">Add a lesson</button>
+    </form>
+  </section>
+
+  <section class="flow">
+    <h2>About the unit</h2>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ form }}
+      <button class="button" type="submit">Save unit</button>
+    </form>
+    <div class="cluster">
+      <form method="post" action="{% url 'unit_duplicate' unit.pk %}">
+        {% csrf_token %}
+        <button class="button" type="submit">Duplicate unit</button>
+      </form>
+      <form method="post" action="{% url 'unit_delete' unit.pk %}" onsubmit="return confirm('Delete {{ unit|escapejs }} and its lessons?')">
+        {% csrf_token %}
+        <button class="button" type="submit" data-variant="danger">Delete unit</button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

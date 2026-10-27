@@ -1,0 +1,6 @@
+{% comment %}Plan → a class: Lessons, Seating, Groups. Tabs are links, not a widget.{% endcomment %}
+<nav class="cluster" aria-label="{{ klass }}">
+  <a href="{% url 'class_lessons' klass.pk %}" {% if tab == "lessons" %}aria-current="page"{% endif %}>Lessons</a>
+  <a href="{% url 'plan_home' %}#class-{{ klass.pk }}" {% if tab == "seating" %}aria-current="page"{% endif %}>Seating</a>
+  <a href="{% url 'class_groups' klass.pk %}" {% if tab == "groups" %}aria-current="page"{% endif %}>Groups</a>
+</nav>

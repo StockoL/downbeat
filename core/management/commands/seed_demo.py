@@ -21,6 +21,8 @@ from django.utils import timezone
 
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
+from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
+from plans.services import fill_from_unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
@@ -234,6 +236,25 @@ class Command(BaseCommand):
             moved.save()
         SeatingPlan.objects.filter(klass=classes["8X Mu"], room=rooms["Hall"]).delete()
 
+        # A skeleton curriculum: Year 8 blues and Year 9 riffs, six lessons each, filled into the timetable.
+        units = {}
+        for year, unit_name, ideas in [
+            (8, "Blues", ["Twelve-bar pattern", "Walking bass", "Blues scale improvising", "Lyrics in AAB form", "Putting it together", "Performance"]),
+            (9, "Riffs", ["What makes a riff", "Riffs on keyboards", "Layering riffs", "Band arrangement", "Rehearsal", "Performance"]),
+        ]:
+            scheme = Scheme.objects.create(name=f"Year {year}", year_group=year)
+            unit = Unit.objects.create(scheme=scheme, name=unit_name, order=1, lessons_planned=6,
+                                       purpose="Hear who can keep a groove going and adapt it.")
+            for order, objective in enumerate(ideas, start=1):
+                lesson = LessonPlan.objects.create(unit=unit, order=order, objective=objective, homework="Listen to one track from the playlist.")
+                for position, (text, minutes) in enumerate([("Starter: call and response", 5), (f"{objective}: demo", 10),
+                                                            (f"{objective}: in pairs", 25), ("Share and feedback", 10)]):
+                    PlanActivity.objects.create(lesson_plan=lesson, order=position, text=text, minutes=minutes)
+                if order in (1, 4):
+                    Resource.objects.create(lesson_plan=lesson, title=f"{unit_name} sheet {order}", needs_print=True, copies=30,
+                                            path_or_url=f"Music/Y{year}/{unit_name}/sheet-{order}.pdf")
+            units[year] = unit
+
         # History: past lessons were taught, with notes, actions and spoken-to.
         past = Session.objects.filter(date__lt=today).select_related("klass")
         for session in past:
@@ -264,6 +285,10 @@ class Command(BaseCommand):
                 SpokenTo.objects.create(session=session, pupil=pupil)
             for pupil in rng.sample(pupils, min(2, len(pupils))):
                 SessionAttendance.objects.create(session=session, pupil=pupil, present=False)
+
+        last_monday = today - datetime.timedelta(days=today.weekday() + 7)
+        fill_from_unit(classes["8X Mu"], units[8], from_date=last_monday)
+        fill_from_unit(classes["9Y Mu"], units[9], from_date=last_monday)
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

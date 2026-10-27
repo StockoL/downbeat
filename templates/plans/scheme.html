@@ -1,0 +1,23 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ scheme }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'schemes' %}">← Schemes of work</a></p>
+<h1>{{ scheme }}</h1>
+{% if units %}
+<ol class="flow" role="list">
+  {% for unit in units %}
+  <li><a href="{% url 'unit' unit.pk %}">{{ unit.order }}. {{ unit }}</a> <small>{{ unit.lessons.count }} of {{ unit.lessons_planned }} lessons written</small></li>
+  {% endfor %}
+</ol>
+{% endif %}
+<section class="card"><div class="card__body flow">
+  <h2>New unit</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add unit</button>
+  </form>
+</div></section>
+{% endblock %}

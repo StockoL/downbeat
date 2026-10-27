@@ -1,0 +1,27 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Schemes of work · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'plan_home' %}">← Plan</a></p>
+<h1>Schemes of work</h1>
+{% if schemes %}
+<div class="grid">
+  {% for scheme in schemes %}
+  <section class="card"><div class="card__body flow">
+    <h2><a href="{% url 'scheme' scheme.pk %}">{{ scheme }}</a></h2>
+    {% if scheme.year_group %}<p>Year {{ scheme.year_group }}</p>{% endif %}
+    <ol class="flow" role="list">{% for unit in scheme.units.all %}<li><a href="{% url 'unit' unit.pk %}">{{ unit }}</a></li>{% endfor %}</ol>
+  </div></section>
+  {% endfor %}
+</div>
+{% endif %}
+<section class="card"><div class="card__body flow">
+  <h2>New scheme</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add scheme</button>
+  </form>
+</div></section>
+{% endblock %}

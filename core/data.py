@@ -14,16 +14,25 @@ from django.db import connection, transaction
 from django.utils import timezone
 
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
+from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, SessionAttendance, Slot, Timetable
 
 # Every Downbeat table, children before parents, so deleting in this order never trips a protected key.
 APP_MODELS = [
-    ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance, SeatAssignment, SeatingPlan, Session, Slot,
-    Seat, Room, Loan, LoanItem, PupilRotation, Rotation, GroupMember, Group, Relationship, PupilFlag, FlagType, Class, Pupil, NoteType, Timetable,
+    # what happened in lessons
+    ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance,
+    # seating and sessions
+    SeatAssignment, SeatingPlan, Session, Slot, Seat, Room,
+    # plans
+    Resource, PlanActivity, LessonPlan, Unit, Scheme,
+    # pupils' records
+    Loan, LoanItem, PupilRotation, Rotation, GroupMember, Group, Relationship, PupilFlag, FlagType,
+    # the frame
+    Class, Pupil, NoteType, Timetable,
 ]
-EXPORT_APPS = ["timetable", "rooms", "notes", "pupils"]
+EXPORT_APPS = ["timetable", "rooms", "notes", "pupils", "plans"]
 BACKUP_GLOB = "downbeat-*.sqlite3"
 
 

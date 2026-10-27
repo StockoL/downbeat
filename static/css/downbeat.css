@@ -883,3 +883,12 @@ ol[role="list"] {
 .loan-return .input {
   inline-size: min(18rem, 100%);
 }
+
+/* In formset rows, numbers stay compact and text takes the room. */
+.form-row > .field:has(input[type="number"]) {
+  flex: 0 1 5.5rem;
+}
+
+.form-row > .field:has(input[type="text"]) {
+  flex-grow: 4;
+}
