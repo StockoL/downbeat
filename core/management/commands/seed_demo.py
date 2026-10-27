@@ -25,7 +25,8 @@ from pupils.models import FlagType, Group, GroupMember, PupilFlag, Relationship
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
-from timetable.models import Class, Pupil, Session, SessionAttendance, Slot, Timetable
+from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, SessionAttendance, Slot, Timetable
+from timetable.rotations import rotating
 from timetable.services import generate_sessions
 
 FIRST_NAMES = [
@@ -204,6 +205,13 @@ class Command(BaseCommand):
             )
             for role in roles:
                 GroupMember.objects.create(group=group, pupil=nine_y.pop(), role=role)
+
+        # Violin lessons rotate through the day's five periods, so some lessons have pupils out.
+        weeks, slots = rotating(min(today.weekday(), 4), ["P1", "P2", "P3", "P4", "P5"], today - datetime.timedelta(days=14), 14)
+        violin = Rotation.objects.create(name="Ms R, violin", slot_count=5, weeks=weeks, slots=slots)
+        learners = [p for p in Pupil.objects.filter(lessons_in_school=True)][:5]
+        for index, pupil in enumerate(learners):
+            PupilRotation.objects.create(pupil=pupil, rotation=violin, slot_index=index)
 
         # Last week to the end of next week; this week is week A.
         monday = today - datetime.timedelta(days=today.weekday())

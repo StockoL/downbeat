@@ -1,0 +1,39 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Rotations · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Instrumental rotations</h1>
+<p>Pupils who leave lessons for instrumental tuition, on a timetable that moves each week. Their seat greys out when they're away.</p>
+
+{% if rotations %}
+<ul class="flow" role="list">
+  {% for rotation in rotations %}
+  <li><a href="{% url 'rotation_detail' rotation.pk %}">{{ rotation }}</a> <small>{{ rotation.slot_count }} slot{{ rotation.slot_count|pluralize }}, {{ rotation.weeks|length }} week{{ rotation.weeks|length|pluralize }}</small></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<div class="switcher">
+  <section class="card"><div class="card__body flow">
+    <h2>Generate</h2>
+    <p>One day; the lessons move one period later each week.</p>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="generate">
+      {{ generate }}
+      <button class="button" type="submit" data-variant="primary">Generate</button>
+    </form>
+  </div></section>
+
+  <section class="card"><div class="card__body flow">
+    <h2>Paste from a spreadsheet</h2>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="import">
+      {{ paste }}
+      <button class="button" type="submit" data-variant="primary">Import</button>
+    </form>
+  </div></section>
+</div>
+{% endblock %}

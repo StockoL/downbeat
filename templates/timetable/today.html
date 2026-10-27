@@ -15,6 +15,7 @@
       <span>{{ session.room }}</span>
       {% if session.klass.kind == "co_curricular" %}<span class="badge">Co-curricular</span>{% endif %}
       {% if session.status != "planned" %}<span class="badge">{{ session.get_status_display }}</span>{% endif %}
+      {% if session.out %}<span class="today-list__out">♪ {{ session.out }} out</span>{% endif %}
     </a>
   </li>
   {% endfor %}

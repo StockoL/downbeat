@@ -8,6 +8,7 @@ from collections import Counter
 
 from pupils.services import active_groups
 from rooms.seating import seating_for
+from timetable.rotations import out_of
 
 from . import goals, services
 from .models import Note
@@ -64,6 +65,7 @@ def lesson_state(session):
         "checklist": [{"id": str(item.pk), "text": item.text} for item in goals.checklist_items(session)],
         "ticked": ticked,
         "missed": [str(pk) for pk in services.missed_last_time(session)],
+        "out": [str(pk) for pk in out_of(session)],
     }
 
 

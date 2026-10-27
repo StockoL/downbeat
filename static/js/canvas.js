@@ -407,18 +407,21 @@ function initRoomView(root) {
     const s = view();
     const absent = new Set(s.absent);
     const missed = new Set(s.missed);
+    const out = new Set(s.out);
 
     for (const marks of document.querySelectorAll("[data-marks]")) {
       const pupil = marks.dataset.marks;
       marks.toggleAttribute("data-spoken", isSpoken(s, pupil));
       marks.toggleAttribute("data-absent", absent.has(pupil));
       marks.toggleAttribute("data-missed", missed.has(pupil));
+      marks.toggleAttribute("data-out", out.has(pupil));
       const icons = s.notes.filter((n) => n.pupil === pupil).sort(byTime).map((n) => iconOf(s, n)).join("");
       const count = unread(s, pupil);
       const children = [];
       if (icons) children.push(el("span", { class: "seat__badges", "aria-hidden": "true" }, icons));
       if (count) children.push(el("span", { class: "seat__unread", "aria-label": `${count} open` }, String(count)));
-      if (absent.has(pupil)) children.push(el("span", { class: "visually-hidden" }, "absent"));
+      if (out.has(pupil)) children.push(el("span", { class: "visually-hidden" }, "at an instrumental lesson"));
+      else if (absent.has(pupil)) children.push(el("span", { class: "visually-hidden" }, "absent"));
       else if (isSpoken(s, pupil)) children.push(el("span", { class: "visually-hidden" }, "spoken to"));
       marks.replaceChildren(...children);
     }
@@ -594,8 +597,8 @@ function initRoomView(root) {
 
   function draw() {
     const s = view();
-    const absent = new Set(s.absent);
-    const present = s.pupils.filter((p) => !absent.has(p.id));
+    const away = new Set([...s.absent, ...s.out]); // absent, or at an instrumental lesson
+    const present = s.pupils.filter((p) => !away.has(p.id));
     let pool = picker.whole ? present : present.filter((p) => !isSpoken(s, p.id));
     if (!pool.length) pool = present; // everyone has had a turn: start again
     const pupil = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;

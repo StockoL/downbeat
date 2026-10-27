@@ -16,12 +16,12 @@ from django.utils import timezone
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
 from pupils.models import FlagType, Group, GroupMember, PupilFlag, Relationship
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
-from timetable.models import Class, Pupil, Session, SessionAttendance, Slot, Timetable
+from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, SessionAttendance, Slot, Timetable
 
 # Every Downbeat table, children before parents, so deleting in this order never trips a protected key.
 APP_MODELS = [
     ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance, SeatAssignment, SeatingPlan, Session, Slot,
-    Seat, Room, GroupMember, Group, Relationship, PupilFlag, FlagType, Class, Pupil, NoteType, Timetable,
+    Seat, Room, PupilRotation, Rotation, GroupMember, Group, Relationship, PupilFlag, FlagType, Class, Pupil, NoteType, Timetable,
 ]
 EXPORT_APPS = ["timetable", "rooms", "notes", "pupils"]
 BACKUP_GLOB = "downbeat-*.sqlite3"

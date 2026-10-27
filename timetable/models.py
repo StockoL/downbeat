@@ -140,3 +140,42 @@ class SessionAttendance(Base):
 
     def __str__(self):
         return f"{self.pupil} {'present' if self.present else 'absent'} in {self.session}"
+
+
+class Rotation(Base):
+    """
+    The peripatetic grid: pupils leave for instrumental lessons in slots that move week by week.
+    `weeks` lists week-commencing Mondays; `slots[w][i]` is [day, period] for slot index i that week.
+    """
+
+    name = models.CharField(max_length=60, help_text="E.g. the instrumental teacher and instrument.")
+    slot_count = models.PositiveSmallIntegerField()
+    weeks = models.JSONField(default=list)
+    slots = models.JSONField(default=list)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def when(self, week_monday, slot_index):
+        """(day, period) for a slot in a given week, or None if the rotation doesn't run that week."""
+        key = week_monday.isoformat()
+        if key not in self.weeks or slot_index >= self.slot_count:
+            return None
+        day, period = self.slots[self.weeks.index(key)][slot_index]
+        return day, period
+
+
+class PupilRotation(Base):
+    pupil = models.ForeignKey(Pupil, on_delete=models.CASCADE, related_name="rotations")
+    rotation = models.ForeignKey(Rotation, on_delete=models.CASCADE, related_name="pupils")
+    slot_index = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ["slot_index"]
+        constraints = [models.UniqueConstraint(fields=["pupil", "rotation"], name="one_slot_per_pupil_per_rotation")]
+
+    def __str__(self):
+        return f"{self.pupil} in {self.rotation}, slot {self.slot_index + 1}"

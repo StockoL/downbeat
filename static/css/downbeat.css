@@ -864,3 +864,18 @@ ol[role="list"] {
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
+
+/* Out at an instrumental lesson: greyed, struck, with a dashed edge so it reads apart from absent. */
+.seat:has(.seat__marks[data-out]) {
+  opacity: 0.45;
+  border-style: dashed;
+  background: var(--color-surface-sunken);
+}
+
+.seat:has(.seat__marks[data-out]) .seat__name {
+  text-decoration: line-through;
+}
+
+.today-list__out {
+  color: var(--color-text-muted);
+}

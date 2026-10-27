@@ -2,7 +2,7 @@ from django.urls import path
 
 from notes import settings_views as note_settings
 
-from . import views
+from . import rotation_views, views
 
 urlpatterns = [
     path("timetable/", views.timetable_edit, name="timetable_edit"),
@@ -22,5 +22,9 @@ urlpatterns = [
     path("sessions/<uuid:pk>/delete/", views.session_delete, name="session_delete"),
     path("note-types/", note_settings.note_types, name="note_types"),
     path("goals/", note_settings.goals, name="goals"),
+    path("rotations/", rotation_views.rotation_list, name="rotation_list"),
+    path("rotations/<uuid:pk>/", rotation_views.rotation_detail, name="rotation_detail"),
+    path("rotations/<uuid:pk>/delete/", rotation_views.rotation_delete, name="rotation_delete"),
+    path("rotations/assigned/<uuid:pk>/remove/", rotation_views.rotation_unassign, name="rotation_unassign"),
     path("checklist/", note_settings.checklist, name="checklist"),
 ]

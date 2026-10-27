@@ -13,6 +13,7 @@ from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 from rooms.seating import seating_for
 
 from .models import Session, Timetable
+from .rotations import out_of
 from .services import live_session, next_session, sessions_on
 
 
@@ -26,6 +27,8 @@ def today(request):
             return redirect("room_view", pk=live.pk)
 
     sessions = sessions_on(now.date(), timetable)
+    for session in sessions:
+        session.out = len(out_of(session))
     current = next((s for s in sessions if s.status != Session.CANCELLED and s.end and now.time() < s.end), None)
     upcoming = None
     if not sessions:

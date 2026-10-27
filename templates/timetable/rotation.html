@@ -1,0 +1,52 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}{{ rotation }} · Rotations · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<p><a href="{% url 'rotation_list' %}">← Rotations</a></p>
+<h1>{{ rotation }}</h1>
+
+<section class="flow">
+  <h2>Pupils</h2>
+  <ul class="flow" role="list">
+    {% for slot in by_slot %}
+    <li class="cluster">
+      <strong>Slot {{ slot.slot }}</strong>
+      {% for entry in slot.entries %}
+      <span class="cluster">
+        <a href="{% url 'pupil_page' entry.pupil.pk %}">{{ entry.pupil }}</a>
+        <form method="post" action="{% url 'rotation_unassign' entry.pk %}">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small" aria-label="Take {{ entry.pupil }} out of this rotation">✕</button>
+        </form>
+      </span>
+      {% empty %}<small>nobody</small>{% endfor %}
+    </li>
+    {% endfor %}
+  </ul>
+  <form method="post" class="cluster form-row">
+    {% csrf_token %}
+    {% for field in form %}{{ field.as_field_group }}{% endfor %}
+    <button class="button" type="submit">Add</button>
+  </form>
+</section>
+
+<section class="flow">
+  <h2>When</h2>
+  <div class="table-wrapper">
+    <table class="table" data-density="compact">
+      <thead><tr><th scope="col">Week of</th>{% for slot in by_slot %}<th scope="col">Slot {{ slot.slot }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in grid %}
+        <tr><th scope="row">{{ row.week|date:"j M Y" }}</th>{% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<form method="post" action="{% url 'rotation_delete' rotation.pk %}" onsubmit="return confirm('Delete this rotation?')">
+  {% csrf_token %}
+  <button class="button" type="submit" data-variant="danger">Delete rotation</button>
+</form>
+{% endblock %}
