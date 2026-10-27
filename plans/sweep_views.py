@@ -43,6 +43,9 @@ def session_sweep(request, pk):
             session, statuses, set(request.POST.getlist("carry")), request.POST.getlist("bin"),
             request.POST.get("text", ""), tags,
         )
+        session.observations.filter(pk__in=request.POST.getlist("bin_observation"), deleted_at__isnull=True).update(
+            deleted_at=timezone.now(), updated_at=timezone.now(),
+        )
         goal = _spawn_goal(request, session)
         if goal:
             messages.success(request, f"New goal: {goal}. It shows in the room's bar from today.")
@@ -65,6 +68,7 @@ def session_sweep(request, pk):
         "activities": activities,
         "statuses": ActivityStatus.STATUSES,
         "notes": session.notes.live().select_related("pupil", "group", "note_type"),
+        "observations": session.observations.filter(deleted_at__isnull=True).select_related("pupil", "component"),
         "next": sweep.next_for_class(session),
         "carried_in": sweep.carried_into(session),
         "reflection": reflection,

@@ -145,6 +145,7 @@ device's unsent captures applied on top, so it works the same with or without a 
     <h2 class="note-sheet__name" data-slot="name"></h2>
     <button type="button" class="note-sheet__unread" data-action="inbox" hidden></button>
     <span class="note-sheet__badges" data-slot="badges" aria-label="This lesson"></span>
+    <button type="button" class="button" data-variant="ghost" data-action="observe-sheet" hidden>Observe ›<kbd class="key-hint">O</kbd></button>
     <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
   </header>
   <div class="note-sheet__buttons">
@@ -195,6 +196,23 @@ device's unsent captures applied on top, so it works the same with or without a 
     <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
   </header>
   <ol class="flow sheet-list" role="list" data-slot="list"></ol>
+</template>
+
+<template id="tpl-observation">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name" data-slot="name"></h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <ul class="observe" role="list" data-slot="list"></ul>
+  <div class="observe__confirm cluster" data-slot="confirm" hidden>
+    <span>Next step: <strong data-slot="step"></strong></span>
+    <button type="button" class="button" data-variant="ghost" data-action="change-step">Change</button>
+  </div>
+  <form class="cluster form-row" data-form="next-step" hidden>
+    <div class="field"><label class="label" for="next-step">Next step</label>
+      <input class="input" type="text" id="next-step" name="next_step" maxlength="200" required></div>
+    <button class="button" type="submit" data-variant="primary">Save</button>
+  </form>
 </template>
 
 <template id="tpl-checklist">

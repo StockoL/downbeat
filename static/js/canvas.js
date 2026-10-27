@@ -256,6 +256,8 @@ function initPlanEditor(wrapper) {
 // an operation for the queue (queue.js), which sends it when the laptop is in reach.
 
 const UNDO_LIMIT = 10;
+const STATE_WORDS = { not_yet: "not yet", partly: "partly", secure: "secure" };
+const LONG_PRESS_MS = 500;
 const ICON_FREE_TEXT = "✎";
 
 function el(tag, attributes = {}, text = "") {
@@ -318,6 +320,17 @@ function applyOp(s, op, graveyard) {
     case "checklist.untick":
       s.ticked[op.item] = [];
       break;
+    case "observation.add":
+      if (!s.observations.some((o) => o.id === op.id)) {
+        s.observations.push({ id: op.id, pupil: op.pupil, component: op.component, state: op.state, nextStep: op.next_step, at: op.at });
+      }
+      break;
+    case "observation.update":
+      for (const o of s.observations) if (o.id === op.observation) o.nextStep = op.next_step;
+      break;
+    case "observation.remove":
+      s.observations = s.observations.filter((o) => o.id !== op.observation);
+      break;
   }
 }
 
@@ -353,6 +366,7 @@ function initRoomView(root) {
   const unread = (s, pupil) => (s.elsewhere[pupil] ?? 0) + s.actions.filter((n) => n.pupil === pupil).length;
   const byTime = (a, b) => a.at.localeCompare(b.at);
   const isTicked = (s, item) => (s.ticked[item] ?? []).length > 0;
+  const componentText = (s, id) => s.components.find((c) => c.id === id)?.text ?? "Component";
   const ticked = (s) => s.checklist.filter((item) => isTicked(s, item.id)).length;
   const describe = (s, note) => `${iconOf(s, note)} ${labelOf(s, note)}${note.type && note.text ? `: ${note.text}` : ""}`;
 
@@ -432,16 +446,27 @@ function initRoomView(root) {
       marks.replaceChildren(...(icons ? [el("span", { class: "seat__badges", "aria-hidden": "true" }, icons)] : []));
     }
 
-    log.replaceChildren(...[...s.notes].sort(byTime).map((note) => {
+    // Notes and observations together, in the order they were caught.
+    const entries = [
+      ...s.notes.map((note) => ({
+        at: note.at, text: `${whoOf(s, note)} · ${describe(s, note)}`, label: labelOf(s, note), who: whoOf(s, note),
+        remove: { "data-action": "remove", "data-note": note.id },
+      })),
+      ...s.observations.map((o) => ({
+        at: o.at, text: `${nameOf(s, o.pupil)} · ${componentText(s, o.component)}: ${STATE_WORDS[o.state]}`,
+        label: componentText(s, o.component), who: nameOf(s, o.pupil),
+        remove: { "data-action": "remove-observation", "data-observation": o.id },
+      })),
+    ].sort(byTime);
+    log.replaceChildren(...entries.map((entry) => {
       const line = el("li", { class: "room-log__line" });
-      const time = new Date(note.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+      const time = new Date(entry.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
       line.append(
         el("span", { class: "room-log__time" }, time),
-        el("span", {}, `${whoOf(s, note)} · ${describe(s, note)}`),
+        el("span", {}, entry.text),
         el("button", {
-          type: "button", class: "button room-log__remove", "data-variant": "ghost",
-          "data-action": "remove", "data-note": note.id,
-          "aria-label": `Remove ${labelOf(s, note)} for ${whoOf(s, note)}`,
+          type: "button", class: "button room-log__remove", "data-variant": "ghost", ...entry.remove,
+          "aria-label": `Remove ${entry.label} for ${entry.who}`,
         }, "✕"),
       );
       return line;
@@ -558,6 +583,40 @@ function initRoomView(root) {
     counter.setAttribute("aria-label", `${count} open note${count === 1 ? "" : "s"} for ${nameOf(s, pupil)}`);
     body.querySelector("[data-slot=badges]").textContent =
       s.notes.filter((n) => n.pupil === pupil).sort(byTime).map((n) => iconOf(s, n)).join(" ");
+    body.querySelector("[data-action=observe-sheet]").hidden = !s.components.length;
+  }
+
+  /** This unit's components, three states each. A tap saves with the default next step attached. */
+  function openObservationSheet(pupil) {
+    const s = view();
+    if (!s.components.length) {
+      openNoteSheet(pupil);
+      return;
+    }
+    show("tpl-observation", "observe");
+    delete body.dataset.group;
+    delete body.dataset.observation;
+    body.dataset.pupil = pupil;
+    body.querySelector("[data-slot=name]").textContent = nameOf(s, pupil);
+    fillObservations(s);
+  }
+
+  function fillObservations(s) {
+    const pupil = body.dataset.pupil;
+    const latest = {};
+    for (const o of [...s.observations].sort(byTime)) if (o.pupil === pupil) latest[o.component] = o.state;
+    body.querySelector("[data-slot=list]").replaceChildren(...s.components.map((component) => {
+      const row = el("li", { class: "observe__row" });
+      const states = el("div", { class: "observe__states" });
+      for (const [state, words] of Object.entries(STATE_WORDS)) {
+        states.append(el("button", {
+          type: "button", class: "button", "data-action": "observe", "data-component": component.id, "data-state": state,
+          "aria-pressed": String(latest[component.id] === state),
+        }, words[0].toUpperCase() + words.slice(1)));
+      }
+      row.append(el("span", {}, component.text), states);
+      return row;
+    }));
   }
 
   /** A group's sheet: the same note buttons, without spoken to, absent or the inbox. */
@@ -683,7 +742,34 @@ function initRoomView(root) {
     close();
   }
 
+  // A long-press on a seat opens the observation sheet; the click that follows it is swallowed.
+  let pressTimer = null;
+  let longPressed = false;
+  document.addEventListener("pointerdown", (event) => {
+    const seat = event.target.closest(".seat[data-pupil]");
+    if (!seat || !base.components.length) return;
+    const start = { x: event.clientX, y: event.clientY };
+    longPressed = false;
+    const cancel = () => clearTimeout(pressTimer);
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      openObservationSheet(seat.dataset.pupil);
+    }, LONG_PRESS_MS);
+    seat.addEventListener("pointerup", cancel, { once: true });
+    seat.addEventListener("pointercancel", cancel, { once: true });
+    seat.addEventListener("pointermove", (e) => {
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) cancel();
+    });
+  });
+  document.addEventListener("contextmenu", (event) => {
+    if (event.target.closest(".seat[data-pupil]")) event.preventDefault();
+  });
+
   document.addEventListener("click", (event) => {
+    if (longPressed) {
+      longPressed = false;
+      if (event.target.closest(".seat[data-pupil]")) return;
+    }
     const target = event.target.closest("[data-action], [data-pupil], [data-group], [data-close-sheet]");
     if (!target) return;
     if (target.matches("[data-close-sheet]")) {
@@ -703,6 +789,30 @@ function initRoomView(root) {
       }
       case "free-text":
         openFreeText();
+        break;
+      case "observe-sheet":
+        openObservationSheet(pupil);
+        break;
+      case "observe": {
+        const component = base.components.find((c) => c.id === target.dataset.component);
+        const id = queue.uuid();
+        submit({ type: "observation.add", id, pupil, component: component.id, state: target.dataset.state, next_step: component.nextStep });
+        body.dataset.observation = id;
+        fillObservations(view());
+        body.querySelector("[data-slot=step]").textContent = component.nextStep;
+        body.querySelector("[data-slot=confirm]").hidden = false;
+        body.querySelector("[data-form=next-step]").hidden = true;
+        break;
+      }
+      case "change-step": {
+        const form = body.querySelector("[data-form=next-step]");
+        form.hidden = false;
+        form.querySelector("input").value = body.querySelector("[data-slot=step]").textContent;
+        form.querySelector("input").focus();
+        break;
+      }
+      case "remove-observation":
+        submit({ type: "observation.remove", observation: target.dataset.observation });
         break;
       case "spoken":
         submit(isSpoken(view(), pupil) ? { type: "spoken.clear", pupil } : { type: "spoken.add", id: queue.uuid(), pupil });
@@ -791,6 +901,16 @@ function initRoomView(root) {
   });
 
   document.addEventListener("submit", (event) => {
+    if (event.target.matches("[data-form=next-step]")) {
+      event.preventDefault();
+      const nextStep = String(new FormData(event.target).get("next_step") ?? "").trim();
+      if (nextStep && body.dataset.observation) {
+        submit({ type: "observation.update", observation: body.dataset.observation, next_step: nextStep });
+        body.querySelector("[data-slot=step]").textContent = nextStep;
+        event.target.hidden = true;
+      }
+      return;
+    }
     if (!event.target.matches("[data-form=free-text]")) return;
     event.preventDefault();
     const form = new FormData(event.target);
@@ -807,6 +927,7 @@ function initRoomView(root) {
     delete body.dataset.sheet;
     delete body.dataset.pupil;
     delete body.dataset.group;
+    delete body.dataset.observation;
   });
 
   document.addEventListener("downbeat:synced", refresh);
@@ -854,7 +975,7 @@ function initRoomView(root) {
     l: () => setPanel(panel.dataset.state !== "open"),
     "?": () => show("tpl-shortcuts", "shortcuts"),
   };
-  const SHEET_KEYS = { s: "spoken", x: "absent", f: "free-text" };
+  const SHEET_KEYS = { s: "spoken", x: "absent", f: "free-text", o: "observe-sheet" };
 
   document.addEventListener("keydown", (event) => {
     // Tab flips Log and Plan, but only when nothing has focus, so keyboard navigation still works.

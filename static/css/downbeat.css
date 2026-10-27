@@ -964,3 +964,40 @@ button.room-strip {
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
+
+/* --- Observation sheet --- */
+.room-layout__canvas .seat {
+  -webkit-touch-callout: none;
+}
+
+.observe {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.observe__row {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.observe__states {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2xs);
+}
+
+.observe__states .button {
+  min-block-size: 3.25rem;
+}
+
+.observe__states .button[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+.observe__confirm {
+  padding: var(--space-xs);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+  --cluster-justify: space-between;
+}

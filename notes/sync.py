@@ -14,6 +14,9 @@ resending after a dropped connection, changes nothing.
     attendance.set  {session, pupil, present, at}
     checklist.tick  {id, session, item, at}
     checklist.untick {session, item, at}
+    observation.add {id, session, pupil, component, state, next_step, at}
+    observation.update {observation, next_step, at}
+    observation.remove {observation, at}
 """
 
 import datetime
@@ -23,6 +26,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
+from assessment.models import Component, Observation
 from pupils.models import Group
 from timetable.models import Pupil, Session, SessionAttendance
 
@@ -144,6 +148,37 @@ def checklist_untick(op):
     ChecklistTick.objects.filter(session=session, checklist_item=item, ticked_at__lte=at).delete()
 
 
+def observation_add(op):
+    observation_id = _uuid(op.get("id"))
+    if Observation.objects.filter(pk=observation_id).exists():
+        return
+    session, pupil, component = _get(Session, op.get("session")), _get(Pupil, op.get("pupil")), _get(Component, op.get("component"))
+    state = op.get("state")
+    if state not in dict(Observation.STATES):
+        raise Rejected("unknown state")
+    next_step = str(op.get("next_step") or "").strip()[:200]
+    if not next_step:
+        raise Rejected("an observation needs a next step")
+    at = _at(op)
+    Observation.objects.create(id=observation_id, session=session, pupil=pupil, component=component, state=state, next_step=next_step)
+    Observation.objects.filter(pk=observation_id).update(created_at=at, updated_at=at)
+
+
+def observation_update(op):
+    observation, at = _get(Observation, op.get("observation")), _at(op)
+    next_step = str(op.get("next_step") or "").strip()[:200]
+    if not next_step and not observation.recording_path:
+        raise Rejected("an observation needs a next step")
+    if at >= observation.updated_at:
+        Observation.objects.filter(pk=observation.pk).update(next_step=next_step, updated_at=at)
+
+
+def observation_remove(op):
+    observation, at = _get(Observation, op.get("observation")), _at(op)
+    if at >= observation.updated_at:
+        Observation.objects.filter(pk=observation.pk).update(deleted_at=at, updated_at=at)
+
+
 HANDLERS = {
     "note.add": note_add,
     "note.remove": note_remove,
@@ -155,6 +190,9 @@ HANDLERS = {
     "attendance.set": attendance_set,
     "checklist.tick": checklist_tick,
     "checklist.untick": checklist_untick,
+    "observation.add": observation_add,
+    "observation.update": observation_update,
+    "observation.remove": observation_remove,
 }
 
 

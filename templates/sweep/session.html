@@ -52,7 +52,18 @@
       </li>
       {% endfor %}
     </ul>
-    {% else %}
+    {% endif %}
+    {% if observations %}
+    <ul class="flow" role="list">
+      {% for o in observations %}
+      <li class="cluster">
+        <label class="choice"><input class="choice__input" type="checkbox" name="bin_observation" value="{{ o.pk }}"> Bin</label>
+        <span>{{ o.pupil }} · {{ o.component }}: <strong>{{ o.get_state_display|lower }}</strong> <small>next: {{ o.next_step }}</small></span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if not notes and not observations %}
     <p>Nothing caught.</p>
     {% endif %}
   </section>

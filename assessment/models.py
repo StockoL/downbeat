@@ -70,3 +70,36 @@ class FeedbackCode(Base):
 
     def __str__(self):
         return f"{self.number}. {self.text}"
+
+
+class Observation(Base):
+    """
+    What was seen against a component. Only kept with a next step or a recording attached, and its
+    state may move backwards: nothing here is progress arithmetic.
+    """
+
+    NOT_YET = "not_yet"
+    PARTLY = "partly"
+    SECURE = "secure"
+    STATES = [(NOT_YET, "Not yet"), (PARTLY, "Partly"), (SECURE, "Secure")]
+    ASSESSORS = [("teacher", "Teacher"), ("self", "Self"), ("peer", "Peer")]
+
+    session = models.ForeignKey("timetable.Session", on_delete=models.PROTECT, related_name="observations")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="observations")
+    component = models.ForeignKey(Component, on_delete=models.PROTECT, related_name="observations")
+    state = models.CharField(max_length=8, choices=STATES)
+    assessor = models.CharField(max_length=8, choices=ASSESSORS, default="teacher")
+    next_step = models.CharField(max_length=200, blank=True)
+    recording_path = models.CharField(max_length=500, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(next_step="") | ~models.Q(recording_path=""), name="observation_has_next_step_or_recording",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.pupil} · {self.component}: {self.get_state_display().lower()}"

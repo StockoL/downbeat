@@ -70,6 +70,16 @@ def lesson_state(session):
         "missed": [str(pk) for pk in services.missed_last_time(session)],
         "out": [str(pk) for pk in out_of(session)],
         "plan": _plan(session),
+        # The unit's components for the observation sheet, and this lesson's observations.
+        "components": [
+            {"id": str(c.pk), "text": c.text, "nextStep": c.next_step_default}
+            for c in (session.lesson.unit.components.all() if session.lesson_id else [])
+        ],
+        "observations": [
+            {"id": str(o.pk), "pupil": str(o.pupil_id), "component": str(o.component_id), "state": o.state,
+             "nextStep": o.next_step, "at": o.created_at.isoformat()}
+            for o in session.observations.filter(deleted_at__isnull=True)
+        ],
     }
 
 
