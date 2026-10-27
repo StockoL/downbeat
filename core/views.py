@@ -9,6 +9,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from notes.models import NoteType
+from pupils.forms import FlagTypeFormSet
+from pupils.models import FlagType
 from timetable.models import Timetable
 
 from . import data
@@ -38,7 +40,8 @@ def setup(request):
     periods = PeriodFormSet(data, prefix="periods")
     note_types = NoteTypeFormSet(data, prefix="notetypes", queryset=NoteType.objects.none())
     room_form = RoomForm(data, prefix="room")
-    forms = [f for f in [account_form, timetable_form, periods, note_types, room_form] if f is not None]
+    flag_types = FlagTypeFormSet(data, prefix="flags", queryset=FlagType.objects.none())
+    forms = [f for f in [account_form, timetable_form, periods, note_types, room_form, flag_types] if f is not None]
 
     if data is not None and all(f.is_valid() for f in forms):
         with transaction.atomic():
@@ -50,6 +53,7 @@ def setup(request):
                 note_type.order = order
                 note_type.save()
             room_form.save()
+            flag_types.save()
         if user is not None:
             login(request, user)
         return redirect("today")
@@ -60,6 +64,7 @@ def setup(request):
         "periods": periods,
         "note_types": note_types,
         "room_form": room_form,
+        "flag_types": flag_types,
     })
 
 

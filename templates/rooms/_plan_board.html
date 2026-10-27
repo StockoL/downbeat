@@ -11,7 +11,7 @@
     <button type="button" class="seat" data-drop="seat" data-seat="{{ seat.pk }}"
             {% if a %}data-pupil="{{ a.pupil_id }}" data-locked="{{ a.locked|yesno:'true,false' }}" aria-label="{{ a.pupil }}{% if a.locked %}, locked{% endif %}"{% else %}data-empty aria-label="Empty seat {{ seat.label }}"{% endif %}
             style="--x: {{ seat.x }}; --y: {{ seat.y }}">
-      {% if a %}<span class="seat__name">{{ a.pupil }}</span>{% if a.locked %}<span class="seat__lock" aria-hidden="true">🔒</span>{% endif %}
+      {% if a %}{% include "partials/seat_flags.html" with flags=item.flags %}<span class="seat__name">{{ a.pupil }}</span>{% if a.locked %}<span class="seat__lock" aria-hidden="true">🔒</span>{% endif %}
       {% else %}<span class="seat__meta">{{ seat.label }}</span>{% endif %}
     </button>
     {% endwith %}{% endfor %}

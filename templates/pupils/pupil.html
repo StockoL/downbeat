@@ -1,0 +1,68 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ pupil }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<div class="cluster">
+  <h1>{{ pupil }}</h1>
+  <a href="{% url 'pupil_edit' pupil.pk %}">Edit details</a>
+</div>
+<p>
+  {% if pupil.year_group %}Year {{ pupil.year_group }}{% endif %}
+  {% for klass in classes %} · <a href="{% url 'class_pupils' klass.pk %}">{{ klass }}</a>{% endfor %}
+  {% if pupil.instrument %} · {{ pupil.instrument }}{% if pupil.instrument_teacher %} with {{ pupil.instrument_teacher }}{% endif %}{% endif %}
+</p>
+{% if pupil.remember %}<p class="pupil-remember">{{ pupil.remember|linebreaksbr }}</p>{% endif %}
+
+<div class="switcher">
+  <section class="flow">
+    <h2>Flags</h2>
+    {% if flags %}
+    <ul class="flow" role="list">
+      {% for flag in flags %}
+      <li class="card"><div class="card__body flow">
+        <div class="cluster">
+          <span class="flag-swatch flag-{{ flag.flag_type.colour }}" aria-hidden="true"></span>
+          <strong>{{ flag.flag_type.label }}</strong>
+          {% if flag.since %}<small>since {{ flag.since|date:"j M Y" }}</small>{% endif %}
+        </div>
+        {% if flag.note %}<p>{{ flag.note }}</p>{% endif %}
+        {% if flag.flag_type.what_works %}<p><small>What works: {{ flag.flag_type.what_works }}</small></p>{% endif %}
+        <form method="post" action="{% url 'pupil_flag_remove' flag.pk %}" onsubmit="return confirm('Remove this flag?')">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small">Remove</button>
+        </form>
+      </div></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if flag_form %}
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ flag_form }}
+      <button class="button" type="submit" data-variant="primary">Add flag</button>
+    </form>
+    {% elif not flags %}
+    <p>Flag types are set up in <a href="{% url 'flag_types' %}">Settings → Flags</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>Notes</h2>
+    {% if notes %}
+    <ol class="flow sheet-list" role="list">
+      {% for note in notes %}
+      <li>
+        <span class="sheet-list__when">{{ note.session.date|date:"j M" }} · {{ note.session.klass }}</span>
+        <span>{{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
+        {% if note.actionable %}<span class="sheet-list__state">{% if note.done_at %}done{% else %}open{% endif %}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p>No notes yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

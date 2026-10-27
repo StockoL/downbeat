@@ -31,6 +31,7 @@ device's unsent captures applied on top, so it works the same with or without a 
   {% for item in seats %}
   {% if item.pupil %}
   <button type="button" class="seat" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}">
+    {% include "partials/seat_flags.html" with flags=item.flags %}
     <span class="seat__name">{{ item.pupil }}</span>
     <span class="seat__marks" data-marks="{{ item.pupil.pk }}"></span>
   </button>
@@ -44,10 +45,11 @@ device's unsent captures applied on top, so it works the same with or without a 
 </div>
 {% if unseated %}
 <ul class="cluster room-unseated" role="list" aria-label="Not seated">
-  {% for pupil in unseated %}
-  <li><button type="button" class="seat room-unseated__pupil" data-pupil="{{ pupil.pk }}">
-    <span class="seat__name">{{ pupil }}</span>
-    <span class="seat__marks" data-marks="{{ pupil.pk }}"></span>
+  {% for item in unseated %}
+  <li><button type="button" class="seat room-unseated__pupil" data-pupil="{{ item.pupil.pk }}">
+    {% include "partials/seat_flags.html" with flags=item.flags %}
+    <span class="seat__name">{{ item.pupil }}</span>
+    <span class="seat__marks" data-marks="{{ item.pupil.pk }}"></span>
   </button></li>
   {% endfor %}
 </ul>

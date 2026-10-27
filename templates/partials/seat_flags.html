@@ -1,0 +1,2 @@
+{% comment %}A seat's flags as a coloured left edge. Colour only: no label, not even for screen readers.{% endcomment %}
+{% if flags %}<span class="seat__flags" aria-hidden="true">{% for colour in flags %}<i class="flag-{{ colour }}"></i>{% endfor %}</span>{% endif %}

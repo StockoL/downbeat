@@ -32,6 +32,13 @@ def setup_post(**overrides):
         "notetypes-1-label": "Chase homework",
         "notetypes-1-is_actionable_default": "on",
         "room-name": "M2",
+        "flags-TOTAL_FORMS": "1",
+        "flags-INITIAL_FORMS": "0",
+        "flags-MIN_NUM_FORMS": "0",
+        "flags-MAX_NUM_FORMS": "1000",
+        # a blank row, as a browser sends it: the dropdowns keep their defaults
+        "flags-0-category": "other",
+        "flags-0-placement_rule": "none",
     }
     data.update(overrides)
     return data
@@ -92,3 +99,14 @@ def test_setup_rejects_a_period_that_ends_before_it_starts(client):
 def test_setup_is_closed_once_done(client, timetable):
     response = client.get("/setup/")
     assert response.status_code == 302 and response.url == "/"
+
+
+def test_setup_can_add_flag_types(client):
+    from pupils.models import FlagType
+
+    client.post("/setup/", setup_post(**{
+        "flags-0-colour": "3", "flags-0-label": "Needs a quiet word", "flags-0-category": "attention",
+        "flags-0-placement_rule": "near_teacher",
+    }))
+    flag = FlagType.objects.get()
+    assert (flag.colour, flag.placement_rule) == (3, "near_teacher")

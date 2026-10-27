@@ -7,6 +7,7 @@ from django.utils.text import slugify
 
 from notes.services import sheet_types
 from notes.state import lesson_state
+from pupils.services import flag_colours
 from rooms.cover import cover_pdf
 from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 from rooms.seating import seating_for
@@ -43,14 +44,18 @@ def room_view(request, pk):
     elsewhere = None
     if plan is None:
         elsewhere = SeatingPlan.objects.filter(klass=session.klass).exclude(room=room).select_related("room").first()
+    flags = flag_colours([p.pk for p in [*seated.values(), *unseated]])
 
     return render(request, "timetable/room_view.html", {
         "session": session,
         "room": room,
         "plan": plan,
         "elsewhere": elsewhere,
-        "seats": [{"seat": seat, "pupil": seated.get(seat.id)} for seat in room.seats.all()],
-        "unseated": unseated,
+        "seats": [
+            {"seat": seat, "pupil": seated.get(seat.id), "flags": flags.get(seated[seat.id].pk) if seat.id in seated else None}
+            for seat in room.seats.all()
+        ],
+        "unseated": [{"pupil": p, "flags": flags.get(p.pk)} for p in unseated],
         "state": lesson_state(session),
         "note_types": sheet_types(),
         "next": next_session(session, timetable),

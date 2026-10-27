@@ -665,3 +665,82 @@
 .shortcut-list dd {
   margin: 0;
 }
+
+/* --- Flag palette: Tier 3, reserved. Eight hues kept well away from the interface accent
+       (indigo, hue 270), used for flags and nowhere else, so a flag never looks like a button. --- */
+:root {
+  --flag-1: oklch(0.6 0.19 25);
+  --flag-2: oklch(0.7 0.16 60);
+  --flag-3: oklch(0.8 0.15 95);
+  --flag-4: oklch(0.65 0.17 140);
+  --flag-5: oklch(0.65 0.12 185);
+  --flag-6: oklch(0.6 0.12 220);
+  --flag-7: oklch(0.62 0.2 335);
+  --flag-8: oklch(0.55 0.08 60);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --flag-1: oklch(0.7 0.17 25);
+    --flag-2: oklch(0.78 0.14 60);
+    --flag-3: oklch(0.86 0.14 95);
+    --flag-4: oklch(0.75 0.15 140);
+    --flag-5: oklch(0.75 0.11 185);
+    --flag-6: oklch(0.72 0.11 220);
+    --flag-7: oklch(0.72 0.17 335);
+    --flag-8: oklch(0.68 0.07 60);
+  }
+}
+
+:root[data-theme="dark"] {
+  --flag-1: oklch(0.7 0.17 25);
+  --flag-2: oklch(0.78 0.14 60);
+  --flag-3: oklch(0.86 0.14 95);
+  --flag-4: oklch(0.75 0.15 140);
+  --flag-5: oklch(0.75 0.11 185);
+  --flag-6: oklch(0.72 0.11 220);
+  --flag-7: oklch(0.72 0.17 335);
+  --flag-8: oklch(0.68 0.07 60);
+}
+
+.flag-1 { --flag: var(--flag-1); }
+.flag-2 { --flag: var(--flag-2); }
+.flag-3 { --flag: var(--flag-3); }
+.flag-4 { --flag: var(--flag-4); }
+.flag-5 { --flag: var(--flag-5); }
+.flag-6 { --flag: var(--flag-6); }
+.flag-7 { --flag: var(--flag-7); }
+.flag-8 { --flag: var(--flag-8); }
+
+/* On a seat, flags are a coloured left edge; more than one stack as thin bands. Colour only. */
+.seat__flags {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: flex;
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+  overflow: hidden;
+}
+
+.seat__flags > i {
+  inline-size: 0.3em;
+  background: var(--flag);
+}
+
+/* A swatch for choosing and showing a flag colour, on desk pages. */
+.flag-swatch {
+  display: inline-block;
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  border-radius: var(--radius-control);
+  vertical-align: middle;
+  background: var(--flag);
+}
+
+/* Lists marked role="list" are layout, not prose: no bullets, no indent. */
+ul[role="list"],
+ol[role="list"] {
+  padding-inline-start: 0;
+  list-style: none;
+}

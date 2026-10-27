@@ -1,0 +1,17 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ klass }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>{{ klass }}</h1>
+<ul class="flow pupil-list" role="list">
+  {% for row in rows %}
+  <li class="cluster">
+    <a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a>
+    {% for colour in row.flags %}<span class="flag-swatch flag-{{ colour }}" aria-hidden="true"></span>{% endfor %}
+    {% if row.pupil.instrument %}<small>{{ row.pupil.instrument }}</small>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

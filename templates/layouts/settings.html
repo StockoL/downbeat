@@ -11,6 +11,7 @@
       <li><a href="{% url 'class_list' %}" {% if section == "classes" %}aria-current="page"{% endif %}>Classes</a></li>
       <li><a href="{% url 'pupil_list' %}" {% if section == "pupils" %}aria-current="page"{% endif %}>Pupils</a></li>
       <li><a href="{% url 'note_types' %}" {% if section == "note_types" %}aria-current="page"{% endif %}>Note types</a></li>
+      <li><a href="{% url 'flag_types' %}" {% if section == "flags" %}aria-current="page"{% endif %}>Flags</a></li>
       <li><a href="{% url 'room_list' %}" {% if section == "rooms" %}aria-current="page"{% endif %}>Rooms</a></li>
       <li><a href="{% url 'data_page' %}" {% if section == "data" %}aria-current="page"{% endif %}>Data</a></li>
     </ul>

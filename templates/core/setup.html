@@ -54,6 +54,13 @@
       <p>Seats are placed in the room editor afterwards.</p>
       {{ room_form }}
     </div></section>
+
+    <section class="card"><div class="card__body flow">
+      <h2>Flags <small>(optional)</small></h2>
+      <p>Coloured edges on seats for things you want to see at a glance. The label is private: it shows on the pupil's page and nowhere else. Leave blank to add them later.</p>
+      {{ flag_types.management_form }}
+      {% for form in flag_types %}{% include "partials/form_row.html" %}{% endfor %}
+    </div></section>
     {% endif %}
 
     <button class="button" type="submit" data-variant="primary" data-size="large">Save and start</button>

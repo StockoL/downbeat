@@ -21,6 +21,7 @@ from django.utils import timezone
 
 from core.data import delete_all
 from notes.models import Note, NoteType, SpokenTo
+from pupils.models import FlagType, PupilFlag
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan
 from timetable.models import Class, Pupil, Session, SessionAttendance, Slot, Timetable
@@ -51,6 +52,13 @@ NOTE_TYPES = [
     ("Off task", "↯", False, False),
     ("Chase homework", "!", False, True),
     ("Kit missing", "🎧", False, True),
+]
+
+FLAG_TYPES = [
+    # private label, palette colour, category, seating rule, what works
+    ("Needs a word before the lesson", 1, "attention", "near_teacher", "Quiet check-in at the door; a job early on."),
+    ("Hearing: seat near the front", 5, "adjustment", "front", "Face the class when talking; written instructions."),
+    ("Young carer", 7, "other", "none", "Flexibility on homework deadlines."),
 ]
 
 # name, year group, home room, size
@@ -134,6 +142,14 @@ class Command(BaseCommand):
                 )
                 klass.pupils.add(pupil)
             classes[name] = klass
+        flag_types = [
+            FlagType.objects.create(label=label, colour=colour, category=category, placement_rule=rule, what_works=works)
+            for label, colour, category, rule, works in FLAG_TYPES
+        ]
+        for pupil in rng.sample(list(Pupil.objects.all()), 12):
+            for flag_type in rng.sample(flag_types, rng.choice([1, 1, 1, 2])):
+                PupilFlag.objects.create(pupil=pupil, flag_type=flag_type, since=today - datetime.timedelta(days=rng.randint(10, 200)))
+
         choir = Class.objects.create(name="Choir", kind=Class.CO_CURRICULAR)
         everyone = list(Pupil.objects.all())
         choir.pupils.add(*rng.sample(everyone, 24))

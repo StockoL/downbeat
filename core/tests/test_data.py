@@ -2,6 +2,7 @@ import json
 import sqlite3
 
 import pytest
+from django.conf import settings
 from django.contrib.sessions.models import Session as BrowserSession
 from django.core.management import call_command
 
@@ -100,3 +101,16 @@ def test_delete_all_needs_the_phrase(client, school):
 def test_delete_all_needs_post(client, school):
     assert client.get("/settings/data/delete-all/").status_code == 405
     assert Timetable.objects.exists()
+
+
+def test_delete_all_and_export_cover_every_downbeat_table():
+    """A table added in a later phase must be added to delete-all and export, or this fails."""
+    from django.apps import apps
+
+    ours = {m for m in apps.get_models() if m._meta.app_label in data.EXPORT_APPS}
+    assert ours == set(data.APP_MODELS)
+    local_apps = {"core", *data.EXPORT_APPS}
+    for config in apps.get_app_configs():
+        ours_on_disk = config.path.startswith(str(settings.BASE_DIR)) and "site-packages" not in config.path
+        if ours_on_disk and list(config.get_models()):
+            assert config.label in local_apps, f"{config.label} isn't exported or deleted"

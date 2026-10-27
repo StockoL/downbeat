@@ -1,0 +1,50 @@
+from django.db import models
+
+from core.models import Base
+
+# The reserved flag palette: eight hues defined in downbeat.css as --flag-1 … --flag-8 and used
+# nowhere else in the interface. A flag type picks one by number, never a free colour.
+FLAG_COLOURS = [(n, f"Colour {n}") for n in range(1, 9)]
+
+
+class FlagType(Base):
+    """What a flag means lives in the teacher's head; the label is private and shown on the pupil page only."""
+
+    ATTENTION = "attention"
+    ADJUSTMENT = "adjustment"
+    OTHER = "other"
+    CATEGORIES = [(ATTENTION, "Attention"), (ADJUSTMENT, "Adjustment"), (OTHER, "Other")]
+
+    PLACEMENT_RULES = [
+        ("none", "No rule"),
+        ("front", "Near the front"),
+        ("near_teacher", "Near the teacher"),
+        ("near_door", "Near the door"),
+        ("away_from_window", "Away from the window"),
+    ]
+
+    label = models.CharField(max_length=60)
+    colour = models.PositiveSmallIntegerField(choices=FLAG_COLOURS, unique=True)
+    category = models.CharField(max_length=12, choices=CATEGORIES, default=OTHER)
+    placement_rule = models.CharField(max_length=20, choices=PLACEMENT_RULES, default="none")
+    what_works = models.TextField(blank=True, help_text="The minimal pupil passport: what helps.")
+
+    class Meta:
+        ordering = ["colour"]
+
+    def __str__(self):
+        return self.label
+
+
+class PupilFlag(Base):
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="flags")
+    flag_type = models.ForeignKey(FlagType, on_delete=models.PROTECT, related_name="pupil_flags")
+    since = models.DateField(null=True, blank=True)
+    note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["flag_type__colour"]
+        constraints = [models.UniqueConstraint(fields=["pupil", "flag_type"], name="one_of_each_flag_per_pupil")]
+
+    def __str__(self):
+        return f"{self.pupil}: {self.flag_type}"

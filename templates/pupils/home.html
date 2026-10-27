@@ -1,0 +1,17 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<h1>Pupils</h1>
+<div class="grid">
+  {% for klass in classes %}
+  <a class="card" href="{% url 'class_pupils' klass.pk %}"><div class="card__body">
+    <h2>{{ klass }}</h2>
+    <p>{{ klass.pupil_count }} pupil{{ klass.pupil_count|pluralize }}{% if klass.kind == "co_curricular" %} · co-curricular{% endif %}</p>
+  </div></a>
+  {% empty %}
+  <p>Classes are added in <a href="{% url 'class_list' %}">Settings</a>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Flags · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Flags</h1>
+<p>Flags show on seats as colour only. Their labels are private and appear on the pupil page and nowhere else. Each colour can be used by one flag.</p>
+<p class="cluster" aria-label="The eight flag colours">
+  {% for n in palette %}<span class="cluster"><span class="flag-swatch flag-{{ n }}" aria-hidden="true"></span> {{ n }}</span>{% endfor %}
+</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="alert" data-status="danger" role="alert">{{ formset.non_form_errors|join:" " }}</div>{% endif %}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save flags</button>
+</form>
+{% endblock %}

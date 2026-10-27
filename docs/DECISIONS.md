@@ -141,3 +141,13 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. Below desk width the panel is a sheet docked above the bar.** Closed, it is a grab handle and the plan strip, sized to fit them; the canvas keeps a matching clear space at its foot so no seat is hidden. A tap on the handle, its keyboard activation, a swipe up or `L` opens it to at most 70% of the room's height to show the log; a swipe down or the handle closes it. At desk width it is the side column and the log is always shown.
 
 **27 Oct 2026. Laptop shortcuts.** N next lesson, P pick, A actions, U undo, L the log, ? the list. Inside a pupil's sheet, 1–9 record that note type and S, X and F are spoken to, absent and free text, so a note is two key presses after a click on the seat. None fire while typing or (except the sheet keys) while a sheet is open. Hints appear on the buttons only for a fine pointer that can hover, so the iPad never shows them. The list is also in the ⋯ menu.
+
+## Phase 3: flags, relationships, groups, goals
+
+**27 Oct 2026. A `pupils` app holds Phase 3's pupil-side tables and the Pupils area.** The project layout places Rotation in `timetable` but names no home for flags, relationships, groups or loans. They go in a new `pupils` app with the Pupils area pages (class list, pupil page). Goals and the checklist go in `notes`, beside the notes that feed them.
+
+**27 Oct 2026. Flag colours are eight reserved palette slots.** `--flag-1` … `--flag-8` are Tier 3 variables in downbeat.css, written in `oklch()` (no raw hex), with light and dark variants, and kept clear of the interface's indigo accent. A FlagType chooses a slot by number (one flag per slot), never a free colour, so no flag can match a button. On a seat they are a coloured left edge, thin bands side by side when there are several, `aria-hidden` and with no text at all. The label, the note and "what works" appear on the pupil page only; the class list shows swatches without labels; the projector view, the cover PDF and the lesson state carry nothing of flags.
+
+**27 Oct 2026. The first-run setup gains an optional flags section.** As promised in Phase 1. Checklist items join it with the checklist step.
+
+**27 Oct 2026. Delete-all and export are checked against every model.** A test now fails if any model in Downbeat's own apps is missing from the delete-all list or the export, so later phases can't add a table that "delete everything" leaves behind.

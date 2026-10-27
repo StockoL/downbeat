@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from pupils.services import flag_colours
 from timetable.models import Class, Pupil
 
 from . import seating
@@ -20,7 +21,12 @@ def plan_home(request):
 def board_context(request, plan, message=""):
     assignments = {a.seat_id: a for a in plan.assignments.select_related("pupil")}
     seated = {a.pupil_id for a in assignments.values()}
-    seats = [{"seat": seat, "assignment": assignments.get(seat.id)} for seat in plan.room.seats.all()]
+    flags = flag_colours(plan.klass.pupils.values_list("id", flat=True))
+    seats = [
+        {"seat": seat, "assignment": a, "flags": flags.get(a.pupil_id) if a else None}
+        for seat in plan.room.seats.all()
+        for a in [assignments.get(seat.id)]
+    ]
     return {
         "plan": plan,
         "room": plan.room,
