@@ -168,7 +168,7 @@ def test_editor_draws_a_line_between_keep_apart_neighbours(client, row, pupils):
 def test_editor_marks_pair_well_neighbours_quietly(client, row, pupils):
     Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[1], kind="pair_well")
     html = client.get(f"/plan/seating/{row.pk}/").content.decode()
-    assert 'data-kind="pair_well"' in html and "keep-apart" not in html
+    assert 'data-kind="pair_well"' in html and "side by side" not in html
 
 
 def test_editor_outlines_a_seat_that_breaks_a_flag_rule(client, row, pupils):

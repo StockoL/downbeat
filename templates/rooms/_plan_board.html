@@ -1,5 +1,5 @@
 {% comment %}The seating editor's working area. Re-rendered by the server after every change.{% endcomment %}
-<div class="plan-board" data-move-url="{% url 'seating_move' plan.pk %}" data-lock-url="{% url 'seating_lock' plan.pk %}" data-undo-url="{% url 'seating_undo' plan.pk %}">
+<div class="plan-board" data-move-url="{% url 'seating_move' plan.pk %}" data-lock-url="{% url 'seating_lock' plan.pk %}" data-undo-url="{% url 'seating_undo' plan.pk %}" data-shuffle-url="{% url 'seating_shuffle' plan.pk %}">
   <p class="plan-board__message" role="status" aria-live="polite">{{ message }}</p>
   {% if checks.clashes or checks.unmet or checks.together %}
   <p class="plan-board__checks">
@@ -38,7 +38,11 @@
       </ul>
     </section>
     <div class="plan-board__bin" data-drop="bin">Bin: drop here to unseat</div>
-    <button class="button" type="button" data-action="undo" {% if not undo_count %}disabled{% endif %}>Undo{% if undo_count %} ({{ undo_count }}){% endif %}</button>
+    <div class="cluster">
+      <button class="button" type="button" data-action="shuffle" data-variant="primary">Shuffle</button>
+      <button class="button" type="button" data-action="undo" {% if not undo_count %}disabled{% endif %}>Undo{% if undo_count %} ({{ undo_count }}){% endif %}</button>
+    </div>
+    <p class="field__hint">Shuffle keeps locked pupils in place and keep-apart pairs apart, and seats flagged pupils and good pairs where it can.</p>
   </div>
   </div>
 </div>

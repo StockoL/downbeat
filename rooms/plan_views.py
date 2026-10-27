@@ -13,6 +13,7 @@ from timetable.models import Class, Pupil
 from . import seating
 from .adjacency import adjacent, centre, meets_rule
 from .models import SEAT_HEIGHT, SEAT_WIDTH, Room, Seat, SeatingPlan
+from .solver import NoArrangement
 
 
 def plan_home(request):
@@ -119,6 +120,29 @@ def seating_undo(request, pk):
     if snap:
         seating.restore(plan, snap)
     return _board(request, plan)
+
+
+@require_POST
+def seating_shuffle(request, pk):
+    plan = get_object_or_404(SeatingPlan.objects.select_related("klass", "room"), pk=pk)
+    try:
+        snap = seating.shuffle_plan(plan)
+    except NoArrangement:
+        return _board(
+            request, plan,
+            "Couldn't keep every keep-apart pair apart with these seats and locks. Unlock someone or add seats.",
+            status=409,
+        )
+    seating.push_undo(request.session, plan, snap)
+    return _board(request, plan, "Shuffled. Undo puts everyone back.")
+
+
+@require_POST
+def seating_duplicate(request, pk):
+    plan = get_object_or_404(SeatingPlan, pk=pk)
+    copy = seating.duplicate_plan(plan, timezone.localdate())
+    messages.success(request, "A new plan from today; the old one is kept as history.")
+    return redirect("seating_edit", pk=copy.pk)
 
 
 @require_POST

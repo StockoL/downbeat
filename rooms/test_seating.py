@@ -204,3 +204,79 @@ def test_lock_view(client, timetable, plan, seats, pupils):
 def test_delete_plan_view(client, timetable, plan):
     client.post(f"/plan/seating/{plan.pk}/delete/")
     assert not SeatingPlan.objects.exists()
+
+
+# --- Shuffle and duplicate ---
+
+@pytest.fixture
+def crowded(klass, pupils):
+    """Six seats in a row and three keep-apart pairs among six pupils."""
+    from pupils.models import Relationship
+    from timetable.models import Pupil
+
+    more = [Pupil.objects.create(first_name=n, surname_initial="Z") for n in ["Kai", "Mia", "Leo"]]
+    klass.pupils.add(*more)
+    everyone = [*pupils, *more]
+    room = Room.objects.create(name="Row")
+    seats = [Seat.objects.create(room=room, x=i * 100, y=0) for i in range(6)]
+    plan = SeatingPlan.objects.create(klass=klass, room=room, active_from=TODAY)
+    for seat, pupil in zip(seats, everyone, strict=True):
+        SeatAssignment.objects.create(seating_plan=plan, seat=seat, pupil=pupil)
+    for a, b in [(0, 1), (2, 3), (4, 5)]:  # every pair starts side by side
+        Relationship.objects.create(pupil_a=everyone[a], pupil_b=everyone[b], kind="keep_apart")
+    return plan, seats, everyone
+
+
+def keep_apart_neighbours(plan):
+    from rooms.solver import violations
+    return violations(seating.build_problem(plan), {a.seat_id: a.pupil_id for a in plan.assignments.all()})
+
+
+def test_shuffle_separates_every_keep_apart_pair(client, timetable, crowded):
+    plan, _, _ = crowded
+    assert len(keep_apart_neighbours(plan)) == 3
+    response = client.post(f"/plan/seating/{plan.pk}/shuffle/")
+    assert response.status_code == 200 and b"Shuffled" in response.content
+    assert keep_apart_neighbours(plan) == []
+    assert plan.assignments.count() == 6
+
+
+def test_shuffle_never_moves_a_locked_seat(client, timetable, crowded):
+    plan, seats, everyone = crowded
+    plan.assignments.filter(seat=seats[5]).update(locked=True)
+    for _ in range(5):
+        client.post(f"/plan/seating/{plan.pk}/shuffle/")
+        assert plan.assignments.get(seat=seats[5]).pupil == everyone[5]
+
+
+def test_one_undo_puts_the_whole_shuffle_back(client, timetable, crowded):
+    plan, _, _ = crowded
+    before = seated(plan)
+    client.post(f"/plan/seating/{plan.pk}/shuffle/")
+    client.post(f"/plan/seating/{plan.pk}/undo/")
+    assert seated(plan) == before
+
+
+def test_shuffle_refuses_rather_than_break_a_keep_apart(client, timetable, crowded):
+    plan, seats, _ = crowded
+    plan.assignments.filter(seat__in=seats[:2]).update(locked=True)  # a keep-apart pair locked side by side
+    before = seated(plan)
+    response = client.post(f"/plan/seating/{plan.pk}/shuffle/")
+    assert response.status_code == 409 and b"Couldn" in response.content
+    assert seated(plan) == before
+
+
+def test_duplicate_keeps_the_old_plan_as_history(client, timetable, crowded):
+    plan, _, _ = crowded
+    SeatingPlan.objects.filter(pk=plan.pk).update(active_from=TODAY - datetime.timedelta(days=40))
+    plan.refresh_from_db()
+    response = client.post(f"/plan/seating/{plan.pk}/duplicate/")
+    copy = SeatingPlan.objects.exclude(pk=plan.pk).get()
+    assert response.url == f"/plan/seating/{copy.pk}/"
+    plan.refresh_from_db()
+    from django.utils import timezone
+    today = timezone.localdate()
+    assert plan.active_to == today - datetime.timedelta(days=1) and copy.active_from == today
+    assert seated(copy) == seated(plan)
+    assert SeatingPlan.current(plan.klass, plan.room, today) == copy
+    assert SeatingPlan.current(plan.klass, plan.room, today - datetime.timedelta(days=1)) == plan

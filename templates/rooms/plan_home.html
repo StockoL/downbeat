@@ -15,7 +15,8 @@
     {% if klass.seating_plans.all %}
     <ul role="list" class="flow">
       {% for plan in klass.seating_plans.all %}
-      <li><a href="{% url 'seating_edit' plan.pk %}">{{ plan.room }}</a>{% if plan.name %} <small>{{ plan.name }}</small>{% endif %}</li>
+      <li><a href="{% url 'seating_edit' plan.pk %}">{{ plan.room }}</a>{% if plan.name %} {{ plan.name }}{% endif %}
+        <small>from {{ plan.active_from|date:"j M Y" }}{% if plan.active_to %}, ended {{ plan.active_to|date:"j M Y" }}{% endif %}</small></li>
       {% endfor %}
     </ul>
     {% endif %}

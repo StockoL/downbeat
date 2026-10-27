@@ -13,8 +13,14 @@
 <div data-canvas="plan">
   {% include "rooms/_plan_board.html" %}
 </div>
+<div class="cluster">
+<form method="post" action="{% url 'seating_duplicate' plan.pk %}">
+  {% csrf_token %}
+  <button class="button" type="submit">Duplicate as a new plan from today</button>
+</form>
 <form method="post" action="{% url 'seating_delete' plan.pk %}" onsubmit="return confirm('Delete this seating plan?')">
   {% csrf_token %}
   <button class="button" type="submit" data-variant="danger">Delete plan</button>
 </form>
+</div>
 {% endblock %}

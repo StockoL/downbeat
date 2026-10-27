@@ -3,6 +3,7 @@ Seating plan changes. Every change returns a snapshot of the seats it touched, t
 the change, so the caller can keep an undo stack. Restoring a snapshot reverses the change.
 """
 
+import datetime
 import math
 
 from django.db import transaction
@@ -153,3 +154,62 @@ def seating_for(session):
     seated_ids = {p.pk for p in seated.values()}
     unseated = [p for p in session.klass.pupils.all() if p.pk not in seated_ids]
     return plan, seated, unseated
+
+
+def build_problem(plan):
+    """The shuffle's inputs for a plan: its room, its class, their locks, relationships and flag rules."""
+    from pupils.services import placement_rules, relationships_among
+
+    from .adjacency import meets_rule, neighbours
+    from .solver import Problem
+
+    seats = list(plan.room.seats.all())
+    pupils = list(plan.klass.pupils.values_list("id", flat=True))
+    pairs = relationships_among(pupils)
+    rules = placement_rules(pupils)
+    return Problem(
+        seats=[s.id for s in seats],
+        pupils=pupils,
+        neighbours=neighbours(seats),
+        locked={a.seat_id: a.pupil_id for a in plan.assignments.filter(locked=True, pupil_id__in=pupils)},
+        keep_apart={frozenset((a, b)) for a, b, kind in pairs if kind == "keep_apart"},
+        pair_well={frozenset((a, b)) for a, b, kind in pairs if kind == "pair_well"},
+        rules_met={
+            pupil: {s.id for s in seats if all(meets_rule(rule, s, plan.room) for rule in pupil_rules)}
+            for pupil, pupil_rules in rules.items()
+        },
+    )
+
+
+@transaction.atomic
+def shuffle_plan(plan, rng=None):
+    """
+    Reseat the class: locked seats stay, keep-apart pairs end up apart, rules and pairs are met
+    where possible. Returns the undo snapshot of every seat. Raises solver.NoArrangement.
+    """
+    from .solver import shuffle
+
+    arrangement = shuffle(build_problem(plan), rng)
+    seat_ids = list(plan.room.seats.values_list("id", flat=True))
+    snap = snapshot(plan, seat_ids)
+    plan.assignments.filter(locked=False).delete()
+    locked = set(plan.assignments.values_list("seat_id", flat=True))
+    SeatAssignment.objects.bulk_create([
+        SeatAssignment(seating_plan=plan, seat_id=seat, pupil_id=pupil)
+        for seat, pupil in arrangement.items() if seat not in locked
+    ])
+    return snap
+
+
+@transaction.atomic
+def duplicate_plan(plan, date):
+    """A copy that takes over from `date`; the original ends the day before and stays as history."""
+    copy = SeatingPlan.objects.create(klass=plan.klass, room=plan.room, name=plan.name, active_from=date)
+    SeatAssignment.objects.bulk_create([
+        SeatAssignment(seating_plan=copy, seat_id=a.seat_id, pupil_id=a.pupil_id, locked=a.locked)
+        for a in plan.assignments.all()
+    ])
+    if plan.active_from < date:
+        plan.active_to = date - datetime.timedelta(days=1)
+        plan.save(update_fields=["active_to", "updated_at"])
+    return copy

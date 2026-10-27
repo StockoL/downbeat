@@ -245,6 +245,7 @@ function initPlanEditor(wrapper) {
 
   wrapper.addEventListener("click", (event) => {
     if (event.target.closest("[data-action=undo]")) send(board().dataset.undoUrl);
+    if (event.target.closest("[data-action=shuffle]")) send(board().dataset.shuffleUrl);
   });
 }
 
