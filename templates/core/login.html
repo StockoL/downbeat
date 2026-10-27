@@ -1,0 +1,17 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Sign in · Downbeat{% endblock %}
+
+{% block nav %}{% endblock %}
+
+{% block content %}
+<div class="center flow">
+  <h1>Sign in</h1>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="button" type="submit" data-variant="primary" data-size="large">Sign in</button>
+  </form>
+</div>
+{% endblock %}

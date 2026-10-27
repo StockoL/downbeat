@@ -22,10 +22,39 @@ def _secret_key():
 
 
 SECRET_KEY = _secret_key()
-DEBUG = os.environ.get("DOWNBEAT_DEBUG", "1") == "1"
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# Off unless asked for: set DOWNBEAT_DEBUG=1 while developing.
+DEBUG = os.environ.get("DOWNBEAT_DEBUG") == "1"
+
+# The laptop's Tailscale name(s), e.g. "teacher-laptop.tail1234.ts.net". Tailscale's own HTTPS
+# proxy (`tailscale serve`) terminates TLS with a real certificate and forwards to localhost.
+# Written by tools/tailscale-check.ps1 into local/hosts.txt, or given in DOWNBEAT_HOSTS.
+_hosts_file = LOCAL_DIR / "hosts.txt"
+_hosts = os.environ.get("DOWNBEAT_HOSTS") or (_hosts_file.read_text(encoding="utf-8-sig") if _hosts_file.exists() else "")
+TAILNET_HOSTS = [h.strip() for h in _hosts.replace("\n", ",").split(",") if h.strip()]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", *TAILNET_HOSTS]
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in TAILNET_HOSTS]
+if TAILNET_HOSTS:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30  # browsers only honour it over HTTPS, so localhost is unaffected
+
+# No HTTPS redirect: the laptop itself uses http://127.0.0.1, which never leaves the machine;
+# every other device arrives through Tailscale's HTTPS.
+# HSTS preload and subdomains are for public domains; a private ts.net name never joins the preload list.
+SILENCED_SYSTEM_CHECKS = ["security.W008", "security.W005", "security.W021"]
+
+# One teacher, two devices: stay signed in for a term so the iPad never asks mid-lesson.
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 120
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "today"
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 10}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+]
 
 INSTALLED_APPS = [
+    "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -40,12 +69,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.FirstRunMiddleware",
+    "core.middleware.GateMiddleware",
 ]
 
 ROOT_URLCONF = "downbeat.urls"
@@ -58,6 +89,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
@@ -94,6 +126,14 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT.mkdir(exist_ok=True)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+# Serve straight from the app folders too, so the app works whether or not collectstatic has run.
+WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

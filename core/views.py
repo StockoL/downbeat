@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -20,19 +22,27 @@ def settings_home(request):
 
 
 def setup(request):
-    """First run: the timetable, note types and a first room, saved together or not at all."""
-    if Timetable.objects.exists():
-        return redirect("today")
-
+    """
+    First run: the teacher's account (only if none exists), the timetable, note types and a
+    first room, saved together or not at all.
+    """
     data = request.POST if request.method == "POST" else None
+    has_account = get_user_model().objects.exists()
+    if Timetable.objects.exists():
+        if has_account:
+            return redirect("today")
+        return account_only(request, data)
+
+    account_form = None if has_account else UserCreationForm(data, prefix="account")
     timetable_form = TimetableForm(data, prefix="timetable")
     periods = PeriodFormSet(data, prefix="periods")
     note_types = NoteTypeFormSet(data, prefix="notetypes", queryset=NoteType.objects.none())
     room_form = RoomForm(data, prefix="room")
-    forms = [timetable_form, periods, note_types, room_form]
+    forms = [f for f in [account_form, timetable_form, periods, note_types, room_form] if f is not None]
 
     if data is not None and all(f.is_valid() for f in forms):
         with transaction.atomic():
+            user = account_form.save() if account_form is not None else None
             timetable = timetable_form.save(commit=False)
             timetable.periods = periods.as_periods()
             timetable.save()
@@ -40,14 +50,26 @@ def setup(request):
                 note_type.order = order
                 note_type.save()
             room_form.save()
+        if user is not None:
+            login(request, user)
         return redirect("today")
 
     return render(request, "core/setup.html", {
+        "account_form": account_form,
         "timetable_form": timetable_form,
         "periods": periods,
         "note_types": note_types,
         "room_form": room_form,
     })
+
+
+def account_only(request, data):
+    """An install from before sign-in existed: it has a timetable but no account. Create just the account."""
+    account_form = UserCreationForm(data, prefix="account")
+    if data is not None and account_form.is_valid():
+        login(request, account_form.save())
+        return redirect("today")
+    return render(request, "core/setup.html", {"account_form": account_form, "account_only": True})
 
 
 # --- Settings → Data ----------------------------------------------------------

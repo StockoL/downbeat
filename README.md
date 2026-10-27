@@ -4,16 +4,29 @@ A personal classroom app for a secondary music teacher: seating plans, two-tap n
 
 See `docs/BUILD_ORDER.md` for the data model and phases, `docs/UX.md` for navigation and screens, and `docs/DECISIONS.md` for choices made during the build.
 
-## Running it
+## Installing
 
 ```
 py -3.12 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
-.venv\Scripts\python manage.py migrate
+```
+
+## Using it
+
+```
+.\tools\serve.ps1
+```
+
+Applies any migrations, then serves Downbeat at http://127.0.0.1:8000 on this laptop only, with debug off. The first visit opens the setup, which creates your account. `.\tools\install-server-task.ps1` starts it whenever you sign in to Windows. To reach it from the iPad, follow `docs/TAILSCALE.md`.
+
+## Developing
+
+```
+$env:DOWNBEAT_DEBUG = "1"
 .venv\Scripts\python manage.py runserver
 ```
 
-Tests and lint: `.venv\Scripts\python -m pip install -r requirements-dev.txt`, then `.venv\Scripts\python -m pytest` and `.venv\Scriptsuff check .`.
+Tests and lint: `.venv\Scripts\python -m pip install -r requirements-dev.txt`, then `.venv\Scripts\python -m pytest` and `.venv\Scripts\ruff check .`. GitHub Actions runs both on every push.
 
 ## Backups
 
@@ -36,6 +49,8 @@ $env:DOWNBEAT_DB = "demo.sqlite3"
 .venv\Scripts\python manage.py runserver
 ```
 
-`seed_demo --reset` wipes and rebuilds it (it refuses to run on `db.sqlite3`). Close the terminal, or `Remove-Item Env:DOWNBEAT_DB`, to go back to the real database.
+Sign in as `demo` / `demo-downbeat`. `seed_demo --reset` wipes and rebuilds it (it refuses to run on `db.sqlite3`). Close the terminal, or `Remove-Item Env:DOWNBEAT_DB`, to go back to the real database.
+
+## Theme
 
 The theme in `static/theme/` is built from LooseLeaf's tokens by `node tools/build-theme.mjs ../looseleaf-ui static/theme`; a bundle exported from the LooseLeaf configurator can replace it.

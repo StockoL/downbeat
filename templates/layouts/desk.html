@@ -16,6 +16,12 @@
     <a class="navbar__link" href="{% url 'settings' %}" {% if nav == "settings" %}aria-current="page"{% endif %}>Settings</a>
     {% endblock %}
     <button class="button" type="button" data-variant="ghost" data-theme-toggle>Theme</button>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="ghost">Sign out</button>
+    </form>
+    {% endif %}
   </nav>
 </header>
 <main id="main" class="wrapper region flow">

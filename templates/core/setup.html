@@ -7,11 +7,24 @@
 {% block content %}
 <div class="center flow">
   <h1>Set up Downbeat</h1>
-  <p>Three things before the first lesson. Everything here can be changed later in Settings.</p>
+  {% if account_only %}
+  <p>Downbeat now asks for a password, so it is safe to reach from the iPad. Create your account to carry on; everything else is kept.</p>
+  {% else %}
+  <p>A few things before the first lesson. Everything here can be changed later in Settings.</p>
+  {% endif %}
 
   <form method="post" class="flow">
     {% csrf_token %}
 
+    {% if account_form %}
+    <section class="card"><div class="card__body flow">
+      <h2>Your account</h2>
+      <p>The only way in once the app is reachable from the iPad. Choose a password you don't use elsewhere.</p>
+      {{ account_form }}
+    </div></section>
+    {% endif %}
+
+    {% if not account_only %}
     <section class="card"><div class="card__body flow">
       <h2>Timetable</h2>
       {{ timetable_form }}
@@ -41,6 +54,7 @@
       <p>Seats are placed in the room editor afterwards.</p>
       {{ room_form }}
     </div></section>
+    {% endif %}
 
     <button class="button" type="submit" data-variant="primary" data-size="large">Save and start</button>
   </form>

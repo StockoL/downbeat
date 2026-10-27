@@ -58,12 +58,14 @@ def test_export_contains_every_row_and_loads_back(school, tmp_path):
     assert Pupil.objects.count() == 3 and Note.objects.count() == 1
 
 
-def test_delete_all_leaves_nothing_and_returns_to_setup(client, school):
+def test_delete_all_leaves_nothing_and_returns_to_setup(client, school, teacher):
     client.get("/")  # make a browser session
     data.delete_all()
     for model in data.APP_MODELS:
         assert not model.objects.exists(), model
     assert not BrowserSession.objects.exists()
+    assert client.get("/").url.startswith("/login/")  # every device is signed out
+    client.force_login(teacher)  # the account is kept, so signing back in leads to setup
     assert client.get("/").url == "/setup/"
 
 

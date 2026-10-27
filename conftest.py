@@ -1,7 +1,34 @@
 import pytest
+from django.test import Client
 
 from rooms.models import Room
 from timetable.models import Class, Pupil, Timetable
+
+PASSWORD = "a long test password"
+
+
+@pytest.fixture(autouse=True)
+def fast_password_hashing(settings):
+    """Real hashing is deliberately slow; tests don't need it."""
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture
+def teacher(django_user_model):
+    return django_user_model.objects.create_user("teacher", password=PASSWORD)
+
+
+@pytest.fixture
+def client(db, teacher):
+    """Signed in as the teacher, as every page but login and first-run setup requires."""
+    signed_in = Client()
+    signed_in.force_login(teacher)
+    return signed_in
+
+
+@pytest.fixture
+def anon_client(db):
+    return Client()
 
 
 @pytest.fixture

@@ -14,6 +14,7 @@ import datetime
 import random
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -33,6 +34,8 @@ FIRST_NAMES = [
     "Imogen", "Musa", "Holly", "Dylan", "Sienna", "Reuben", "Esme", "Ali", "Martha", "Jude", "Tilly",
 ]
 INITIALS = "ABCDEFGHJKLMNPRSTW"
+DEMO_USERNAME = "demo"
+DEMO_PASSWORD = "demo-downbeat"
 INSTRUMENTS = ["Piano", "Violin", "Guitar", "Drums", "Flute", "Cello", "Trumpet", "Clarinet", "Voice"]
 
 PERIODS = [
@@ -93,6 +96,11 @@ class Command(BaseCommand):
         today = timezone.localdate()
         with transaction.atomic():
             counts = self.seed(rng, today)
+            made_account = not get_user_model().objects.exists()
+            if made_account:
+                get_user_model().objects.create_user(DEMO_USERNAME, password=DEMO_PASSWORD)
+        if made_account:
+            self.stdout.write(f"Sign in as {DEMO_USERNAME} / {DEMO_PASSWORD} (demo database only).")
         self.stdout.write(self.style.SUCCESS(
             "Demo data in {db}: {pupils} pupils, {classes} classes, {rooms} rooms, {sessions} sessions, {notes} notes.".format(
                 db=db_name, **counts,
