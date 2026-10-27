@@ -11,6 +11,7 @@
     <a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a>
     {% for colour in row.flags %}<span class="flag-swatch flag-{{ colour }}" aria-hidden="true"></span>{% endfor %}
     {% if row.pupil.instrument %}<small>{{ row.pupil.instrument }}</small>{% endif %}
+    {% if row.attendance %}<small>at {{ row.attendance.0 }} of {{ row.attendance.1 }} rehearsal{{ row.attendance.1|pluralize }}</small>{% endif %}
   </li>
   {% endfor %}
 </ul>

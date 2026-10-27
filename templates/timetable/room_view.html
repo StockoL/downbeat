@@ -85,6 +85,7 @@ device's unsent captures applied on top, so it works the same with or without a 
   <strong class="room-bar__session">{{ session.period }} · {{ session.klass }}</strong>
   {% if state.goals %}<span class="cluster room-bar__goals" data-goals></span>{% endif %}
   {% if state.checklist %}<button type="button" class="button" data-variant="ghost" data-action="checklist">✓ <span class="room-bar__count" data-checklist-count></span></button>{% endif %}
+  {% if state.register %}<button type="button" class="button" data-variant="ghost" data-action="register">Register <span class="room-bar__count" data-register-count></span></button>{% endif %}
   <button type="button" class="button" data-variant="ghost" data-action="actions">Actions <span class="room-bar__count" data-actions-count></span></button>
   <button type="button" class="button" data-action="pick">Pick</button>
   <span class="room-bar__sync" data-sync-status role="status" aria-live="polite"></span>
@@ -175,6 +176,15 @@ device's unsent captures applied on top, so it works the same with or without a 
     <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
   </header>
   <ul class="flow" role="list" data-slot="list"></ul>
+</template>
+
+<template id="tpl-register">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name">Register · {{ session.klass }}</h2>
+    <button type="button" class="button" data-action="all-present">Everyone here</button>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <ul class="register" role="list" data-slot="list"></ul>
 </template>
 
 <template id="tpl-shortcuts">

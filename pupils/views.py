@@ -9,7 +9,7 @@ from django.db.models import Count, ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from timetable.models import Class, Pupil
+from timetable.models import Class, Pupil, SessionAttendance
 
 from .forms import FlagTypeFormSet, PupilFlagForm, RelationshipForm
 from .models import FlagType, PupilFlag, Relationship
@@ -25,8 +25,15 @@ def class_pupils(request, pk):
     klass = get_object_or_404(Class, pk=pk)
     pupils = list(klass.pupils.all())
     colours = flag_colours([p.pk for p in pupils])
+    attendance = {}
+    if klass.kind == Class.CO_CURRICULAR:
+        # Ensemble attendance: of the rehearsals where the register was taken, how many each came to.
+        for pupil_id, present in SessionAttendance.objects.filter(session__klass=klass).values_list("pupil_id", "present"):
+            came, marked = attendance.get(pupil_id, (0, 0))
+            attendance[pupil_id] = (came + present, marked + 1)
     return render(request, "pupils/class.html", {
-        "nav": "pupils", "klass": klass, "rows": [{"pupil": p, "flags": colours.get(p.pk, [])} for p in pupils],
+        "nav": "pupils", "klass": klass,
+        "rows": [{"pupil": p, "flags": colours.get(p.pk, []), "attendance": attendance.get(p.pk)} for p in pupils],
     })
 
 

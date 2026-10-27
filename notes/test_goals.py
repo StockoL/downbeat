@@ -126,3 +126,35 @@ def test_settings_goals_and_checklist(client, timetable, hp):
     assert client.get("/settings/checklist/").status_code == 200
     client.post("/settings/checklist/", formset({"order": "0", "text": "Starter"}, {"order": "1", "text": "Exit task"}))
     assert list(ChecklistItem.objects.values_list("text", flat=True)) == ["Starter", "Exit task"]
+
+
+# --- Ensemble register ---
+
+def test_a_co_curricular_lesson_has_a_register(client, timetable, room, pupils):
+    choir = Class.objects.create(name="Choir", kind=Class.CO_CURRICULAR)
+    choir.pupils.add(*pupils)
+    rehearsal = Session.objects.create(date=MON, period="P1", klass=choir, room=room)
+    html = client.get(f"/room/{rehearsal.pk}/").content.decode()
+    assert 'data-action="register"' in html and 'id="tpl-register"' in html
+    assert client.get(f"/room/{rehearsal.pk}/state/").json()["register"] is True
+
+
+def test_a_timetabled_lesson_has_no_register(client, timetable, klass, room):
+    html = client.get(f"/room/{lesson(klass, room, 0).pk}/").content.decode()
+    assert 'data-action="register"' not in html
+
+
+def test_register_marks_reach_the_state_and_the_class_page(client, timetable, room, pupils):
+    choir = Class.objects.create(name="Choir", kind=Class.CO_CURRICULAR)
+    choir.pupils.add(*pupils)
+    first = Session.objects.create(date=MON, period="P1", klass=choir, room=room)
+    second = Session.objects.create(date=MON + datetime.timedelta(days=7), period="P1", klass=choir, room=room)
+    ops = [
+        {"op_id": str(uuid.uuid4()), "type": "attendance.set", "session": str(s.pk), "pupil": str(pupils[0].pk),
+         "present": present, "at": timezone.now().isoformat()}
+        for s, present in [(first, True), (second, False)]
+    ]
+    sync(client, *ops)
+    assert client.get(f"/room/{first.pk}/state/").json()["present"] == [str(pupils[0].pk)]
+    html = client.get(f"/pupils/class/{choir.pk}/").content.decode()
+    assert "at 1 of 2 rehearsals" in html

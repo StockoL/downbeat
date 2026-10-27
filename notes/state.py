@@ -50,6 +50,8 @@ def lesson_state(session):
         "elsewhere": {str(pk): totals[pk] - in_class[pk] for pk in pupil_ids if totals[pk] > in_class[pk]},
         "spoken": spoken,
         "absent": [str(pk) for pk in services.absent(session)],
+        "present": [str(pk) for pk in session.attendance.filter(present=True).values_list("pupil_id", flat=True)],
+        "register": session.klass.kind == "co_curricular",
         # Each goal's count from the other lessons in its window; the page adds this one.
         "goals": [
             {

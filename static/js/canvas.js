@@ -309,7 +309,8 @@ function applyOp(s, op, graveyard) {
       break;
     case "attendance.set":
       s.absent = s.absent.filter((id) => id !== op.pupil);
-      if (!op.present) s.absent.push(op.pupil);
+      s.present = s.present.filter((id) => id !== op.pupil);
+      (op.present ? s.present : s.absent).push(op.pupil);
       break;
     case "checklist.tick":
       s.ticked[op.item] = [...(s.ticked[op.item] ?? []), op.id];
@@ -454,11 +455,14 @@ function initRoomView(root) {
           `${goal.icon} ${count}/${goal.target}`);
       }));
     }
+    const registerCount = document.querySelector("[data-register-count]");
+    if (registerCount) registerCount.textContent = `${s.present.length}/${s.pupils.length}`;
     const checklistCount = document.querySelector("[data-checklist-count]");
     if (checklistCount) checklistCount.textContent = `${ticked(s)}/${s.checklist.length}`;
     undoButton.hidden = undoStack().length === 0;
     if (sheet.open && body.dataset.sheet === "actions") fillActions(s);
     if (sheet.open && body.dataset.sheet === "checklist") fillChecklist(s);
+    if (sheet.open && body.dataset.sheet === "register") fillRegister(s);
   }
 
   /* Sheets ----------------------------------------------------------------- */
@@ -557,6 +561,27 @@ function initRoomView(root) {
     }));
   }
 
+  /** The ensemble register: each member present, absent or not yet marked. */
+  function fillRegister(s) {
+    const present = new Set(s.present);
+    const absent = new Set(s.absent);
+    body.querySelector("[data-slot=list]").replaceChildren(...s.pupils.map((pupil) => {
+      const state = present.has(pupil.id) ? "present" : absent.has(pupil.id) ? "absent" : "unmarked";
+      const button = el("button", {
+        type: "button", class: "button register__pupil", "data-action": "mark", "data-pupil-id": pupil.id,
+        "data-state": state, "aria-label": `${pupil.name}: ${state === "unmarked" ? "not marked" : state}`,
+      }, pupil.name);
+      const row = el("li");
+      row.append(button);
+      return row;
+    }));
+  }
+
+  function openRegister() {
+    show("tpl-register", "register");
+    fillRegister(view());
+  }
+
   function openChecklist() {
     show("tpl-checklist", "checklist");
     fillChecklist(view());
@@ -651,6 +676,23 @@ function initRoomView(root) {
       case "checklist":
         openChecklist();
         break;
+      case "register":
+        openRegister();
+        break;
+      case "mark": {
+        // Unmarked or absent → present; present → absent.
+        const pupilId = target.dataset.pupilId;
+        submit({ type: "attendance.set", pupil: pupilId, present: target.dataset.state !== "present" });
+        break;
+      }
+      case "all-present": {
+        const s = view();
+        const marked = new Set([...s.present, ...s.absent]);
+        for (const pupil of s.pupils) {
+          if (!marked.has(pupil.id)) submit({ type: "attendance.set", pupil: pupil.id, present: true });
+        }
+        break;
+      }
       case "tick": {
         const item = target.dataset.item;
         submit(isTicked(view(), item) ? { type: "checklist.untick", item } : { type: "checklist.tick", id: queue.uuid(), item });

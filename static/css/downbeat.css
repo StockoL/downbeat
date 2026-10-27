@@ -838,3 +838,29 @@ ol[role="list"] {
 .checklist__item[aria-pressed="true"]::before {
   content: "✓ ";
 }
+
+/* --- Ensemble register --- */
+.register {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 1fr));
+  gap: var(--space-2xs);
+}
+
+.register__pupil {
+  inline-size: 100%;
+  min-block-size: 3rem;
+}
+
+.register__pupil[data-state="present"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+.register__pupil[data-state="present"]::before {
+  content: "✓ ";
+}
+
+.register__pupil[data-state="absent"] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
