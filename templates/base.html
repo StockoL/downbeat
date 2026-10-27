@@ -2,14 +2,16 @@
 <html lang="en-GB">
   <head>
     <meta charset="utf-8">
-    {% looseleaf_meta %}
-    <link rel="icon" href="data:,">
+    {% looseleaf_meta title="Downbeat" icon="icons/icon-180.png" %}
+    <link rel="icon" href="{% static 'icons/icon-192.png' %}">
+    <link rel="manifest" href="/manifest.webmanifest">
     <title>{% block title %}Downbeat{% endblock %}</title>
     {% looseleaf_theme %}
     {% looseleaf_css %}
     <link rel="stylesheet" href="{% static 'css/downbeat.css' %}">
     {% looseleaf_js %}
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/queue.js' %}" defer></script>
     {% block head %}{% endblock %}
   </head>
   <body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

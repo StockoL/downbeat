@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% comment %}Shown by the service worker when a page isn't saved and the laptop can't be reached.{% endcomment %}
+
+{% block title %}Offline · Downbeat{% endblock %}
+
+{% block layout %}
+<main class="wrapper region flow center">
+  <h1>Not reachable</h1>
+  <p>The laptop can't be reached and this page wasn't saved on this device. Pages opened today while connected still work: go back and open the lesson from Today.</p>
+  <p><a class="button" href="/">Try again</a></p>
+</main>
+{% endblock %}

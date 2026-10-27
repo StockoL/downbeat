@@ -17,7 +17,7 @@
     {% endblock %}
     <button class="button" type="button" data-variant="ghost" data-theme-toggle>Theme</button>
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'logout' %}">
+    <form method="post" action="{% url 'logout' %}" data-sign-out>
       {% csrf_token %}
       <button class="button" type="submit" data-variant="ghost">Sign out</button>
     </form>
