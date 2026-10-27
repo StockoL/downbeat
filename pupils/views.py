@@ -11,8 +11,8 @@ from django.views.decorators.http import require_POST
 
 from timetable.models import Class, Pupil
 
-from .forms import FlagTypeFormSet, PupilFlagForm
-from .models import FlagType, PupilFlag
+from .forms import FlagTypeFormSet, PupilFlagForm, RelationshipForm
+from .models import FlagType, PupilFlag, Relationship
 from .services import flag_colours
 
 
@@ -32,10 +32,17 @@ def class_pupils(request, pk):
 
 def pupil_page(request, pk):
     pupil = get_object_or_404(Pupil, pk=pk)
-    form = PupilFlagForm(request.POST or None, pupil=pupil)
-    if request.method == "POST" and form.is_valid():
+    adding_flag = request.method == "POST" and "add_flag" in request.POST
+    adding_relationship = request.method == "POST" and "add_relationship" in request.POST
+    form = PupilFlagForm(request.POST if adding_flag else None, pupil=pupil)
+    relationship_form = RelationshipForm(request.POST if adding_relationship else None, pupil=pupil)
+    if adding_flag and form.is_valid():
         form.save()
         messages.success(request, "Flag added.")
+        return redirect("pupil_page", pk=pupil.pk)
+    if adding_relationship and relationship_form.is_valid():
+        relationship_form.save()
+        messages.success(request, "Saved.")
         return redirect("pupil_page", pk=pupil.pk)
     notes = pupil.notes.live().select_related("note_type", "session__klass").order_by("-created_at")[:100]
     return render(request, "pupils/pupil.html", {
@@ -44,6 +51,8 @@ def pupil_page(request, pk):
         "classes": pupil.classes.all(),
         "flags": pupil.flags.select_related("flag_type"),
         "flag_form": form if form.fields["flag_type"].queryset.exists() else None,
+        "relationships": [{"r": r, "other": r.other(pupil)} for r in Relationship.involving(pupil)],
+        "relationship_form": relationship_form if relationship_form.fields["other"].queryset.exists() else None,
         "notes": notes,
     })
 
@@ -54,6 +63,13 @@ def pupil_flag_remove(request, pk):
     flag.delete()
     messages.success(request, "Flag removed.")
     return redirect("pupil_page", pk=flag.pupil.pk)
+
+
+@require_POST
+def relationship_remove(request, pk, pupil_pk):
+    get_object_or_404(Relationship, pk=pk).delete()
+    messages.success(request, "Removed.")
+    return redirect("pupil_page", pk=pupil_pk)
 
 
 def flag_types(request):

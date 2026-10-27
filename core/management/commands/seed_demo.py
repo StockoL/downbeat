@@ -21,9 +21,10 @@ from django.utils import timezone
 
 from core.data import delete_all
 from notes.models import Note, NoteType, SpokenTo
-from pupils.models import FlagType, PupilFlag
+from pupils.models import FlagType, PupilFlag, Relationship
+from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
-from rooms.seating import create_plan
+from rooms.seating import create_plan, move
 from timetable.models import Class, Pupil, Session, SessionAttendance, Slot, Timetable
 from timetable.services import generate_sessions
 
@@ -165,6 +166,22 @@ class Command(BaseCommand):
         # Seat every class in its home room, filling front zones first.
         for name, klass in classes.items():
             self.seat(klass, rooms[homes[name]], today, rng)
+
+        # 8X has three keep-apart pairs and two who work well together: what the shuffle is for.
+        eight_x = list(classes["8X Mu"].pupils.all())
+        rng.shuffle(eight_x)
+        for i, kind in enumerate(["keep_apart"] * 3 + ["pair_well"] * 2):
+            Relationship.objects.create(
+                pupil_a=eight_x[2 * i], pupil_b=eight_x[2 * i + 1], kind=kind, source="Head of year",
+            )
+
+        # …and the first keep-apart pair has ended up side by side, for the shuffle to sort out.
+        plan = SeatingPlan.objects.get(klass=classes["8X Mu"], room=rooms["M1"])
+        plan.assignments.update(locked=False)
+        first, second = eight_x[0], eight_x[1]
+        anchor = plan.assignments.get(pupil=first).seat
+        beside = next(seat for seat in rooms["M1"].seats.all() if adjacent(anchor, seat))
+        move(plan, second, beside)
 
         # Last week to the end of next week; this week is week A.
         monday = today - datetime.timedelta(days=today.weekday())

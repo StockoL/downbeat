@@ -41,10 +41,36 @@
     <form method="post" class="flow">
       {% csrf_token %}
       {{ flag_form }}
-      <button class="button" type="submit" data-variant="primary">Add flag</button>
+      <button class="button" type="submit" name="add_flag" data-variant="primary">Add flag</button>
     </form>
     {% elif not flags %}
     <p>Flag types are set up in <a href="{% url 'flag_types' %}">Settings → Flags</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>Seating</h2>
+    {% if relationships %}
+    <ul class="flow" role="list">
+      {% for item in relationships %}
+      <li class="cluster">
+        <strong>{{ item.r.get_kind_display }}</strong> <a href="{% url 'pupil_page' item.other.pk %}">{{ item.other }}</a>
+        {% if item.r.source %}<small>({{ item.r.source }}{% if item.r.since %}, {{ item.r.since|date:"M Y" }}{% endif %})</small>{% endif %}
+        {% if item.r.note %}<small>{{ item.r.note }}</small>{% endif %}
+        <form method="post" action="{% url 'relationship_remove' pupil.pk item.r.pk %}">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if relationship_form %}
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ relationship_form }}
+      <button class="button" type="submit" name="add_relationship" data-variant="primary">Save</button>
+    </form>
     {% endif %}
   </section>
 

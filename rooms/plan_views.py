@@ -6,10 +6,12 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from pupils.services import flag_colours
+from pupils.models import Relationship
+from pupils.services import flag_colours, placement_rules, relationships_among
 from timetable.models import Class, Pupil
 
 from . import seating
+from .adjacency import adjacent, centre, meets_rule
 from .models import SEAT_HEIGHT, SEAT_WIDTH, Room, Seat, SeatingPlan
 
 
@@ -27,16 +29,41 @@ def board_context(request, plan, message=""):
         for seat in plan.room.seats.all()
         for a in [assignments.get(seat.id)]
     ]
+    checks = seating_checks(plan, assignments)
+    for item in seats:
+        item["rule_unmet"] = item["seat"].id in checks["unmet"]
     return {
         "plan": plan,
         "room": plan.room,
         "seats": seats,
+        "checks": checks,
         "unseated": [p for p in plan.klass.pupils.all() if p.id not in seated],
         "undo_count": seating.undo_count(request.session, plan),
         "seat_width": SEAT_WIDTH,
         "seat_height": SEAT_HEIGHT,
         "message": message,
     }
+
+
+def seating_checks(plan, assignments):
+    """
+    The editor's validation: keep-apart pairs seated next to each other, pair-well pairs that are,
+    and seats where a pupil's flag rule isn't met. Lines are in canvas units, centre to centre.
+    """
+    seat_of = {a.pupil_id: a.seat for a in assignments.values()}
+    lines, clashes, together = [], 0, 0
+    for a, b, kind in relationships_among(seat_of):
+        if a in seat_of and b in seat_of and adjacent(seat_of[a], seat_of[b]):
+            (x1, y1), (x2, y2) = centre(seat_of[a]), centre(seat_of[b])
+            lines.append({"x1": x1, "y1": y1, "x2": x2, "y2": y2, "kind": kind})
+            clashes += kind == Relationship.KEEP_APART
+            together += kind == Relationship.PAIR_WELL
+    unmet = {
+        seat_of[pupil].id
+        for pupil, rules in placement_rules(seat_of).items()
+        if not all(meets_rule(rule, seat_of[pupil], plan.room) for rule in rules)
+    }
+    return {"lines": lines, "clashes": clashes, "together": together, "unmet": unmet}
 
 
 def seating_edit(request, pk):

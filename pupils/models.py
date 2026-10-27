@@ -48,3 +48,39 @@ class PupilFlag(Base):
 
     def __str__(self):
         return f"{self.pupil}: {self.flag_type}"
+
+
+class Relationship(Base):
+    """Symmetric: stored once per pair, with the two pupils in a fixed order."""
+
+    KEEP_APART = "keep_apart"
+    PAIR_WELL = "pair_well"
+    KINDS = [(KEEP_APART, "Keep apart"), (PAIR_WELL, "Pair well")]
+
+    pupil_a = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="+")
+    pupil_b = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="+")
+    kind = models.CharField(max_length=10, choices=KINDS)
+    source = models.CharField(max_length=100, blank=True, help_text="Who told you, e.g. the head of year.")
+    since = models.DateField(null=True, blank=True)
+    note = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["pupil_a", "pupil_b"], name="one_relationship_per_pair"),
+            models.CheckConstraint(condition=models.Q(pupil_a__lt=models.F("pupil_b")), name="pair_in_fixed_order"),
+        ]
+
+    def __str__(self):
+        return f"{self.pupil_a} and {self.pupil_b}: {self.get_kind_display().lower()}"
+
+    def save(self, *args, **kwargs):
+        if self.pupil_a_id and self.pupil_b_id and str(self.pupil_a_id) > str(self.pupil_b_id):
+            self.pupil_a_id, self.pupil_b_id = self.pupil_b_id, self.pupil_a_id
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def involving(cls, pupil):
+        return cls.objects.filter(models.Q(pupil_a=pupil) | models.Q(pupil_b=pupil)).select_related("pupil_a", "pupil_b")
+
+    def other(self, pupil):
+        return self.pupil_b if self.pupil_a_id == pupil.pk else self.pupil_a

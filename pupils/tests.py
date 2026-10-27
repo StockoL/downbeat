@@ -3,7 +3,7 @@ import datetime
 import pytest
 from reportlab import rl_config
 
-from pupils.models import FlagType, PupilFlag
+from pupils.models import FlagType, PupilFlag, Relationship
 from rooms.models import Seat, SeatAssignment, SeatingPlan
 from timetable.models import Session
 
@@ -72,7 +72,7 @@ def test_pupil_page_shows_the_label_note_and_what_works(client, timetable, flagg
 
 
 def test_add_and_remove_a_pupil_flag(client, timetable, pupils, flag):
-    client.post(f"/pupils/{pupils[1].pk}/", {"flag_type": flag.pk, "since": "2026-09-01", "note": ""})
+    client.post(f"/pupils/{pupils[1].pk}/", {"add_flag": "", "flag_type": flag.pk, "since": "2026-09-01", "note": ""})
     pupil_flag = PupilFlag.objects.get(pupil=pupils[1])
     assert pupil_flag.since == datetime.date(2026, 9, 1)
     client.post(f"/pupils/flags/{pupil_flag.pk}/remove/")
@@ -80,7 +80,7 @@ def test_add_and_remove_a_pupil_flag(client, timetable, pupils, flag):
 
 
 def test_the_same_flag_cannot_be_added_twice(client, timetable, flagged, flag):
-    client.post(f"/pupils/{flagged.pk}/", {"flag_type": flag.pk})
+    client.post(f"/pupils/{flagged.pk}/", {"add_flag": "", "flag_type": flag.pk})
     assert PupilFlag.objects.count() == 1
 
 
@@ -114,3 +114,74 @@ def test_projector_and_cover_show_no_flags(client, lesson, flagged, monkeypatch)
 
 def test_lesson_state_never_carries_flag_labels(client, lesson, flagged):
     assert LABEL not in client.get(f"/room/{lesson.pk}/state/").content.decode()
+
+
+# --- Relationships ---
+
+def test_relationships_are_stored_once_whichever_side_adds_them(client, timetable, pupils):
+    client.post(f"/pupils/{pupils[1].pk}/", {"add_relationship": "", "other": pupils[0].pk, "kind": "keep_apart", "source": "HoY"})
+    rel = Relationship.objects.get()
+    assert str(rel.pupil_a_id) < str(rel.pupil_b_id)
+    assert {rel.pupil_a, rel.pupil_b} == {pupils[0], pupils[1]}
+    # shown on both pages, and the partner can't be chosen again from either side
+    for pupil, other in [(pupils[0], pupils[1]), (pupils[1], pupils[0])]:
+        html = client.get(f"/pupils/{pupil.pk}/").content.decode()
+        assert "Keep apart" in html and str(other) in html
+    client.post(f"/pupils/{pupils[0].pk}/", {"add_relationship": "", "other": pupils[1].pk, "kind": "pair_well"})
+    assert Relationship.objects.count() == 1
+
+
+def test_relationships_are_only_offered_with_classmates(client, timetable, pupils):
+    from timetable.models import Pupil
+    stranger = Pupil.objects.create(first_name="Zed", surname_initial="Q")
+    client.post(f"/pupils/{pupils[0].pk}/", {"add_relationship": "", "other": stranger.pk, "kind": "keep_apart"})
+    assert not Relationship.objects.exists()
+
+
+def test_remove_a_relationship(client, timetable, pupils):
+    rel = Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[1], kind="pair_well")
+    client.post(f"/pupils/{pupils[0].pk}/relationships/{rel.pk}/remove/")
+    assert not Relationship.objects.exists()
+
+
+# --- Seating editor validation ---
+
+@pytest.fixture
+def row(timetable, klass, room, pupils):
+    """Three seats in a row (neighbours 100 apart) and one far away; pupils 0 and 1 side by side."""
+    seats = [Seat.objects.create(room=room, x=x, y=y, zone=zone) for x, y, zone in [(0, 0, "front"), (100, 0, ""), (200, 0, ""), (700, 500, "back")]]
+    plan = SeatingPlan.objects.create(klass=klass, room=room, active_from=D)
+    SeatAssignment.objects.create(seating_plan=plan, seat=seats[0], pupil=pupils[0])
+    SeatAssignment.objects.create(seating_plan=plan, seat=seats[1], pupil=pupils[1])
+    SeatAssignment.objects.create(seating_plan=plan, seat=seats[3], pupil=pupils[2])
+    return plan
+
+
+def test_editor_draws_a_line_between_keep_apart_neighbours(client, row, pupils):
+    Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[1], kind="keep_apart")
+    Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[2], kind="keep_apart")  # far apart: fine
+    html = client.get(f"/plan/seating/{row.pk}/").content.decode()
+    assert html.count('data-kind="keep_apart"') == 1
+    assert "1 keep-apart pair side by side." in html
+
+
+def test_editor_marks_pair_well_neighbours_quietly(client, row, pupils):
+    Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[1], kind="pair_well")
+    html = client.get(f"/plan/seating/{row.pk}/").content.decode()
+    assert 'data-kind="pair_well"' in html and "keep-apart" not in html
+
+
+def test_editor_outlines_a_seat_that_breaks_a_flag_rule(client, row, pupils):
+    front = FlagType.objects.create(label="Front", colour=2, placement_rule="front")
+    PupilFlag.objects.create(pupil=pupils[0], flag_type=front)  # in the front seat: met
+    PupilFlag.objects.create(pupil=pupils[2], flag_type=front)  # at the back: not met
+    html = client.get(f"/plan/seating/{row.pk}/").content.decode()
+    assert html.count("data-rule-unmet") == 1
+    assert "1 seat not meeting a flag's seating rule." in html
+
+
+def test_a_move_redraws_the_checks(client, row, pupils):
+    Relationship.objects.create(pupil_a=pupils[0], pupil_b=pupils[1], kind="keep_apart")
+    far = Seat.objects.get(x=200)
+    html = client.post(f"/plan/seating/{row.pk}/move/", {"pupil": pupils[1].pk, "seat": far.pk}).content.decode()
+    assert 'data-kind="keep_apart"' not in html

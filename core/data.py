@@ -14,14 +14,14 @@ from django.db import connection, transaction
 from django.utils import timezone
 
 from notes.models import Note, NoteType, SpokenTo
-from pupils.models import FlagType, PupilFlag
+from pupils.models import FlagType, PupilFlag, Relationship
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from timetable.models import Class, Pupil, Session, SessionAttendance, Slot, Timetable
 
 # Every Downbeat table, children before parents, so deleting in this order never trips a protected key.
 APP_MODELS = [
     SpokenTo, Note, SessionAttendance, SeatAssignment, SeatingPlan, Session, Slot,
-    Seat, Room, PupilFlag, FlagType, Class, Pupil, NoteType, Timetable,
+    Seat, Room, Relationship, PupilFlag, FlagType, Class, Pupil, NoteType, Timetable,
 ]
 EXPORT_APPS = ["timetable", "rooms", "notes", "pupils"]
 BACKUP_GLOB = "downbeat-*.sqlite3"

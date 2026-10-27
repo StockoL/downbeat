@@ -1,14 +1,24 @@
 {% comment %}The seating editor's working area. Re-rendered by the server after every change.{% endcomment %}
 <div class="plan-board" data-move-url="{% url 'seating_move' plan.pk %}" data-lock-url="{% url 'seating_lock' plan.pk %}" data-undo-url="{% url 'seating_undo' plan.pk %}">
   <p class="plan-board__message" role="status" aria-live="polite">{{ message }}</p>
+  {% if checks.clashes or checks.unmet or checks.together %}
+  <p class="plan-board__checks">
+    {% if checks.clashes %}{{ checks.clashes }} keep-apart pair{{ checks.clashes|pluralize }} side by side.{% endif %}
+    {% if checks.unmet %}{{ checks.unmet|length }} seat{{ checks.unmet|length|pluralize }} not meeting a flag's seating rule.{% endif %}
+    {% if checks.together %}{{ checks.together }} pair{{ checks.together|pluralize }} who work well together, together.{% endif %}
+  </p>
+  {% endif %}
 
   <div class="sidebar" data-side="right">
   <div class="canvas"
        data-width="{{ room.canvas_width }}" data-height="{{ room.canvas_height }}"
        data-seat-width="{{ seat_width }}" data-seat-height="{{ seat_height }}"
        style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
+    <svg class="plan-board__lines" viewBox="0 0 {{ room.canvas_width }} {{ room.canvas_height }}" preserveAspectRatio="none" aria-hidden="true">
+      {% for line in checks.lines %}<line x1="{{ line.x1 }}" y1="{{ line.y1 }}" x2="{{ line.x2 }}" y2="{{ line.y2 }}" class="plan-line" data-kind="{{ line.kind }}"/>{% endfor %}
+    </svg>
     {% for item in seats %}{% with seat=item.seat a=item.assignment %}
-    <button type="button" class="seat" data-drop="seat" data-seat="{{ seat.pk }}"
+    <button type="button" class="seat" data-drop="seat" data-seat="{{ seat.pk }}"{% if item.rule_unmet %} data-rule-unmet{% endif %}
             {% if a %}data-pupil="{{ a.pupil_id }}" data-locked="{{ a.locked|yesno:'true,false' }}" aria-label="{{ a.pupil }}{% if a.locked %}, locked{% endif %}"{% else %}data-empty aria-label="Empty seat {{ seat.label }}"{% endif %}
             style="--x: {{ seat.x }}; --y: {{ seat.y }}">
       {% if a %}{% include "partials/seat_flags.html" with flags=item.flags %}<span class="seat__name">{{ a.pupil }}</span>{% if a.locked %}<span class="seat__lock" aria-hidden="true">🔒</span>{% endif %}

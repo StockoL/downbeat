@@ -744,3 +744,34 @@ ol[role="list"] {
   padding-inline-start: 0;
   list-style: none;
 }
+
+/* --- Seating editor validation: lines between seat centres, under the seats. --- */
+.plan-board__lines {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.plan-line {
+  stroke-width: 4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.plan-line[data-kind="keep_apart"] {
+  stroke: var(--color-status-danger);
+}
+
+.plan-line[data-kind="pair_well"] {
+  stroke: var(--color-text-muted);
+  stroke-dasharray: 6 6;
+  stroke-width: 2;
+}
+
+.seat[data-rule-unmet] {
+  outline: 2px dotted var(--color-status-warning);
+  outline-offset: 3px;
+}
