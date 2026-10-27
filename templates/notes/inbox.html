@@ -1,6 +1,6 @@
 {% comment %}A pupil's notes, newest first, over the note sheet. Read only.{% endcomment %}
 <header class="note-sheet__head cluster">
-  <button type="button" class="button" data-variant="ghost" hx-get="{% url 'note_sheet' session.pk pupil.pk %}" hx-target="#sheet-body">‹ Back</button>
+  <button type="button" class="button" data-variant="ghost" data-action="back" data-pupil="{{ pupil.pk }}">‹ Back</button>
   <h2 class="note-sheet__name">{{ pupil }}</h2>
   <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
 </header>

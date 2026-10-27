@@ -10,10 +10,9 @@ import uuid
 import pytest
 from django.urls import reverse
 
-from notes.models import Note, SpokenTo
 from rooms import seating
 from rooms.models import Room, Seat, SeatingPlan
-from timetable.models import Pupil, Session, SessionAttendance
+from timetable.models import Pupil, Session
 
 pytestmark = pytest.mark.django_db
 
@@ -26,8 +25,7 @@ POST_ONLY = [
     ("teacher_move", [ANY]),
     ("seating_create", []), ("seating_move", [ANY]), ("seating_lock", [ANY]), ("seating_undo", [ANY]),
     ("seating_delete", [ANY]),
-    ("note_add", [ANY]), ("note_remove", [ANY]), ("note_undo", [ANY]), ("action_done", [ANY]),
-    ("spoken_toggle", [ANY]), ("absent_toggle", [ANY]), ("pick", [ANY]),
+    ("sync", []),
 ]
 
 
@@ -76,24 +74,6 @@ def test_teacher_move_needs_both_coordinates(client, timetable, room):
     assert room.teacher_x is None
 
 
-# --- Room view ---
-
-def test_note_add_with_an_unknown_type_records_nothing(client, lesson, pupils):
-    response = client.post(f"/room/{lesson.pk}/notes/", {"pupil": pupils[0].pk, "note_type": ANY})
-    assert response.status_code == 404
-    assert not Note.objects.exists()
-
-
-def test_pick_with_everyone_absent_says_so_and_records_nothing(client, lesson, pupils):
-    for pupil in pupils:
-        SessionAttendance.objects.create(session=lesson, pupil=pupil, present=False)
-    html = client.post(f"/room/{lesson.pk}/pick/").content.decode()
-    assert "No one to pick" in html
-    assert not SpokenTo.objects.exists()
-
-
-def test_undo_with_an_empty_stack_changes_nothing(client, lesson):
-    assert client.post(f"/room/{lesson.pk}/notes/undo/").status_code == 200
 
 
 # --- Seating invariants under random sequences ---

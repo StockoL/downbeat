@@ -1,5 +1,10 @@
 {% extends "layouts/room.html" %}
 {% load static %}
+{% comment %}
+The room view. The server draws the room; everything that changes in a lesson (seat marks, the
+log, counts, sheets, the picker) is drawn by canvas.js from the lesson state below, with the
+device's unsent captures applied on top, so it works the same with or without a connection.
+{% endcomment %}
 
 {% block title %}{{ session.period }} · {{ session.klass }} · Downbeat{% endblock %}
 
@@ -20,14 +25,14 @@
 <div class="canvas" data-canvas="view"
      data-width="{{ room.canvas_width }}" data-height="{{ room.canvas_height }}"
      data-seat-width="{{ seat_width }}" data-seat-height="{{ seat_height }}"
+     data-state-url="{% url 'lesson_state' session.pk %}"
      {% if next %}data-next-url="{% url 'room_view' next.pk %}"{% endif %}
      style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
   {% for item in seats %}
   {% if item.pupil %}
-  <button type="button" class="seat" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}"
-          hx-get="{% url 'note_sheet' session.pk item.pupil.pk %}" hx-target="#sheet-body">
+  <button type="button" class="seat" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}">
     <span class="seat__name">{{ item.pupil }}</span>
-    {% include "notes/_seat_marks.html" with state=item.state %}
+    <span class="seat__marks" data-marks="{{ item.pupil.pk }}"></span>
   </button>
   {% else %}
   <div class="seat" data-empty aria-hidden="true" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}"></div>
@@ -39,29 +44,36 @@
 </div>
 {% if unseated %}
 <ul class="cluster room-unseated" role="list" aria-label="Not seated">
-  {% for item in unseated %}
-  <li><button type="button" class="seat room-unseated__pupil" data-pupil="{{ item.pupil.pk }}"
-              hx-get="{% url 'note_sheet' session.pk item.pupil.pk %}" hx-target="#sheet-body">
-    <span class="seat__name">{{ item.pupil }}</span>
-    {% include "notes/_seat_marks.html" with state=item.state %}
+  {% for pupil in unseated %}
+  <li><button type="button" class="seat room-unseated__pupil" data-pupil="{{ pupil.pk }}">
+    <span class="seat__name">{{ pupil }}</span>
+    <span class="seat__marks" data-marks="{{ pupil.pk }}"></span>
   </button></li>
   {% endfor %}
 </ul>
 {% endif %}
 {% if not seats %}<p class="room-offer">{{ room }} has no seats yet. They are placed in <a href="{% url 'room_edit' room.pk %}">Settings → Rooms</a>.</p>{% endif %}
+{{ state|json_script:"lesson-state" }}
 {% endblock %}
 
 {% block panel %}
 <p class="room-strip">{{ session.period }}{% if session.start %} · {{ session.start|time:"H:i" }}–{{ session.end|time:"H:i" }}{% endif %}</p>
-{% include "notes/_log.html" %}
+<section id="log-panel" class="flow" aria-labelledby="log-heading">
+  <div class="cluster room-log__head">
+    <h2 id="log-heading" class="room-panel__heading">Log</h2>
+    <button type="button" class="button" data-variant="ghost" data-action="undo" hidden>Undo</button>
+  </div>
+  <ol class="room-log flow" id="log" role="list"></ol>
+</section>
 {% endblock %}
 
 {% block bar %}
 <nav class="cluster room-bar" aria-label="Lesson">
   <a class="button" data-variant="ghost" href="{% url 'today' %}?list">Today</a>
   <strong class="room-bar__session">{{ session.period }} · {{ session.klass }}</strong>
-  {% include "notes/_actions_button.html" %}
-  <button type="button" class="button" hx-post="{% url 'pick' session.pk %}" hx-disabled-elt="this" hx-target="#sheet-body">Pick</button>
+  <button type="button" class="button" data-variant="ghost" data-action="actions">Actions <span class="room-bar__count" data-actions-count></span></button>
+  <button type="button" class="button" data-action="pick">Pick</button>
+  <span class="room-bar__sync" data-sync-status role="status" aria-live="polite"></span>
   <div class="dropdown-wrapper room-bar__more">
     <button type="button" class="button" data-variant="ghost" data-toggle="dropdown" aria-label="More">⋯</button>
     <div class="dropdown" data-align="end">
@@ -79,4 +91,74 @@
 <dialog class="note-sheet" id="sheet" aria-label="Sheet">
   <div id="sheet-body" class="flow"></div>
 </dialog>
+
+{% comment %}Sheet templates, filled in by canvas.js. Names go in with textContent, never as HTML.{% endcomment %}
+<template id="tpl-note-sheet">
+  <div class="cluster note-sheet__toggles">
+    <button type="button" class="button" data-size="large" data-action="spoken" aria-pressed="false">Spoken to</button>
+    <button type="button" class="button" data-size="large" data-variant="ghost" data-action="absent" aria-pressed="false">Absent</button>
+  </div>
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name" data-slot="name"></h2>
+    <button type="button" class="note-sheet__unread" data-action="inbox" hidden></button>
+    <span class="note-sheet__badges" data-slot="badges" aria-label="This lesson"></span>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <div class="note-sheet__buttons">
+    {% for note_type in note_types %}
+    <button type="button" class="button" data-size="large" data-action="note" data-note-type="{{ note_type.pk }}">
+      {% if note_type.icon %}<span aria-hidden="true">{{ note_type.icon }}</span> {% endif %}{{ note_type.label }}
+    </button>
+    {% endfor %}
+    <button type="button" class="button" data-size="large" data-variant="ghost" data-action="free-text">
+      <span aria-hidden="true">✎</span> Free text
+    </button>
+  </div>
+</template>
+
+<template id="tpl-free-text">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name" data-slot="name"></h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <form class="flow" data-form="free-text">
+    <div class="field">
+      <label class="label" for="note-text">Note</label>
+      <textarea class="textarea" id="note-text" name="text" rows="3" required></textarea>
+    </div>
+    <label class="choice"><input class="choice__input" type="checkbox" name="actionable"> Needs action</label>
+    <button class="button" type="submit" data-variant="primary" data-size="large">Save</button>
+  </form>
+</template>
+
+<template id="tpl-picker">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name">Picker</h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <button type="button" class="picker__name" data-action="draw" aria-live="polite">
+    <span data-slot="name"></span>
+    <span class="picker__hint">Tap to draw again</span>
+  </button>
+  <div class="cluster picker__controls">
+    <button type="button" class="button" data-action="pool" aria-pressed="false"></button>
+    <button type="button" class="button" data-variant="ghost" data-action="picked-absent"></button>
+  </div>
+</template>
+
+<template id="tpl-actions">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name">Actions · {{ session.klass }}</h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <ol class="flow sheet-list" role="list" data-slot="list"></ol>
+</template>
+
+<template id="tpl-offline">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name" data-slot="name"></h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <p>Past notes need the laptop. Everything recorded now is kept on this device and sent when it's back in reach.</p>
+</template>
 {% endblock %}

@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -30,6 +30,9 @@ class GateMiddleware:
         if not get_user_model().objects.exists():
             return self.get_response(request) if path == setup_url else redirect(setup_url)
         if not request.user.is_authenticated:
+            if path == reverse("sync") or path.endswith("/state/"):
+                # The device's queue reads this as "keep everything and ask to sign in".
+                return JsonResponse({"error": "signed out"}, status=401)
             login_url = f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}"
             if request.headers.get("HX-Request"):
                 # A sheet's request must move the whole page, not load the login form into the sheet.

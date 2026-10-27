@@ -1,9 +1,0 @@
-{% comment %}
-Fragments returned after any change made from the room view. Everything is out of band except
-`sheet_main`, which is the response's own content for requests that target #sheet-body.
-{% endcomment %}
-{% if sheet_main %}{% include sheet_main %}{% endif %}
-{% include "notes/_log.html" with oob=True %}
-{% for state in states %}{% include "notes/_seat_marks.html" with oob=True %}{% endfor %}
-{% include "notes/_actions_button.html" with oob=True %}
-{% if sheet %}<div id="sheet-body" hx-swap-oob="innerHTML">{% include sheet %}</div>{% endif %}

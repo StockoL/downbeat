@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
 
-from notes import services as notes
+from notes.services import sheet_types
+from notes.state import lesson_state
 from rooms.cover import cover_pdf
 from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 from rooms.seating import seating_for
@@ -43,22 +44,15 @@ def room_view(request, pk):
     if plan is None:
         elsewhere = SeatingPlan.objects.filter(klass=session.klass).exclude(room=room).select_related("room").first()
 
-    states = {s["pupil"].pk: s for s in notes.seat_states(session, list(seated.values()) + unseated)}
-    seats = []
-    for seat in room.seats.all():
-        pupil = seated.get(seat.id)
-        seats.append({"seat": seat, "pupil": pupil, "state": states[pupil.pk] if pupil else None})
-
     return render(request, "timetable/room_view.html", {
         "session": session,
         "room": room,
         "plan": plan,
         "elsewhere": elsewhere,
-        "seats": seats,
-        "unseated": [{"pupil": p, "state": states[p.pk]} for p in unseated],
-        "log": notes.log(session),
-        "undo_count": notes.undo_count(request, session),
-        "actions_count": len(notes.actions(session)),
+        "seats": [{"seat": seat, "pupil": seated.get(seat.id)} for seat in room.seats.all()],
+        "unseated": unseated,
+        "state": lesson_state(session),
+        "note_types": sheet_types(),
         "next": next_session(session, timetable),
         "seat_width": SEAT_WIDTH,
         "seat_height": SEAT_HEIGHT,

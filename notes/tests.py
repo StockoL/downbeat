@@ -1,10 +1,14 @@
 import datetime
+import json
+import uuid
 
 import pytest
+from django.utils import timezone
 
-from notes.models import Note, NoteType
+from notes.models import Note, NoteType, SpokenTo
+from notes.state import lesson_state
 from rooms.models import Seat, SeatAssignment, SeatingPlan
-from timetable.models import Session
+from timetable.models import Class, Session, SessionAttendance
 
 pytestmark = pytest.mark.django_db
 
@@ -21,165 +25,198 @@ def types(db):
 
 @pytest.fixture
 def lesson(timetable, klass, room, pupils):
-    """A P1 session with the class seated."""
     plan = SeatingPlan.objects.create(klass=klass, room=room, active_from=D)
-    for i, pupil in enumerate(pupils):
+    for i, pupil in enumerate(pupils[:2]):
         SeatAssignment.objects.create(seating_plan=plan, seat=Seat.objects.create(room=room, x=i * 100, y=0), pupil=pupil)
     return Session.objects.create(date=D, period="P1", klass=klass, room=room)
 
 
-def add(client, session, pupil, **data):
-    return client.post(f"/room/{session.pk}/notes/", {"pupil": pupil.pk, **data})
+def at(minutes=0):
+    return (timezone.now() - datetime.timedelta(minutes=30) + datetime.timedelta(minutes=minutes)).isoformat()
 
 
-# --- Note sheet ---
-
-def test_sheet_lists_types_house_point_first_then_free_text_last(client, lesson, pupils, types):
-    html = client.get(f"/room/{lesson.pk}/sheet/{pupils[0].pk}/").content.decode()
-    assert html.index("House point") < html.index("Chase homework") < html.index("Free text")
-    assert "<textarea" not in html  # no field until free text is chosen
+def op(kind, **fields):
+    return {"op_id": str(uuid.uuid4()), "type": kind, "at": fields.pop("at", at()), **fields}
 
 
-def test_free_text_is_the_only_button_that_opens_a_field(client, lesson, pupils, types):
-    html = client.get(f"/room/{lesson.pk}/sheet/{pupils[0].pk}/?free").content.decode()
-    assert "<textarea" in html
+def sync(client, *ops):
+    response = client.post("/sync/", json.dumps({"ops": list(ops)}), content_type="application/json")
+    assert response.status_code == 200, response.content
+    return response.json()
 
 
-def test_one_tap_records_a_note_and_closes_the_sheet(client, lesson, pupils, types):
-    response = add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    assert response["HX-Trigger"] == "closeSheet"
-    note = Note.objects.get()
+# --- Notes ---
+
+def test_note_add_records_the_note_at_the_time_it_was_caught(client, lesson, pupils, types):
+    note_id, caught = str(uuid.uuid4()), at(5)
+    result = sync(client, op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk), at=caught))
+    assert len(result["applied"]) == 1 and not result["rejected"]
+    note = Note.objects.get(pk=note_id)
     assert (note.session, note.pupil, note.note_type, note.actionable) == (lesson, pupils[0], types["hp"], False)
-    html = response.content.decode()
-    assert 'id="log-panel"' in html and "House point" in html  # the log
-    assert f'id="marks-{pupils[0].pk}"' in html and "★" in html  # the seat badge
+    assert note.created_at.isoformat() == caught
 
 
-def test_actionable_type_makes_an_actionable_note(client, lesson, pupils, types):
-    response = add(client, lesson, pupils[1], note_type=types["chase"].pk)
-    assert Note.objects.get().actionable
-    assert 'id="actions-button"' in response.content.decode()
+def test_note_type_decides_actionable_not_the_device(client, lesson, pupils, types):
+    note_id = str(uuid.uuid4())
+    sync(client, op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["chase"].pk), actionable=False))
+    assert Note.objects.get(pk=note_id).actionable
 
 
-def test_free_text_note(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], text="  Bring a capo  ", actionable="on")
-    note = Note.objects.get()
-    assert note.note_type is None and note.text == "Bring a capo" and note.actionable
+def test_free_text_note(client, lesson, pupils):
+    note_id = str(uuid.uuid4())
+    sync(client, op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=None, text=" Brought a capo ", actionable=True))
+    note = Note.objects.get(pk=note_id)
+    assert note.note_type is None and note.text == "Brought a capo" and note.actionable
 
 
-def test_empty_free_text_records_nothing(client, lesson, pupils):
-    add(client, lesson, pupils[0], text="   ")
-    assert not Note.objects.exists()
+def test_sending_the_same_queue_twice_changes_nothing(client, lesson, pupils, types):
+    note_id, spoken_id = str(uuid.uuid4()), str(uuid.uuid4())
+    ops = [
+        op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk)),
+        op("spoken.add", id=spoken_id, session=str(lesson.pk), pupil=str(pupils[1].pk)),
+    ]
+    first, again = sync(client, *ops), sync(client, *ops)
+    assert first["applied"] == again["applied"] == [o["op_id"] for o in ops]
+    assert Note.objects.count() == 1 and SpokenTo.objects.count() == 1
 
 
-def test_room_view_shows_badges_log_and_unread(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    add(client, lesson, pupils[1], note_type=types["chase"].pk)
+def test_remove_restore_and_last_write_wins(client, lesson, pupils, types):
+    note_id = str(uuid.uuid4())
+    sync(client, op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk), at=at(0)))
+    sync(client, op("note.remove", note=note_id, at=at(2)))
+    assert Note.objects.get(pk=note_id).deleted_at is not None
+    sync(client, op("note.restore", note=note_id, at=at(1)))  # older than the removal: ignored
+    assert Note.objects.get(pk=note_id).deleted_at is not None
+    sync(client, op("note.restore", note=note_id, at=at(3)))
+    assert Note.objects.get(pk=note_id).deleted_at is None
+
+
+def test_action_done(client, lesson, pupils, types):
+    note_id = str(uuid.uuid4())
+    sync(client,
+         op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["chase"].pk), at=at(0)),
+         op("action.done", note=note_id, at=at(1)))
+    assert Note.objects.get(pk=note_id).done_at is not None
+
+
+# --- Spoken to and attendance ---
+
+def test_spoken_add_remove_and_clear(client, lesson, pupils):
+    a, b = str(uuid.uuid4()), str(uuid.uuid4())
+    sync(client,
+         op("spoken.add", id=a, session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(0)),
+         op("spoken.add", id=b, session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(1)))
+    assert SpokenTo.objects.count() == 2
+    sync(client, op("spoken.remove", spoken=a))
+    assert list(SpokenTo.objects.values_list("pk", flat=True)) == [uuid.UUID(b)]
+    sync(client, op("spoken.clear", session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(2)))
+    assert not SpokenTo.objects.exists()
+
+
+def test_spoken_clear_spares_a_later_tap(client, lesson, pupils):
+    later = str(uuid.uuid4())
+    sync(client,
+         op("spoken.clear", session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(1)),
+         op("spoken.add", id=later, session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(2)))
+    sync(client, op("spoken.clear", session=str(lesson.pk), pupil=str(pupils[0].pk), at=at(1)))  # resent
+    assert SpokenTo.objects.filter(pk=later).exists()
+
+
+def test_attendance_last_write_wins(client, lesson, pupils):
+    pupil = str(pupils[2].pk)
+    sync(client, op("attendance.set", session=str(lesson.pk), pupil=pupil, present=False, at=at(2)))
+    sync(client, op("attendance.set", session=str(lesson.pk), pupil=pupil, present=True, at=at(1)))  # older
+    assert not SessionAttendance.objects.get(pupil=pupils[2]).present
+    sync(client, op("attendance.set", session=str(lesson.pk), pupil=pupil, present=True, at=at(3)))
+    assert SessionAttendance.objects.get(pupil=pupils[2]).present
+
+
+# --- What can never apply ---
+
+def test_impossible_operations_are_rejected_and_the_rest_applied(client, lesson, pupils, types):
+    good = op("note.add", id=str(uuid.uuid4()), session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk))
+    bad = [
+        op("note.add", id=str(uuid.uuid4()), session=str(uuid.uuid4()), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk)),
+        op("note.add", id=str(uuid.uuid4()), session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(uuid.uuid4())),
+        op("note.add", id=str(uuid.uuid4()), session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=None, text="  "),
+        op("note.add", id="not-a-uuid", session=str(lesson.pk), pupil=str(pupils[0].pk)),
+        op("note.remove", note=str(uuid.uuid4())),
+        op("spoken.add", id=str(uuid.uuid4()), session=str(lesson.pk), pupil=str(pupils[0].pk), at="yesterday"),
+        op("reboot.laptop"),
+    ]
+    result = sync(client, *bad[:3], good, *bad[3:])
+    assert result["applied"] == [good["op_id"]]
+    assert {r["op_id"] for r in result["rejected"]} == {o["op_id"] for o in bad}
+    assert Note.objects.count() == 1
+
+
+def test_a_future_device_clock_is_held_to_now(client, lesson, pupils, types):
+    note_id = str(uuid.uuid4())
+    future = (timezone.now() + datetime.timedelta(days=30)).isoformat()
+    sync(client, op("note.add", id=note_id, session=str(lesson.pk), pupil=str(pupils[0].pk), note_type=str(types["hp"].pk), at=future))
+    assert Note.objects.get(pk=note_id).created_at < timezone.now() + datetime.timedelta(minutes=10)
+
+
+def test_sync_refuses_malformed_bodies(client, lesson):
+    assert client.post("/sync/", "not json", content_type="application/json").status_code == 400
+    assert client.post("/sync/", json.dumps({"ops": "x"}), content_type="application/json").status_code == 400
+    too_many = {"ops": [op("spoken.remove", spoken=str(uuid.uuid4())) for _ in range(501)]}
+    assert client.post("/sync/", json.dumps(too_many), content_type="application/json").status_code == 400
+
+
+def test_signed_out_sync_and_state_answer_401_so_the_device_keeps_its_queue(anon_client, teacher, lesson):
+    response = anon_client.post("/sync/", json.dumps({"ops": []}), content_type="application/json")
+    assert response.status_code == 401
+    assert anon_client.get(f"/room/{lesson.pk}/state/").status_code == 401
+
+
+# --- Lesson state ---
+
+def test_lesson_state_carries_what_the_room_view_draws(client, timetable, lesson, pupils, types, room):
+    earlier = Session.objects.create(date=D - datetime.timedelta(days=7), period="P1", klass=lesson.klass, room=room)
+    carried = Note.objects.create(session=earlier, pupil=pupils[0], note_type=types["chase"], actionable=True)
+    other_class = Session.objects.create(date=D, period="P2", klass=Class.objects.create(name="Choir"), room=room)
+    Note.objects.create(session=other_class, pupil=pupils[0], note_type=types["chase"], actionable=True)
+    Note.objects.create(session=lesson, pupil=pupils[1], note_type=types["hp"])
+    Note.objects.create(session=lesson, pupil=pupils[1], note_type=types["hp"], deleted_at=timezone.now())
+    SpokenTo.objects.create(session=earlier, pupil=pupils[1])
+    SpokenTo.objects.create(session=lesson, pupil=pupils[1])
+    SessionAttendance.objects.create(session=lesson, pupil=pupils[2], present=False)
+
+    state = client.get(f"/room/{lesson.pk}/state/").json()
+    assert state == lesson_state(lesson)
+    assert state["session"] == str(lesson.pk)
+    assert [t["label"] for t in state["noteTypes"]] == ["House point", "Chase homework"]  # house point first
+    assert {p["name"] for p in state["pupils"]} == {"Aleya K", "Jojo P", "Sam T"}  # seated and unseated
+    assert len(state["notes"]) == 1  # live notes this lesson only
+    assert [(a["id"], a["when"]) for a in state["actions"]] == [(str(carried.pk), "26 Oct")]
+    assert state["elsewhere"] == {str(pupils[0].pk): 1}  # the choir's open action
+    assert list(state["spoken"]) == [str(pupils[1].pk)]
+    assert state["absent"] == [str(pupils[2].pk)]
+    assert set(state["missed"]) == {str(pupils[0].pk), str(pupils[2].pk)}
+
+
+def test_room_view_embeds_the_state_and_the_sheet_templates(client, lesson, pupils, types):
     html = client.get(f"/room/{lesson.pk}/").content.decode()
-    assert "★" in html and "Chase homework" in html
-    assert 'aria-label="1 open"' in html
+    assert 'id="lesson-state"' in html
+    assert 'id="tpl-note-sheet"' in html and 'id="tpl-picker"' in html and 'id="tpl-actions"' in html
+    sheet = html.split('id="tpl-note-sheet"')[1].split("</template>")[0]
+    assert sheet.index("House point") < sheet.index("Chase homework") < sheet.index("Free text")
+    assert "<textarea" not in sheet  # the only field is behind Free text
+    assert f'data-marks="{pupils[0].pk}"' in html and f'data-marks="{pupils[2].pk}"' in html
 
 
-def test_room_view_with_no_notes_has_no_nags(client, lesson, types):
+def test_room_view_with_no_input_has_no_nags(client, lesson, types):
     html = client.get(f"/room/{lesson.pk}/").content.decode()
-    assert 'aria-label="0 open"' not in html
-    assert 'class="room-bar__count"' not in html
     assert 'data-status="danger"' not in html and 'data-status="warning"' not in html
+    assert "<li" not in html.split('id="log"')[1].split("</ol>")[0]
 
-
-# --- Remove and undo ---
-
-def test_remove_note_goes_to_the_bin(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    note = Note.objects.get()
-    client.post(f"/room/notes/{note.pk}/remove/")
-    note.refresh_from_db()
-    assert note.deleted_at is not None
-    assert "House point" not in client.get(f"/room/{lesson.pk}/").content.decode().split('id="log-panel"')[1]
-
-
-def test_undo_reverses_adds_and_removes_in_order(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    add(client, lesson, pupils[1], note_type=types["hp"].pk)
-    first, _second = Note.objects.all()
-    client.post(f"/room/notes/{first.pk}/remove/")
-    assert Note.objects.live().count() == 1
-
-    client.post(f"/room/{lesson.pk}/notes/undo/")  # restores the removed note
-    assert Note.objects.live().count() == 2
-    client.post(f"/room/{lesson.pk}/notes/undo/")  # takes back the second add
-    assert list(Note.objects.live()) == [first]
-    client.post(f"/room/{lesson.pk}/notes/undo/")
-    client.post(f"/room/{lesson.pk}/notes/undo/")  # nothing left to undo
-    assert not Note.objects.live().exists()
-
-
-# --- Inbox and actions ---
 
 def test_inbox_lists_a_pupils_notes_newest_first(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    add(client, lesson, pupils[0], text="Lovely phrasing")
+    older = Note.objects.create(session=lesson, pupil=pupils[0], note_type=types["hp"])
+    newer = Note.objects.create(session=lesson, pupil=pupils[0], text="Lovely phrasing")
+    Note.objects.filter(pk=older.pk).update(created_at=timezone.now() - datetime.timedelta(minutes=5))
+    Note.objects.filter(pk=newer.pk).update(created_at=timezone.now())
     html = client.get(f"/room/{lesson.pk}/inbox/{pupils[0].pk}/").content.decode()
     assert html.index("Lovely phrasing") < html.index("House point")
-
-
-def test_actions_carry_to_the_next_session_with_the_class(client, timetable, lesson, pupils, types):
-    add(client, lesson, pupils[1], note_type=types["chase"].pk)
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)  # not actionable
-    later = Session.objects.create(date=D + datetime.timedelta(days=2), period="P2", klass=lesson.klass, room=lesson.room)
-
-    html = client.get(f"/room/{later.pk}/actions/").content.decode()
-    assert "Chase homework" in html and "House point" not in html
-    note = Note.objects.get(note_type=types["chase"])
-    assert note.carried_to_session == later
-
-
-def test_actions_do_not_leak_backwards_or_to_other_classes(client, timetable, lesson, pupils, types, room):
-    from timetable.models import Class
-    later = Session.objects.create(date=D, period="P2", klass=lesson.klass, room=room)
-    other = Session.objects.create(date=D, period="P2", klass=Class.objects.create(name="9Y"), room=room)
-    add(client, later, pupils[1], note_type=types["chase"].pk)
-    assert "Chase homework" not in client.get(f"/room/{lesson.pk}/actions/").content.decode()
-    assert "Chase homework" not in client.get(f"/room/{other.pk}/actions/").content.decode()
-
-
-def test_marking_an_action_done(client, lesson, pupils, types):
-    add(client, lesson, pupils[1], note_type=types["chase"].pk)
-    note = Note.objects.get()
-    response = client.post(f"/room/notes/{note.pk}/done/", {"session": lesson.pk})
-    note.refresh_from_db()
-    assert note.done_at is not None
-    html = response.content.decode()
-    assert 'id="sheet-body" hx-swap-oob="innerHTML"' in html and "Nothing open." in html
-
-
-# --- Settings ---
-
-def test_note_types_settings_save_and_add(client, timetable, types):
-    hp, chase = types["hp"], types["chase"]
-    data = {
-        "form-TOTAL_FORMS": "3", "form-INITIAL_FORMS": "2", "form-MIN_NUM_FORMS": "0", "form-MAX_NUM_FORMS": "1000",
-        "form-0-id": chase.pk, "form-0-order": "0", "form-0-label": "Chase", "form-0-icon": "!", "form-0-is_actionable_default": "on",
-        "form-1-id": hp.pk, "form-1-order": "1", "form-1-label": "House point", "form-1-icon": "★", "form-1-is_house_point": "on",
-        "form-2-order": "2", "form-2-label": "Kit", "form-2-icon": "🎧",
-    }
-    client.post("/settings/note-types/", data)
-    assert sorted(NoteType.objects.values_list("label", flat=True)) == ["Chase", "House point", "Kit"]
-
-
-def test_a_used_note_type_cannot_be_deleted(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    hp, chase = types["hp"], types["chase"]
-    data = {
-        "form-TOTAL_FORMS": "2", "form-INITIAL_FORMS": "2", "form-MIN_NUM_FORMS": "0", "form-MAX_NUM_FORMS": "1000",
-        "form-0-id": chase.pk, "form-0-order": "0", "form-0-label": "Chase homework",
-        "form-1-id": hp.pk, "form-1-order": "3", "form-1-label": "House point", "form-1-DELETE": "on",
-    }
-    client.post("/settings/note-types/", data)
-    assert NoteType.objects.filter(pk=hp.pk).exists()
-
-
-def test_a_session_with_notes_cannot_be_deleted(client, lesson, pupils, types):
-    add(client, lesson, pupils[0], note_type=types["hp"].pk)
-    client.post(f"/settings/sessions/{lesson.pk}/delete/")
-    assert Session.objects.filter(pk=lesson.pk).exists()
+    assert 'data-action="back"' in html
