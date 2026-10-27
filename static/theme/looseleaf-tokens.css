@@ -10,17 +10,17 @@
 
   /* --- neutral: Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks. --- */
   --neutral-0: #ffffff;
-  --neutral-50: #f8faff;
-  --neutral-100: #f1f5ff;
-  --neutral-200: #dae4ff;
-  --neutral-300: #c4d3ff;
-  --neutral-400: #7d9bff;
-  --neutral-500: #4d68dc;
-  --neutral-600: #3042b4;
-  --neutral-700: #212b9c;
-  --neutral-800: #11007a;
-  --neutral-900: #090056;
-  --neutral-950: #020029;
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e4e4e4;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a1a1a1;
+  --neutral-500: #747474;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #181818;
+  --neutral-950: #070707;
 
   /* --- action: Raw action hue (500 and its 600 hover step), derived from $palette.action. --- */
   --action-500: #4d68dc;

@@ -1,6 +1,6 @@
 {
   "$version": "2.0.0",
-  "$generated": "2026-10-27T20:34:02.700Z",
+  "$generated": "2026-10-27T20:51:08.573Z",
   "_comment": "Single source of truth for LooseLeaf UI. $utopia and $palette are inputs: the neutral, action, accent, status, step and space groups are derived from them at build time (scripts/tokens-core.mjs). Do not hand-edit derived values; change the inputs, or add an explicit value to a derived group to override it. Everything else is a semantic (tier 2) token named by purpose. Run npm run build after editing; see docs/TOKENS.md for the generated reference.",
   "$utopia": {
     "minViewport": 320,
@@ -36,8 +36,8 @@
   },
   "$palette": {
     "neutral": {
-      "hue": 270,
-      "chroma": 0.18
+      "hue": 0,
+      "chroma": 0
     },
     "action": {
       "hue": 270,

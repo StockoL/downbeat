@@ -1,0 +1,24 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Rooms · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Rooms</h1>
+<p>Each room is drawn once and shared by every class taught in it.</p>
+{% if rooms %}
+<ul class="flow" role="list">
+  {% for room in rooms %}
+  <li><a href="{% url 'room_edit' room.pk %}">{{ room.name }}</a> <small>{{ room.seat_count }} seat{{ room.seat_count|pluralize }}</small></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<section class="card"><div class="card__body flow">
+  <h2>Add a room</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add room</button>
+  </form>
+</div></section>
+{% endblock %}

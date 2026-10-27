@@ -8,7 +8,7 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 
 **27 Oct 2026. No login and no Django admin in Phase 1.** The app binds to localhost on the laptop and has one user, so `contrib.auth` and `contrib.admin` are left out. A login arrives in Phase 2, when Tailscale exposes the app to the iPad. All CRUD is on Downbeat's own pages, as the kickoff asks.
 
-**27 Oct 2026. Theme generated from LooseLeaf's token compiler.** `tools/build-theme.mjs` sets the neutral ramp to zero chroma (greyscale chrome) and the action and accent hues to the same indigo (hue 270), so the interface has exactly one accent. One contrast pair falls short: link text on the dark surface is 4.18:1 against a 4.5 target, the same shortfall LooseLeaf's defaults have. Links are rare in the room view; revisit at the surface pass. A configurator export can replace the bundle at any time.
+**27 Oct 2026. Theme generated from LooseLeaf's token compiler.** `tools/build-theme.mjs` sets the neutral ramp to zero chroma (greyscale chrome) and the action and accent hues to the same indigo (hue 270), so the interface has exactly one accent. One contrast pair falls short: link text on the dark surface is 4.15:1 against a 4.5 target, the same shortfall LooseLeaf's defaults have. Links are rare in the room view; revisit at the surface pass. A configurator export can replace the bundle at any time.
 
 **27 Oct 2026. Navigation shows only areas that exist.** The desk navbar lists Today and Settings in Phase 1 (Plan once the seating editor exists). Sweep and Pupils appear when their phases build them, so no link leads to an empty page.
 
@@ -31,3 +31,13 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. Deleting is guarded where history depends on it.** A class or room with sessions can't be deleted (the sessions will carry notes from step 7 onwards). Deleting a slot keeps its sessions, which become one-offs. Deleting a pupil removes them from every class.
 
 **27 Oct 2026. Pupil keeps the recording permission fields now.** recording_permitted, exemplar_reuse_permitted and recordings_delete_by are fields on the Phase 1 Pupil table in the data model, so they are in the schema and the pupil form from the start, defaulting to off. Nothing uses them until Phase 5.
+
+**27 Oct 2026. The room editor lives under Settings → Rooms.** UX.md's page inventory puts the room editor in Plan, but its Settings list also names rooms, and a room is drawn once and shared by every class. Configured-once work belongs in Settings. Per-class seating plans live under Plan.
+
+**27 Oct 2026. Room stores the teacher position.** The data model has `near_teacher` on Seat but nowhere for the teacher-position marker the kickoff asks for. Room gains nullable `teacher_x` and `teacher_y`. An unplaced marker is drawn at the front centre. `near_teacher` stays a per-seat flag the teacher paints, not a distance computed from the marker, so the teacher decides what "near" means in each room.
+
+**27 Oct 2026. Seats are 80 × 44 canvas units; new rooms default to 900 × 600.** Positions are stored in canvas units and the canvas scales to its container. At the room view's two-thirds of a laptop screen a 900-wide canvas renders near 1:1, so a seat stays close to the 44-point minimum tap size. A larger room can be given a bigger canvas, at the cost of smaller seats on screen. Dragging snaps to 10 units; arrow keys nudge a focused seat.
+
+**27 Oct 2026. Zones are the five fixed choices from the data model.** Front, back, side, carpet, keyboard, or none. They are painted with a brush (choose a zone, tap seats) and show as text in the editor only; the room view doesn't display zones.
+
+**27 Oct 2026. `DOWNBEAT_DB` overrides the database path.** Lets a throwaway database be used for browser checks without touching the real one.

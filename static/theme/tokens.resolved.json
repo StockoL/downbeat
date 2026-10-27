@@ -1,6 +1,6 @@
 {
   "$version": "2.0.0",
-  "$generated": "2026-10-27T20:34:02.700Z",
+  "$generated": "2026-10-27T20:51:08.573Z",
   "neutral.0": {
     "name": "--neutral-0",
     "tier": 1,
@@ -13,8 +13,8 @@
   "neutral.50": {
     "name": "--neutral-50",
     "tier": 1,
-    "light": "#f8faff",
-    "dark": "#f8faff",
+    "light": "#fafafa",
+    "dark": "#fafafa",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -22,8 +22,8 @@
   "neutral.100": {
     "name": "--neutral-100",
     "tier": 1,
-    "light": "#f1f5ff",
-    "dark": "#f1f5ff",
+    "light": "#f5f5f5",
+    "dark": "#f5f5f5",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -31,8 +31,8 @@
   "neutral.200": {
     "name": "--neutral-200",
     "tier": 1,
-    "light": "#dae4ff",
-    "dark": "#dae4ff",
+    "light": "#e4e4e4",
+    "dark": "#e4e4e4",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -40,8 +40,8 @@
   "neutral.300": {
     "name": "--neutral-300",
     "tier": 1,
-    "light": "#c4d3ff",
-    "dark": "#c4d3ff",
+    "light": "#d4d4d4",
+    "dark": "#d4d4d4",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -49,8 +49,8 @@
   "neutral.400": {
     "name": "--neutral-400",
     "tier": 1,
-    "light": "#7d9bff",
-    "dark": "#7d9bff",
+    "light": "#a1a1a1",
+    "dark": "#a1a1a1",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -58,8 +58,8 @@
   "neutral.500": {
     "name": "--neutral-500",
     "tier": 1,
-    "light": "#4d68dc",
-    "dark": "#4d68dc",
+    "light": "#747474",
+    "dark": "#747474",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -67,8 +67,8 @@
   "neutral.600": {
     "name": "--neutral-600",
     "tier": 1,
-    "light": "#3042b4",
-    "dark": "#3042b4",
+    "light": "#525252",
+    "dark": "#525252",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -76,8 +76,8 @@
   "neutral.700": {
     "name": "--neutral-700",
     "tier": 1,
-    "light": "#212b9c",
-    "dark": "#212b9c",
+    "light": "#404040",
+    "dark": "#404040",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -85,8 +85,8 @@
   "neutral.800": {
     "name": "--neutral-800",
     "tier": 1,
-    "light": "#11007a",
-    "dark": "#11007a",
+    "light": "#262626",
+    "dark": "#262626",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -94,8 +94,8 @@
   "neutral.900": {
     "name": "--neutral-900",
     "tier": 1,
-    "light": "#090056",
-    "dark": "#090056",
+    "light": "#181818",
+    "dark": "#181818",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -103,8 +103,8 @@
   "neutral.950": {
     "name": "--neutral-950",
     "tier": 1,
-    "light": "#020029",
-    "dark": "#020029",
+    "light": "#070707",
+    "dark": "#070707",
     "themed": false,
     "overridden": false,
     "purpose": "Raw grayscale ramp, derived from $palette.neutral. Never used directly by blocks."
@@ -608,7 +608,7 @@
     "name": "--color-surface",
     "tier": 2,
     "light": "#ffffff",
-    "dark": "#020029",
+    "dark": "#070707",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -617,7 +617,7 @@
     "name": "--color-surface-raised",
     "tier": 2,
     "light": "#ffffff",
-    "dark": "#090056",
+    "dark": "#181818",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -625,8 +625,8 @@
   "color.surface-sunken": {
     "name": "--color-surface-sunken",
     "tier": 2,
-    "light": "#f1f5ff",
-    "dark": "#11007a",
+    "light": "#f5f5f5",
+    "dark": "#262626",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -634,8 +634,8 @@
   "color.text": {
     "name": "--color-text",
     "tier": 2,
-    "light": "#090056",
-    "dark": "#f1f5ff",
+    "light": "#181818",
+    "dark": "#f5f5f5",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -643,8 +643,8 @@
   "color.text-muted": {
     "name": "--color-text-muted",
     "tier": 2,
-    "light": "#4d68dc",
-    "dark": "#7d9bff",
+    "light": "#747474",
+    "dark": "#a1a1a1",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -653,7 +653,7 @@
     "name": "--color-text-inverse",
     "tier": 2,
     "light": "#ffffff",
-    "dark": "#020029",
+    "dark": "#070707",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -661,8 +661,8 @@
   "color.border": {
     "name": "--color-border",
     "tier": 2,
-    "light": "#dae4ff",
-    "dark": "#212b9c",
+    "light": "#e4e4e4",
+    "dark": "#404040",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -670,8 +670,8 @@
   "color.border-strong": {
     "name": "--color-border-strong",
     "tier": 2,
-    "light": "#c4d3ff",
-    "dark": "#3042b4",
+    "light": "#d4d4d4",
+    "dark": "#525252",
     "themed": true,
     "overridden": false,
     "purpose": "Semantic colour roles. The only colour tokens blocks may use."
@@ -1201,8 +1201,8 @@
   "button.default-text": {
     "name": "--button-default-text",
     "tier": 2,
-    "light": "#090056",
-    "dark": "#f1f5ff",
+    "light": "#181818",
+    "dark": "#f5f5f5",
     "themed": true,
     "overridden": false,
     "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
@@ -1210,8 +1210,8 @@
   "button.default-border": {
     "name": "--button-default-border",
     "tier": 2,
-    "light": "#dae4ff",
-    "dark": "#212b9c",
+    "light": "#e4e4e4",
+    "dark": "#404040",
     "themed": true,
     "overridden": false,
     "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
@@ -1219,8 +1219,8 @@
   "button.default-bg-hover": {
     "name": "--button-default-bg-hover",
     "tier": 2,
-    "light": "#f1f5ff",
-    "dark": "#11007a",
+    "light": "#f5f5f5",
+    "dark": "#262626",
     "themed": true,
     "overridden": false,
     "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."
@@ -1228,8 +1228,8 @@
   "button.default-border-hover": {
     "name": "--button-default-border-hover",
     "tier": 2,
-    "light": "#c4d3ff",
-    "dark": "#3042b4",
+    "light": "#d4d4d4",
+    "dark": "#525252",
     "themed": true,
     "overridden": false,
     "purpose": "Style of a .button with no data-variant: outlined (transparent) or filled (action)."

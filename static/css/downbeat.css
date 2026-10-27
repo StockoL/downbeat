@@ -68,3 +68,71 @@
 .form-row > .field {
   flex: 1 1 8rem;
 }
+
+/* --- Seating canvas: positions are canvas units held in --x and --y,
+       scaled to the canvas's rendered width. --- */
+.canvas {
+  --seat-font: calc(var(--seat-w) / var(--canvas-w) * 100cqi * 0.17);
+  container-type: inline-size;
+  position: relative;
+  inline-size: 100%;
+  aspect-ratio: var(--canvas-w) / var(--canvas-h);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.seat,
+.teacher-marker {
+  position: absolute;
+  inset-inline-start: calc(var(--x) / var(--canvas-w) * 100%);
+  inset-block-start: calc(var(--y) / var(--canvas-h) * 100%);
+}
+
+.seat {
+  display: grid;
+  place-content: center;
+  inline-size: calc(var(--seat-w) / var(--canvas-w) * 100%);
+  block-size: calc(var(--seat-h) / var(--canvas-h) * 100%);
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--seat-font);
+  line-height: 1.1;
+  text-align: center;
+  cursor: grab;
+}
+
+.seat__meta {
+  font-size: 0.75em;
+  color: var(--color-text-muted);
+}
+
+.seat[aria-pressed="true"] {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.seat.is-dragging,
+.teacher-marker.is-dragging {
+  cursor: grabbing;
+  z-index: 1;
+  box-shadow: var(--shadow-raised);
+}
+
+.teacher-marker {
+  translate: -50% -50%;
+  padding: 0.2em 0.6em;
+  border: 2px dashed var(--color-text-muted);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--seat-font);
+  cursor: grab;
+}

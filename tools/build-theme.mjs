@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 const [,, llRoot, outDir] = process.argv;
 const core = await import(pathToFileURL(`${llRoot}/scripts/tokens-core.mjs`));
 const json = JSON.parse(readFileSync(`${llRoot}/design-tokens.json`, "utf8"));
-json.$palette.neutral = { hue: 270, chroma: 0.18 };
+json.$palette.neutral = { hue: 0, chroma: 0 };
 json.$palette.action = { hue: 270, chroma: 0.18 };
 json.$palette.accent = { hue: 270, chroma: 0.18 };
 const meta = { $version: "2.0.0", $generated: new Date().toISOString() };

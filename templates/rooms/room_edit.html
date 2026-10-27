@@ -1,0 +1,73 @@
+{% extends "layouts/settings.html" %}
+{% load static %}
+
+{% block title %}{{ room }} · Rooms · Settings · Downbeat{% endblock %}
+
+{% block head %}<script type="module" src="{% static 'js/canvas.js' %}"></script>{% endblock %}
+
+{% block settings %}
+<p><a href="{% url 'room_list' %}">← Rooms</a></p>
+<h1>{{ room }}</h1>
+<p>Drag seats into place. Pick a zone and tap seats to paint it on. Drag the teacher marker to where you usually stand.</p>
+
+<fieldset class="fieldset" id="brushes">
+  <legend class="legend">Tap a seat to</legend>
+  <div class="choice-group" data-variant="segmented">
+    <label class="choice"><input class="choice__input" type="radio" name="brush" value="move" checked> Select</label>
+    {% for value, label in zones %}
+    <label class="choice"><input class="choice__input" type="radio" name="brush" value="{{ value }}" data-label="{{ label }}"> {{ label }}</label>
+    {% endfor %}
+    <label class="choice"><input class="choice__input" type="radio" name="brush" value="none"> No zone</label>
+    <label class="choice"><input class="choice__input" type="radio" name="brush" value="near"> Near teacher</label>
+  </div>
+</fieldset>
+
+{% csrf_token %}
+<div class="canvas" data-canvas="room"
+     data-width="{{ room.canvas_width }}" data-height="{{ room.canvas_height }}"
+     data-seat-width="{{ seat_width }}" data-seat-height="{{ seat_height }}"
+     style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
+  {% for seat in seats %}
+  <button type="button" class="seat" aria-pressed="false"
+          aria-label="Seat {{ seat.label }}{% if seat.zone %}, {{ seat.get_zone_display }}{% endif %}"
+          data-url="{% url 'seat_update' seat.pk %}" data-delete-url="{% url 'seat_delete' seat.pk %}"
+          data-x="{{ seat.x }}" data-y="{{ seat.y }}" data-zone="{{ seat.zone }}" data-near="{{ seat.near_teacher|yesno:'true,false' }}"
+          style="--x: {{ seat.x }}; --y: {{ seat.y }}">
+    <span class="seat__name">{{ seat.label }}</span>
+    <span class="seat__meta">{{ seat.get_zone_display }}{% if seat.zone and seat.near_teacher %} · {% endif %}{% if seat.near_teacher %}near teacher{% endif %}</span>
+  </button>
+  {% endfor %}
+  <div class="teacher-marker" role="img" aria-label="Teacher position" data-url="{% url 'teacher_move' room.pk %}"
+       data-x="{{ teacher_x }}" data-y="{{ teacher_y }}" style="--x: {{ teacher_x }}; --y: {{ teacher_y }}">Teacher</div>
+</div>
+
+<div class="card" id="seat-panel" hidden><div class="card__body cluster form-row">
+  <div class="field">
+    <label class="label" for="seat-label">Seat label</label>
+    <input class="input" id="seat-label" name="label" maxlength="20">
+  </div>
+  <button class="button" type="button" data-action="deselect" data-variant="ghost">Done</button>
+  <button class="button" type="button" data-action="delete" data-variant="danger">Delete seat</button>
+</div></div>
+
+<form method="post" action="{% url 'seats_add' room.pk %}" class="cluster form-row">
+  {% csrf_token %}
+  {% for field in add_form %}{{ field.as_field_group }}{% endfor %}
+  <button class="button" type="submit">Add seats</button>
+</form>
+
+<details class="accordion">
+  <summary class="accordion__trigger">Room name and canvas size</summary>
+  <div class="accordion__content flow">
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ form }}
+      <button class="button" type="submit" data-variant="primary">Save</button>
+    </form>
+    <form method="post" action="{% url 'room_delete' room.pk %}" onsubmit="return confirm('Delete {{ room|escapejs }} and its seats?')">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="danger">Delete room</button>
+    </form>
+  </div>
+</details>
+{% endblock %}
