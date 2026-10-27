@@ -71,6 +71,23 @@
         {% endfor %}
       </div>
     </fieldset>
+
+    {% if reflection.spawned_goal %}
+    <p>Became the goal "{{ reflection.spawned_goal }}".</p>
+    {% elif note_types %}
+    <details class="accordion">
+      <summary class="accordion__trigger">Turn this into a goal</summary>
+      <div class="accordion__content cluster form-row">
+        <div class="field"><label class="label" for="goal-text">Goal</label>
+          <input class="input" type="text" id="goal-text" name="goal_text" maxlength="100" placeholder="e.g. A house point in 15 lessons this week"></div>
+        <div class="field"><label class="label" for="goal-type">Counts lessons with</label>
+          <select class="select" id="goal-type" name="goal_note_type">{% for t in note_types %}<option value="{{ t.pk }}">{{ t }}</option>{% endfor %}</select></div>
+        <div class="field"><label class="label" for="goal-target">Target</label>
+          <input class="input" type="number" id="goal-target" name="goal_target" min="1" max="500"></div>
+        <label class="choice"><input class="choice__input" type="checkbox" name="goal_this_class"> {{ session.klass }} only</label>
+      </div>
+    </details>
+    {% endif %}
   </section>
 
   <button class="button" type="submit" data-variant="primary" data-size="large">Save sweep</button>

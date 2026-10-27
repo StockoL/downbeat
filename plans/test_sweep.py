@@ -117,3 +117,31 @@ def test_sweep_pages_render(client, tuesdays):
     this, _ = tuesdays
     assert client.get("/sweep/").status_code == 200
     assert client.get(f"/sweep/{this.pk}/").status_code == 200
+
+
+def test_a_reflection_can_spawn_a_goal(client, tuesdays, klass):
+    from django.utils import timezone
+
+    from notes.models import Goal
+
+    this, _ = tuesdays
+    hp = NoteType.objects.create(label="House point", is_house_point=True)
+    client.post(f"/sweep/{this.pk}/", {
+        "text": "Quiet ones got nothing", "goal_text": "A house point in 15 lessons", "goal_note_type": hp.pk,
+        "goal_target": "15", "goal_this_class": "on",
+    })
+    goal = Goal.objects.get()
+    assert (goal.text, goal.target_count, goal.klass, goal.week_start) == ("A house point in 15 lessons", 15, klass, timezone.localdate())
+    assert SessionReflection.objects.get(session=this).spawned_goal == goal
+    assert "Became the goal" in client.get(f"/sweep/{this.pk}/").content.decode()
+
+
+def test_an_incomplete_goal_is_not_made(client, tuesdays):
+    from notes.models import Goal
+
+    this, _ = tuesdays
+    client.post(f"/sweep/{this.pk}/", {"text": "x", "goal_text": "Something", "goal_target": ""})
+    response = client.post(f"/sweep/{this.pk}/", {"text": "x", "goal_text": "Something", "goal_note_type": "nonsense", "goal_target": "5"})
+    assert response.status_code == 302
+    assert not Goal.objects.exists()
+    assert SessionReflection.objects.filter(session=this).exists()  # the sweep itself still saved

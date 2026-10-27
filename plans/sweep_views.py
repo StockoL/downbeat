@@ -3,11 +3,12 @@
 import datetime
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from notes.models import Note
+from notes.models import Goal, Note, NoteType
 from timetable.models import Session, Timetable
 from timetable.services import sessions_on
 
@@ -42,6 +43,9 @@ def session_sweep(request, pk):
             session, statuses, set(request.POST.getlist("carry")), request.POST.getlist("bin"),
             request.POST.get("text", ""), tags,
         )
+        goal = _spawn_goal(request, session)
+        if goal:
+            messages.success(request, f"New goal: {goal}. It shows in the room's bar from today.")
         carried = session.activity_statuses.filter(carried_to_session__isnull=False).count()
         if carried and target:
             messages.success(request, f"Swept. {carried} activit{'y' if carried == 1 else 'ies'} carried to {target.date:%a %d %b}.")
@@ -66,7 +70,32 @@ def session_sweep(request, pk):
         "reflection": reflection,
         "tags": REFLECTION_TAGS,
         "chosen_tags": reflection.tags if reflection else [],
+        "note_types": NoteType.objects.all(),
     })
+
+
+def _spawn_goal(request, session):
+    """The reflection's optional "turn this into a goal": a weekly goal, linked to the reflection."""
+    text = request.POST.get("goal_text", "").strip()[:100]
+    if not text:
+        return None
+    try:
+        note_type = NoteType.objects.filter(pk=request.POST.get("goal_note_type") or None).first()
+    except ValidationError:
+        note_type = None
+    try:
+        target = max(1, min(int(request.POST.get("goal_target", "")), 500))
+    except ValueError:
+        target = None
+    if note_type is None or target is None:
+        messages.error(request, "The goal needs a note type and a target, so it wasn't made.")
+        return None
+    goal = Goal.objects.create(
+        text=text, counts_note_type=note_type, target_count=target, scope=Goal.WEEK,
+        klass=session.klass if request.POST.get("goal_this_class") else None, week_start=timezone.localdate(),
+    )
+    SessionReflection.objects.filter(session=session).update(spawned_goal=goal)
+    return goal
 
 
 def _home(session):
