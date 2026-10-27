@@ -30,7 +30,7 @@ device's unsent captures applied on top, so it works the same with or without a 
      style="--canvas-w: {{ room.canvas_width }}; --canvas-h: {{ room.canvas_height }}; --seat-w: {{ seat_width }}; --seat-h: {{ seat_height }}">
   {% for item in seats %}
   {% if item.pupil %}
-  <button type="button" class="seat" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}">
+  <button type="button" class="seat{% if item.tint %} group-tint-{{ item.tint }}{% endif %}" data-seat="{{ item.seat.pk }}" data-pupil="{{ item.pupil.pk }}" style="--x: {{ item.seat.x }}; --y: {{ item.seat.y }}">
     {% include "partials/seat_flags.html" with flags=item.flags %}
     <span class="seat__name">{{ item.pupil }}</span>
     <span class="seat__marks" data-marks="{{ item.pupil.pk }}"></span>
@@ -43,10 +43,20 @@ device's unsent captures applied on top, so it works the same with or without a 
   <div class="teacher-marker" aria-hidden="true" style="--x: {{ room.teacher_x }}; --y: {{ room.teacher_y }}">Teacher</div>
   {% endif %}
 </div>
+{% if groups %}
+<ul class="cluster room-unseated" role="list" aria-label="Groups">
+  {% for group in groups %}
+  <li><button type="button" class="seat room-unseated__pupil group-tint-{{ group.tint }}" data-group="{{ group.pk }}">
+    <span class="seat__name">{{ group }}</span>
+    <span class="seat__marks" data-marks-group="{{ group.pk }}"></span>
+  </button></li>
+  {% endfor %}
+</ul>
+{% endif %}
 {% if unseated %}
 <ul class="cluster room-unseated" role="list" aria-label="Not seated">
   {% for item in unseated %}
-  <li><button type="button" class="seat room-unseated__pupil" data-pupil="{{ item.pupil.pk }}">
+  <li><button type="button" class="seat room-unseated__pupil{% if item.tint %} group-tint-{{ item.tint }}{% endif %}" data-pupil="{{ item.pupil.pk }}">
     {% include "partials/seat_flags.html" with flags=item.flags %}
     <span class="seat__name">{{ item.pupil }}</span>
     <span class="seat__marks" data-marks="{{ item.pupil.pk }}"></span>

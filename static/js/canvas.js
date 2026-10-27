@@ -273,7 +273,7 @@ function applyOp(s, op, graveyard) {
       if (s.notes.some((n) => n.id === op.id)) break;
       const type = noteType(op.note_type);
       const note = {
-        id: op.id, pupil: op.pupil, type: op.note_type ?? null, text: op.text ?? "",
+        id: op.id, pupil: op.pupil ?? null, group: op.group ?? null, type: op.note_type ?? null, text: op.text ?? "",
         actionable: type ? type.actionable : Boolean(op.actionable), done: false, at: op.at,
       };
       s.notes.push(note);
@@ -340,6 +340,8 @@ function initRoomView(root) {
   const iconOf = (s, note) => typeOf(s, note)?.icon || ICON_FREE_TEXT;
   const labelOf = (s, note) => typeOf(s, note)?.label ?? note.text;
   const nameOf = (s, pupil) => s.pupils.find((p) => p.id === pupil)?.name ?? "Class";
+  const groupNameOf = (s, group) => s.groups.find((g) => g.id === group)?.name ?? "Group";
+  const whoOf = (s, note) => (note.group ? groupNameOf(s, note.group) : nameOf(s, note.pupil));
   const isSpoken = (s, pupil) => (s.spoken[pupil] ?? []).length > 0;
   const unread = (s, pupil) => (s.elsewhere[pupil] ?? 0) + s.actions.filter((n) => n.pupil === pupil).length;
   const byTime = (a, b) => a.at.localeCompare(b.at);
@@ -412,16 +414,22 @@ function initRoomView(root) {
       marks.replaceChildren(...children);
     }
 
+    for (const marks of document.querySelectorAll("[data-marks-group]")) {
+      const group = marks.dataset.marksGroup;
+      const icons = s.notes.filter((n) => n.group === group).sort(byTime).map((n) => iconOf(s, n)).join("");
+      marks.replaceChildren(...(icons ? [el("span", { class: "seat__badges", "aria-hidden": "true" }, icons)] : []));
+    }
+
     log.replaceChildren(...[...s.notes].sort(byTime).map((note) => {
       const line = el("li", { class: "room-log__line" });
       const time = new Date(note.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
       line.append(
         el("span", { class: "room-log__time" }, time),
-        el("span", {}, `${nameOf(s, note.pupil)} · ${describe(s, note)}`),
+        el("span", {}, `${whoOf(s, note)} · ${describe(s, note)}`),
         el("button", {
           type: "button", class: "button room-log__remove", "data-variant": "ghost",
           "data-action": "remove", "data-note": note.id,
-          "aria-label": `Remove ${labelOf(s, note)} for ${nameOf(s, note.pupil)}`,
+          "aria-label": `Remove ${labelOf(s, note)} for ${whoOf(s, note)}`,
         }, "✕"),
       );
       return line;
@@ -444,9 +452,15 @@ function initRoomView(root) {
     if (sheet.open) sheet.close();
   }
 
+  /** Who the open sheet's notes are for: a pupil or a group. */
+  function subject() {
+    return body.dataset.group ? { group: body.dataset.group } : { pupil: body.dataset.pupil };
+  }
+
   function openNoteSheet(pupil) {
     const s = view();
     show("tpl-note-sheet", "note");
+    delete body.dataset.group;
     body.dataset.pupil = pupil;
     body.querySelector("[data-slot=name]").textContent = nameOf(s, pupil);
     body.querySelector("[data-action=spoken]").setAttribute("aria-pressed", String(isSpoken(s, pupil)));
@@ -460,10 +474,24 @@ function initRoomView(root) {
       s.notes.filter((n) => n.pupil === pupil).sort(byTime).map((n) => iconOf(s, n)).join(" ");
   }
 
-  function openFreeText(pupil) {
+  /** A group's sheet: the same note buttons, without spoken to, absent or the inbox. */
+  function openGroupSheet(group) {
+    const s = view();
+    show("tpl-note-sheet", "note");
+    delete body.dataset.pupil;
+    body.dataset.group = group;
+    body.querySelector("[data-slot=name]").textContent = groupNameOf(s, group);
+    body.querySelector(".note-sheet__toggles").hidden = true;
+    body.querySelector("[data-action=inbox]").hidden = true;
+    body.querySelector("[data-slot=badges]").textContent =
+      s.notes.filter((n) => n.group === group).sort(byTime).map((n) => iconOf(s, n)).join(" ");
+  }
+
+  function openFreeText() {
+    const s = view();
+    const who = subject();
     show("tpl-free-text", "free-text");
-    body.dataset.pupil = pupil;
-    body.querySelector("[data-slot=name]").textContent = nameOf(view(), pupil);
+    body.querySelector("[data-slot=name]").textContent = who.group ? groupNameOf(s, who.group) : nameOf(s, who.pupil);
     body.querySelector("textarea").focus();
   }
 
@@ -489,7 +517,7 @@ function initRoomView(root) {
       const item = el("li", { class: "cluster" });
       item.append(
         el("span", { class: "sheet-list__when" }, note.when),
-        el("span", { class: "sheet-list__what" }, `${nameOf(s, note.pupil)} · ${describe(s, note)}`),
+        el("span", { class: "sheet-list__what" }, `${whoOf(s, note)} · ${describe(s, note)}`),
         el("button", { type: "button", class: "button", "data-action": "done", "data-note": note.id }, "Done"),
       );
       return item;
@@ -524,15 +552,15 @@ function initRoomView(root) {
 
   /* Taps --------------------------------------------------------------------- */
 
-  function addNote(pupil, fields) {
+  function addNote(fields) {
     const id = queue.uuid();
-    submit({ type: "note.add", id, pupil, ...fields });
+    submit({ type: "note.add", id, ...subject(), ...fields });
     saveUndo([...undoStack(), { type: "note.remove", note: id }]);
     close();
   }
 
   document.addEventListener("click", (event) => {
-    const target = event.target.closest("[data-action], [data-pupil], [data-close-sheet]");
+    const target = event.target.closest("[data-action], [data-pupil], [data-group], [data-close-sheet]");
     if (!target) return;
     if (target.matches("[data-close-sheet]")) {
       close();
@@ -542,14 +570,15 @@ function initRoomView(root) {
     switch (target.dataset.action) {
       case undefined:
         if (target.matches(".seat[data-pupil]")) openNoteSheet(target.dataset.pupil);
+        else if (target.matches(".seat[data-group]")) openGroupSheet(target.dataset.group);
         break;
       case "note": {
         const type = base.noteTypes.find((t) => t.id === target.dataset.noteType);
-        addNote(pupil, { note_type: type.id, text: "", actionable: type.actionable });
+        addNote({ note_type: type.id, text: "", actionable: type.actionable });
         break;
       }
       case "free-text":
-        openFreeText(pupil);
+        openFreeText();
         break;
       case "spoken":
         submit(isSpoken(view(), pupil) ? { type: "spoken.clear", pupil } : { type: "spoken.add", id: queue.uuid(), pupil });
@@ -614,7 +643,7 @@ function initRoomView(root) {
     event.preventDefault();
     const form = new FormData(event.target);
     const text = String(form.get("text") ?? "").trim();
-    if (text) addNote(body.dataset.pupil, { note_type: null, text, actionable: form.get("actionable") === "on" });
+    if (text) addNote({ note_type: null, text, actionable: form.get("actionable") === "on" });
     else close();
   });
 
@@ -625,6 +654,7 @@ function initRoomView(root) {
     body.replaceChildren();
     delete body.dataset.sheet;
     delete body.dataset.pupil;
+    delete body.dataset.group;
   });
 
   document.addEventListener("downbeat:synced", refresh);
@@ -683,7 +713,7 @@ function initRoomView(root) {
       const target = /^[1-9]$/.test(key)
         ? body.querySelectorAll("[data-action=note]")[Number(key) - 1]
         : SHEET_KEYS[key] && body.querySelector(`[data-action="${SHEET_KEYS[key]}"]`);
-      if (target) {
+      if (target && !target.closest("[hidden]")) {
         event.preventDefault();
         target.click();
       }

@@ -31,3 +31,18 @@ def placement_rules(pupil_ids):
         if rule != "none":
             rules[pupil_id].add(rule)
     return rules
+
+
+def active_groups(klass):
+    from .models import Group
+
+    return list(Group.objects.filter(klass=klass, ended__isnull=True))
+
+
+def group_tints(klass):
+    """{pupil_id: tint} for pupils in the class's active groups."""
+    from .models import GroupMember
+
+    return dict(
+        GroupMember.objects.filter(group__klass=klass, group__ended__isnull=True).values_list("pupil_id", "group__tint")
+    )

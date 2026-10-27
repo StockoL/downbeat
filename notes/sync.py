@@ -4,7 +4,7 @@ operation with an id made on the device, so the iPad can record a lesson with no
 send it later. Applying is idempotent and last-write-wins, so sending the same queue twice, or
 resending after a dropped connection, changes nothing.
 
-    note.add        {id, session, pupil, note_type|null, text, actionable, at}
+    note.add        {id, session, pupil|group, note_type|null, text, actionable, at}
     note.remove     {note, at}
     note.restore    {note, at}
     action.done     {note, at}
@@ -21,6 +21,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
+from pupils.models import Group
 from timetable.models import Pupil, Session, SessionAttendance
 
 from .models import Note, NoteType, SpokenTo
@@ -63,14 +64,22 @@ def note_add(op):
     note_id = _uuid(op.get("id"))
     if Note.objects.filter(pk=note_id).exists():
         return  # already applied
-    session, pupil = _get(Session, op.get("session")), _get(Pupil, op.get("pupil"))
+    session = _get(Session, op.get("session"))
+    pupil = _get(Pupil, op["pupil"]) if op.get("pupil") else None
+    group = _get(Group, op["group"]) if op.get("group") else None
+    if (pupil is None) == (group is None):
+        raise Rejected("a note is for one pupil or one group")
+    if group is not None and group.klass_id != session.klass_id:
+        raise Rejected("that group isn't in this lesson's class")
     note_type = _get(NoteType, op["note_type"]) if op.get("note_type") else None
     text = str(op.get("text", "")).strip()[:2000]
     if note_type is None and not text:
         raise Rejected("an empty free-text note")
     actionable = bool(op.get("actionable")) if note_type is None else note_type.is_actionable_default
     at = _at(op)
-    Note.objects.create(id=note_id, session=session, pupil=pupil, note_type=note_type, text=text, actionable=actionable)
+    Note.objects.create(
+        id=note_id, session=session, pupil=pupil, group=group, note_type=note_type, text=text, actionable=actionable,
+    )
     Note.objects.filter(pk=note_id).update(created_at=at, updated_at=at)  # the time it was caught, not sent
 
 

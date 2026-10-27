@@ -84,3 +84,42 @@ class Relationship(Base):
 
     def other(self, pupil):
         return self.pupil_b if self.pupil_a_id == pupil.pk else self.pupil_a
+
+
+GROUP_TINTS = [(n, f"Tint {n}") for n in range(1, 7)]
+
+
+class Group(Base):
+    """A working group within a class. Ended, not deleted, so its history stays."""
+
+    klass = models.ForeignKey("timetable.Class", on_delete=models.CASCADE, related_name="groups", verbose_name="class")
+    name = models.CharField(max_length=60)
+    working_on = models.CharField(max_length=200, blank=True)
+    started = models.DateField()
+    ended = models.DateField(null=True, blank=True)
+    tint = models.PositiveSmallIntegerField(choices=GROUP_TINTS, default=1)
+
+    class Meta:
+        ordering = ["ended", "name"]
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def free_tint(cls, klass):
+        """The tint used least by the class's active groups."""
+        used = list(cls.objects.filter(klass=klass, ended__isnull=True).values_list("tint", flat=True))
+        return min(range(1, 7), key=lambda t: (used.count(t), t))
+
+
+class GroupMember(Base):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="members")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="group_memberships")
+    role = models.CharField(max_length=40, blank=True, help_text="Optional: drums, keys, vocals…")
+
+    class Meta:
+        ordering = ["pupil__first_name"]
+        constraints = [models.UniqueConstraint(fields=["group", "pupil"], name="one_membership_per_group")]
+
+    def __str__(self):
+        return f"{self.pupil} in {self.group}"

@@ -1,0 +1,70 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Groups · {{ klass }} · Plan · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'plan_home' %}">← Plan</a></p>
+<h1>{{ klass }}: groups</h1>
+
+{% for item in active %}{% with group=item.group %}
+<section class="card group-tint-{{ group.tint }}"><div class="card__body flow">
+  <div class="cluster">
+    <h2>{{ group }}</h2>
+    {% if group.working_on %}<span>{{ group.working_on }}</span>{% endif %}
+    <small>since {{ group.started|date:"j M" }}</small>
+  </div>
+  <ul class="flow" role="list">
+    {% for member in group.members.all %}
+    <li class="cluster form-row">
+      <span>{{ member.pupil }}</span>
+      <form method="post" action="{% url 'group_member_role' member.pk %}" class="cluster">
+        {% csrf_token %}
+        <label class="visually-hidden" for="role-{{ member.pk }}">Role for {{ member.pupil }}</label>
+        <input class="input" id="role-{{ member.pk }}" name="role" value="{{ member.role }}" placeholder="Role" maxlength="40">
+        <button class="button" type="submit" data-variant="ghost" data-size="small">Save</button>
+      </form>
+      <form method="post" action="{% url 'group_remove_member' member.pk %}">
+        {% csrf_token %}
+        <button class="button" type="submit" data-variant="ghost" data-size="small" aria-label="Remove {{ member.pupil }} from {{ group }}">Remove</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  <div class="cluster">
+    {% if item.form.fields.pupil.queryset.exists %}
+    <form method="post" action="{% url 'group_add_member' group.pk %}" class="cluster form-row">
+      {% csrf_token %}
+      {% for field in item.form %}{{ field.as_field_group }}{% endfor %}
+      <button class="button" type="submit">Add</button>
+    </form>
+    {% endif %}
+    <form method="post" action="{% url 'group_end' group.pk %}" onsubmit="return confirm('End {{ group|escapejs }}? It stays in the history.')">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="ghost">End group</button>
+    </form>
+  </div>
+</div></section>
+{% endwith %}{% endfor %}
+
+<section class="card"><div class="card__body flow">
+  <h2>New group</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add group</button>
+  </form>
+</div></section>
+
+{% if ended %}
+<section class="flow">
+  <h2>Earlier groups</h2>
+  <ul class="flow" role="list">
+    {% for group in ended %}
+    <li><strong>{{ group }}</strong>{% if group.working_on %}, {{ group.working_on }}{% endif %}
+      <small>{{ group.started|date:"j M" }}–{{ group.ended|date:"j M Y" }}:
+      {% for member in group.members.all %}{{ member.pupil }}{% if member.role %} ({{ member.role }}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</small></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

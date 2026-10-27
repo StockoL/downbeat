@@ -775,3 +775,46 @@ ol[role="list"] {
   outline: 2px dotted var(--color-status-warning);
   outline-offset: 3px;
 }
+
+/* --- Group tints: Tier 3, reserved. Pale, low-chroma backgrounds, distinct from the flag palette's
+       saturated edges and from the interface accent. One per active group. --- */
+:root {
+  --group-1: oklch(0.95 0.035 100);
+  --group-2: oklch(0.95 0.035 160);
+  --group-3: oklch(0.95 0.035 200);
+  --group-4: oklch(0.95 0.035 20);
+  --group-5: oklch(0.95 0.035 320);
+  --group-6: oklch(0.95 0.035 60);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --group-1: oklch(0.32 0.04 100);
+    --group-2: oklch(0.32 0.04 160);
+    --group-3: oklch(0.32 0.04 200);
+    --group-4: oklch(0.32 0.04 20);
+    --group-5: oklch(0.32 0.04 320);
+    --group-6: oklch(0.32 0.04 60);
+  }
+}
+
+:root[data-theme="dark"] {
+  --group-1: oklch(0.32 0.04 100);
+  --group-2: oklch(0.32 0.04 160);
+  --group-3: oklch(0.32 0.04 200);
+  --group-4: oklch(0.32 0.04 20);
+  --group-5: oklch(0.32 0.04 320);
+  --group-6: oklch(0.32 0.04 60);
+}
+
+.group-tint-1 { --group-tint: var(--group-1); }
+.group-tint-2 { --group-tint: var(--group-2); }
+.group-tint-3 { --group-tint: var(--group-3); }
+.group-tint-4 { --group-tint: var(--group-4); }
+.group-tint-5 { --group-tint: var(--group-5); }
+.group-tint-6 { --group-tint: var(--group-6); }
+
+.seat[class*="group-tint-"],
+.card[class*="group-tint-"] {
+  background: var(--group-tint);
+}

@@ -1,5 +1,7 @@
 from django.urls import path
 
+from pupils import group_views
+
 from . import plan_views
 
 urlpatterns = [
@@ -12,4 +14,9 @@ urlpatterns = [
     path("seating/<uuid:pk>/shuffle/", plan_views.seating_shuffle, name="seating_shuffle"),
     path("seating/<uuid:pk>/duplicate/", plan_views.seating_duplicate, name="seating_duplicate"),
     path("seating/<uuid:pk>/delete/", plan_views.seating_delete, name="seating_delete"),
+    path("classes/<uuid:pk>/groups/", group_views.class_groups, name="class_groups"),
+    path("groups/<uuid:pk>/members/", group_views.group_add_member, name="group_add_member"),
+    path("groups/<uuid:pk>/end/", group_views.group_end, name="group_end"),
+    path("members/<uuid:pk>/role/", group_views.group_member_role, name="group_member_role"),
+    path("members/<uuid:pk>/remove/", group_views.group_remove_member, name="group_remove_member"),
 ]

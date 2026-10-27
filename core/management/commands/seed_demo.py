@@ -21,7 +21,7 @@ from django.utils import timezone
 
 from core.data import delete_all
 from notes.models import Note, NoteType, SpokenTo
-from pupils.models import FlagType, PupilFlag, Relationship
+from pupils.models import FlagType, Group, GroupMember, PupilFlag, Relationship
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
@@ -182,6 +182,21 @@ class Command(BaseCommand):
         anchor = plan.assignments.get(pupil=first).seat
         beside = next(seat for seat in rooms["M1"].seats.all() if adjacent(anchor, seat))
         move(plan, second, beside)
+
+        # 9Y are in bands for the riffs unit, each with parts.
+        nine_y = list(classes["9Y Mu"].pupils.all())
+        rng.shuffle(nine_y)
+        for index, (name, roles) in enumerate([
+            ("Band 1", ["drums", "bass", "keys", "vocals"]),
+            ("Band 2", ["drums", "keys", "guitar"]),
+            ("Band 3", ["bass", "keys", "vocals", "guitar"]),
+        ]):
+            group = Group.objects.create(
+                klass=classes["9Y Mu"], name=name, working_on="Twelve-bar riff", started=today - datetime.timedelta(days=14),
+                tint=index + 1,
+            )
+            for role in roles:
+                GroupMember.objects.create(group=group, pupil=nine_y.pop(), role=role)
 
         # Last week to the end of next week; this week is week A.
         monday = today - datetime.timedelta(days=today.weekday())

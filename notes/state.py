@@ -6,6 +6,7 @@ it again after each successful sync, so the laptop stays the source of truth.
 
 from collections import Counter
 
+from pupils.services import active_groups
 from rooms.seating import seating_for
 
 from . import services
@@ -38,6 +39,7 @@ def lesson_state(session):
             for t in services.sheet_types()
         ],
         "pupils": [{"id": str(p.pk), "name": str(p)} for p in pupils],
+        "groups": [{"id": str(g.pk), "name": g.name} for g in active_groups(session.klass)],
         "notes": [_note(n) for n in services.log(session)],
         "actions": [{**_note(n), "when": when(n)} for n in actions],
         # Open actions for each pupil from other classes, so the unread counter covers them too.
@@ -52,6 +54,7 @@ def _note(note):
     return {
         "id": str(note.pk),
         "pupil": str(note.pupil_id) if note.pupil_id else None,
+        "group": str(note.group_id) if note.group_id else None,
         "type": str(note.note_type_id) if note.note_type_id else None,
         "text": note.text,
         "actionable": note.actionable,

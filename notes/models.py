@@ -32,6 +32,7 @@ class Note(Base):
 
     session = models.ForeignKey("timetable.Session", on_delete=models.PROTECT, related_name="notes")
     pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, null=True, blank=True, related_name="notes")
+    group = models.ForeignKey("pupils.Group", on_delete=models.PROTECT, null=True, blank=True, related_name="notes")
     note_type = models.ForeignKey(NoteType, on_delete=models.PROTECT, null=True, blank=True, related_name="notes")
     text = models.TextField(blank=True)
     actionable = models.BooleanField(default=False)
@@ -47,7 +48,7 @@ class Note(Base):
         ordering = ["created_at"]
 
     def __str__(self):
-        return f"{self.pupil or 'Class'} · {self.label}"
+        return f"{self.pupil or self.group or 'Class'} · {self.label}"
 
     @property
     def label(self):

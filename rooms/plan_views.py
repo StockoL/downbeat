@@ -7,7 +7,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from pupils.models import Relationship
-from pupils.services import flag_colours, placement_rules, relationships_among
+from pupils.services import flag_colours, group_tints, placement_rules, relationships_among
 from timetable.models import Class, Pupil
 
 from . import seating
@@ -25,8 +25,9 @@ def board_context(request, plan, message=""):
     assignments = {a.seat_id: a for a in plan.assignments.select_related("pupil")}
     seated = {a.pupil_id for a in assignments.values()}
     flags = flag_colours(plan.klass.pupils.values_list("id", flat=True))
+    tints = group_tints(plan.klass)
     seats = [
-        {"seat": seat, "assignment": a, "flags": flags.get(a.pupil_id) if a else None}
+        {"seat": seat, "assignment": a, "flags": flags.get(a.pupil_id) if a else None, "tint": tints.get(a.pupil_id) if a else None}
         for seat in plan.room.seats.all()
         for a in [assignments.get(seat.id)]
     ]

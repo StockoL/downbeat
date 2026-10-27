@@ -11,7 +11,7 @@
 <div class="grid">
   {% for klass in classes %}
   <section class="card"><div class="card__body flow">
-    <h3>{{ klass }}</h3>
+    <div class="cluster"><h3>{{ klass }}</h3> <a href="{% url 'class_groups' klass.pk %}">Groups</a></div>
     {% if klass.seating_plans.all %}
     <ul role="list" class="flow">
       {% for plan in klass.seating_plans.all %}
