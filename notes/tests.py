@@ -101,7 +101,7 @@ def test_remove_note_goes_to_the_bin(client, lesson, pupils, types):
 def test_undo_reverses_adds_and_removes_in_order(client, lesson, pupils, types):
     add(client, lesson, pupils[0], note_type=types["hp"].pk)
     add(client, lesson, pupils[1], note_type=types["hp"].pk)
-    first, second = Note.objects.all()
+    first, _second = Note.objects.all()
     client.post(f"/room/notes/{first.pk}/remove/")
     assert Note.objects.live().count() == 1
 

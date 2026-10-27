@@ -1,0 +1,39 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Data · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Data</h1>
+<p>Everything lives in one file on this laptop. These keep it safe and let it go when it should.</p>
+
+<section class="card"><div class="card__body flow">
+  <h2>Backups</h2>
+  <p>Saved to <code>{{ backup_dir }}</code>. The newest copies are kept and older ones removed. Set <code>DOWNBEAT_BACKUP_DIR</code> to a OneDrive folder for an off-laptop copy, and run <code>tools\install-backup-task.ps1</code> once for a nightly backup.</p>
+  {% if backups %}
+  <ul class="flow" role="list">{% for path in backups %}<li><code>{{ path.name }}</code></li>{% endfor %}</ul>
+  {% endif %}
+  <form method="post" action="{% url 'data_backup' %}">
+    {% csrf_token %}
+    <button class="button" type="submit" data-variant="primary">Back up now</button>
+  </form>
+</div></section>
+
+<section class="card"><div class="card__body flow">
+  <h2>Export</h2>
+  <p>Every timetable, class, pupil, room, seating plan, session and note as one JSON file.</p>
+  <a class="button" href="{% url 'data_export' %}">Download everything</a>
+</div></section>
+
+<section class="card"><div class="card__body flow">
+  <h2>Delete everything</h2>
+  <p>For the end of a contract. Removes every pupil, class, note and plan from this database and returns to first-run setup. It cannot be undone here. Backup files are separate and are not touched: delete the backup folder yourself if they should go too.</p>
+  <form method="post" action="{% url 'data_delete_all' %}" class="flow">
+    {% csrf_token %}
+    <div class="field">
+      <label class="label" for="confirm">Type “{{ delete_phrase }}” to confirm</label>
+      <input class="input" id="confirm" name="confirm" autocomplete="off">
+    </div>
+    <button class="button" type="submit" data-variant="danger">Delete everything</button>
+  </form>
+</div></section>
+{% endblock %}

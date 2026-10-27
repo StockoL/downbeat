@@ -4,7 +4,6 @@ import pytest
 
 from rooms import seating
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
-from timetable.models import Pupil
 
 pytestmark = pytest.mark.django_db
 
@@ -71,7 +70,7 @@ def test_every_change_can_be_undone_in_reverse_order(plan, seats, pupils):
     ]:
         snaps.append(action())
         states.append(seated(plan))
-    for snap, expected in zip(reversed(snaps), reversed(states[:-1])):
+    for snap, expected in zip(reversed(snaps), reversed(states[:-1]), strict=True):
         seating.restore(plan, snap)
         assert seated(plan) == expected
     assert not plan.assignments.exists()

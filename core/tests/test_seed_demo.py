@@ -38,7 +38,7 @@ def test_seed_demo_refuses_a_database_with_data(timetable):
 
 @pytest.mark.filterwarnings("ignore:Overriding setting DATABASES")
 def test_seed_demo_reset_refuses_the_real_database(settings, timetable):
-    with override_settings(DATABASES={**settings.DATABASES, "default": {**settings.DATABASES["default"], "NAME": settings.BASE_DIR / "db.sqlite3"}}):
-        with pytest.raises(CommandError, match="won't touch db.sqlite3"):
-            call_command("seed_demo", "--reset")
+    real = {**settings.DATABASES, "default": {**settings.DATABASES["default"], "NAME": settings.BASE_DIR / "db.sqlite3"}}
+    with override_settings(DATABASES=real), pytest.raises(CommandError, match=r"won't touch db\.sqlite3"):
+        call_command("seed_demo", "--reset")
     assert Timetable.objects.filter(pk=timetable.pk).exists()

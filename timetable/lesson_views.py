@@ -6,8 +6,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from notes import services as notes
-from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 from rooms.cover import cover_pdf
+from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
 from rooms.seating import seating_for
 
 from .models import Session, Timetable

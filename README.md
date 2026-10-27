@@ -13,7 +13,17 @@ py -3.12 -m venv .venv
 .venv\Scripts\python manage.py runserver
 ```
 
-Tests: `.venv\Scripts\python -m pytest`.
+Tests and lint: `.venv\Scripts\python -m pip install -r requirements-dev.txt`, then `.venv\Scripts\python -m pytest` and `.venv\Scriptsuff check .`.
+
+## Backups
+
+`.venv\Scripts\python manage.py backup` copies the database to `backups\` (or `DOWNBEAT_BACKUP_DIR`) and keeps the newest 30. For a nightly copy to OneDrive, run once:
+
+```
+.\tools\install-backup-task.ps1 -Dest "$env:OneDrive\Downbeat backups"
+```
+
+To restore, stop the server and copy a backup over `db.sqlite3`. Settings → Data also has "Back up now", a full JSON export and "Delete everything".
 
 ## Demo data
 

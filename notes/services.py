@@ -46,7 +46,8 @@ def actions(session):
     Those from earlier sessions are recorded as carried to this one.
     """
     order = period_order(Timetable.active())
-    rank = lambda s: (s.date, order.get(s.period, len(order)))
+    def rank(s):
+        return (s.date, order.get(s.period, len(order)))
     notes = Note.objects.open_actions().filter(
         session__klass=session.klass, session__date__lte=session.date,
     ).select_related("pupil", "note_type", "session").order_by("session__date", "created_at")

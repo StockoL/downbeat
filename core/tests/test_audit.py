@@ -133,3 +133,20 @@ def test_random_moves_keep_locked_seats_still_and_one_seat_per_pupil(klass, seed
         if action in ("move", "unseat"):
             locked_after = {a.seat_id: a.pupil_id for a in rows if a.locked}
             assert locked_after == locked_before, "a locked seat moved"
+
+
+# --- Double taps ---
+
+def test_every_htmx_post_disables_its_control_while_in_flight():
+    """A double tap in the room must never record twice."""
+    import re
+    from pathlib import Path
+
+    from django.conf import settings
+
+    unguarded = []
+    for path in Path(settings.BASE_DIR, "templates").rglob("*.html"):
+        for tag in re.findall(r"<(?:button|form)\b[^>]*\bhx-post=[^>]*>", path.read_text(encoding="utf-8")):
+            if "hx-disabled-elt=" not in tag:
+                unguarded.append(f"{path.name}: {tag[:80]}")
+    assert not unguarded, unguarded

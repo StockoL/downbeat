@@ -8,7 +8,7 @@
   <li class="cluster">
     <span class="sheet-list__when">{% if note.session_id == session.pk %}Today{% else %}{{ note.session.date|date:"j M" }}{% endif %}</span>
     <span class="sheet-list__what">{{ note.pupil|default:"Class" }} · {{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
-    <button type="button" class="button" hx-post="{% url 'action_done' note.pk %}" hx-vals='{"session": "{{ session.pk }}"}' hx-swap="none">Done</button>
+    <button type="button" class="button" hx-post="{% url 'action_done' note.pk %}" hx-disabled-elt="this" hx-vals='{"session": "{{ session.pk }}"}' hx-swap="none">Done</button>
   </li>
   {% empty %}
   <li class="sheet-list__when">Nothing open.</li>

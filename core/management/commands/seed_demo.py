@@ -18,6 +18,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from core.data import delete_all
 from notes.models import Note, NoteType, SpokenTo
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan
@@ -69,11 +70,6 @@ SLOTS = [
     ("Choir", "A", 1, "After school"), ("Choir", "B", 1, "After school"),
 ]
 
-APP_MODELS = [
-    SpokenTo, Note, SessionAttendance, SeatAssignment, SeatingPlan, Session, Slot,
-    Seat, Room, Class, Pupil, NoteType, Timetable,
-]
-
 
 class Command(BaseCommand):
     help = "Fill an empty database with disposable demo data. Use a separate database (DOWNBEAT_DB)."
@@ -89,8 +85,7 @@ class Command(BaseCommand):
         if reset:
             if db_name == str(settings.BASE_DIR / "db.sqlite3"):
                 raise CommandError("--reset won't touch db.sqlite3. Set DOWNBEAT_DB to a demo database first.")
-            for model in APP_MODELS:
-                model.objects.all().delete()
+            delete_all()
         elif Timetable.objects.exists():
             raise CommandError("This database already has data. Use a fresh one, or --reset on a demo database.")
 
@@ -167,11 +162,12 @@ class Command(BaseCommand):
             pupils = list(session.klass.pupils.all())
             start, end = timetable.period_times(session.period)
             lesson_start = timezone.make_aware(datetime.datetime.combine(session.date, start))
-            minutes = int((datetime.datetime.combine(session.date, end) - datetime.datetime.combine(session.date, start)).total_seconds() // 60)
+            lesson_end = timezone.make_aware(datetime.datetime.combine(session.date, end))
 
-            def during_lesson(note):
+            def during_lesson(note, start=lesson_start, end=lesson_end):
                 # Stamp the note inside its lesson, so the log reads like a real one.
-                at = lesson_start + datetime.timedelta(minutes=rng.randint(3, minutes - 3))
+                minutes = int((end - start).total_seconds() // 60)
+                at = start + datetime.timedelta(minutes=rng.randint(3, minutes - 3))
                 Note.objects.filter(pk=note.pk).update(created_at=at, updated_at=at)
 
             for pupil in rng.sample(pupils, min(len(pupils), rng.randint(3, 7))):
@@ -247,5 +243,5 @@ class Command(BaseCommand):
         rng.shuffle(pupils)
         seats = list(room.seats.all())
         rng.shuffle(seats)
-        for seat, pupil in zip(seats, pupils[: len(seats) - 1]):  # leave one pupil unseated, as happens
+        for seat, pupil in zip(seats, pupils[: len(seats) - 1], strict=False):  # leave one pupil unseated, as happens
             SeatAssignment.objects.create(seating_plan=plan, seat=seat, pupil=pupil, locked=rng.random() < 0.1)

@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 160
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+    "RUF012",  # Django's Meta lists and model choices are class attributes by design
+    "RUF001", "RUF002", "RUF003",  # en dashes and symbols in British UI text are deliberate
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["core", "downbeat", "notes", "rooms", "timetable"]

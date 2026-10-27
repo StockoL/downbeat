@@ -11,8 +11,14 @@ from django.views.decorators.http import require_POST
 from core.forms import PeriodFormSet
 
 from .forms import (
-    AddPupilsForm, ClassForm, GenerateSessionsForm, PupilForm, SessionForm, SlotForm,
-    TimetableEditForm, parse_pupil_lines,
+    AddPupilsForm,
+    ClassForm,
+    GenerateSessionsForm,
+    PupilForm,
+    SessionForm,
+    SlotForm,
+    TimetableEditForm,
+    parse_pupil_lines,
 )
 from .models import Class, Pupil, Session, Slot, Timetable
 from .services import generate_sessions

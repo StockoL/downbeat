@@ -11,4 +11,8 @@ urlpatterns = [
     path("room/<uuid:pk>/cover.pdf", lesson_views.cover, name="cover_pdf"),
     path("setup/", views.setup, name="setup"),
     path("settings/", views.settings_home, name="settings"),
+    path("settings/data/", views.data_page, name="data_page"),
+    path("settings/data/backup/", views.data_backup, name="data_backup"),
+    path("settings/data/export/", views.data_export, name="data_export"),
+    path("settings/data/delete-all/", views.data_delete_all, name="data_delete_all"),
 ]

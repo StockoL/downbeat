@@ -61,7 +61,7 @@
   <a class="button" data-variant="ghost" href="{% url 'today' %}?list">Today</a>
   <strong class="room-bar__session">{{ session.period }} · {{ session.klass }}</strong>
   {% include "notes/_actions_button.html" %}
-  <button type="button" class="button" hx-post="{% url 'pick' session.pk %}" hx-target="#sheet-body">Pick</button>
+  <button type="button" class="button" hx-post="{% url 'pick' session.pk %}" hx-disabled-elt="this" hx-target="#sheet-body">Pick</button>
   <div class="dropdown-wrapper room-bar__more">
     <button type="button" class="button" data-variant="ghost" data-toggle="dropdown" aria-label="More">⋯</button>
     <div class="dropdown" data-align="end">

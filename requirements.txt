@@ -1,4 +1,5 @@
 Django>=5.2,<6
+pytest>=8
 pytest-django>=4.9
 reportlab>=4.0
 -e ../looseleaf-ui/packages/django-looseleaf

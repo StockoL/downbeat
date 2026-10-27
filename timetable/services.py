@@ -63,7 +63,8 @@ def live_session(now, timetable):
 def next_session(session, timetable, horizon_days=60):
     """The next session after this one that isn't cancelled: later today, or on a later day."""
     order = period_order(timetable)
-    rank = lambda s: (s.date, order.get(s.period, len(order)), s.period)
+    def rank(s):
+        return (s.date, order.get(s.period, len(order)), s.period)
     later = Session.objects.filter(
         date__gte=session.date, date__lte=session.date + datetime.timedelta(days=horizon_days),
     ).exclude(status=Session.CANCELLED).exclude(pk=session.pk).select_related("klass", "room")
@@ -74,7 +75,8 @@ def next_session(session, timetable, horizon_days=60):
 def previous_session(session, timetable, horizon_days=60):
     """The last session with the same class before this one that wasn't cancelled."""
     order = period_order(timetable)
-    rank = lambda s: (s.date, order.get(s.period, len(order)), s.period)
+    def rank(s):
+        return (s.date, order.get(s.period, len(order)), s.period)
     earlier = Session.objects.filter(
         klass_id=session.klass_id, date__lte=session.date,
         date__gte=session.date - datetime.timedelta(days=horizon_days),

@@ -1,0 +1,35 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Downbeat installs django-looseleaf from the sibling repo, so check both out side by side.
+      - uses: actions/checkout@v4
+        with:
+          path: downbeat
+      - uses: actions/checkout@v4
+        with:
+          repository: StockoL/looseleaf-ui
+          path: looseleaf-ui
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: downbeat/requirements*.txt
+      - name: Install
+        working-directory: downbeat
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Lint
+        working-directory: downbeat
+        run: ruff check .
+      - name: Django checks
+        working-directory: downbeat
+        run: python manage.py check && python manage.py makemigrations --check --dry-run
+      - name: Test
+        working-directory: downbeat
+        run: pytest -q

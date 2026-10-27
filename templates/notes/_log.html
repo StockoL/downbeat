@@ -3,7 +3,7 @@
   <div class="cluster room-log__head">
     <h2 id="log-heading" class="room-panel__heading">Log</h2>
     {% if undo_count %}
-    <button type="button" class="button" data-variant="ghost" hx-post="{% url 'note_undo' session.pk %}" hx-swap="none">Undo</button>
+    <button type="button" class="button" data-variant="ghost" hx-post="{% url 'note_undo' session.pk %}" hx-disabled-elt="this" hx-swap="none">Undo</button>
     {% endif %}
   </div>
   <ol class="room-log flow" role="list">
@@ -11,7 +11,7 @@
     <li class="room-log__line">
       <span class="room-log__time">{{ note.created_at|time:"H:i" }}</span>
       <span>{{ note.pupil|default:"Class" }} · {{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
-      <button type="button" class="button room-log__remove" data-variant="ghost" hx-post="{% url 'note_remove' note.pk %}" hx-swap="none"
+      <button type="button" class="button room-log__remove" data-variant="ghost" hx-post="{% url 'note_remove' note.pk %}" hx-disabled-elt="this" hx-swap="none"
               aria-label="Remove {{ note.label }} for {{ note.pupil|default:'the class' }}">✕</button>
     </li>
     {% endfor %}
