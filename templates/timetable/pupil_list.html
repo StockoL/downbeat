@@ -1,0 +1,43 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Pupils · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Pupils</h1>
+
+{% if years %}
+<nav class="cluster" aria-label="Year group">
+  <a href="{% url 'pupil_list' %}" {% if not year %}aria-current="page"{% endif %}>All</a>
+  {% for y in years %}<a href="?year={{ y }}" {% if year == y|stringformat:"s" %}aria-current="page"{% endif %}>Year {{ y }}</a>{% endfor %}
+</nav>
+{% endif %}
+
+{% if pupils %}
+<div class="table-wrapper">
+  <table class="table" data-density="compact">
+    <thead><tr><th scope="col">Pupil</th><th scope="col">Year</th><th scope="col">Classes</th><th scope="col">Instrument</th></tr></thead>
+    <tbody>
+      {% for pupil in pupils %}
+      <tr>
+        <td><a href="{% url 'pupil_edit' pupil.pk %}">{{ pupil }}</a></td>
+        <td>{{ pupil.year_group|default:"" }}</td>
+        <td>{{ pupil.classes.all|join:", " }}</td>
+        <td>{{ pupil.instrument }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>Pupils are quickest to add from a class page, pasted one per line.</p>
+{% endif %}
+
+<section class="card"><div class="card__body flow">
+  <h2>Add a pupil</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add pupil</button>
+  </form>
+</div></section>
+{% endblock %}

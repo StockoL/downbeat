@@ -1,0 +1,19 @@
+{% extends "layouts/desk.html" %}
+{% comment %}Settings: everything configured once. Section list on the left, the page on the right.{% endcomment %}
+
+{% block content %}
+<div class="sidebar">
+  <nav aria-label="Settings" class="settings-nav">
+    <ul class="flow" role="list">
+      <li><a href="{% url 'timetable_edit' %}" {% if section == "timetable" %}aria-current="page"{% endif %}>Timetable</a></li>
+      <li><a href="{% url 'slot_list' %}" {% if section == "slots" %}aria-current="page"{% endif %}>Weekly slots</a></li>
+      <li><a href="{% url 'session_list' %}" {% if section == "sessions" %}aria-current="page"{% endif %}>Sessions</a></li>
+      <li><a href="{% url 'class_list' %}" {% if section == "classes" %}aria-current="page"{% endif %}>Classes</a></li>
+      <li><a href="{% url 'pupil_list' %}" {% if section == "pupils" %}aria-current="page"{% endif %}>Pupils</a></li>
+    </ul>
+  </nav>
+  <div class="flow">
+    {% block settings %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

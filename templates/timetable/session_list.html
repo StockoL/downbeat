@@ -1,0 +1,56 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Sessions · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Sessions</h1>
+<p>One row per lesson or rehearsal that actually happens. Change a session's room here when a class moves for the day.</p>
+
+<section class="card"><div class="card__body flow">
+  <h2>Generate from slots</h2>
+  <form method="post" action="{% url 'session_generate' %}" class="flow">
+    {% csrf_token %}
+    {{ generate_form }}
+    <button class="button" type="submit" data-variant="primary">Generate sessions</button>
+  </form>
+  <p class="field__hint">Days that already have a session for a slot are left alone, so it is safe to run again.</p>
+</div></section>
+
+<form method="get" class="cluster form-row" aria-label="Date range">
+  <div class="field"><label class="label" for="from">From</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+  <div class="field"><label class="label" for="to">To</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+  <button class="button" type="submit">Show</button>
+</form>
+
+{% for date, sessions in days %}
+<section class="flow">
+  <h2>{{ date|date:"l j F" }}</h2>
+  <div class="table-wrapper">
+    <table class="table" data-density="compact">
+      <thead><tr><th scope="col">Period</th><th scope="col">Class</th><th scope="col">Room</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        {% for session in sessions %}
+        <tr>
+          <td>{{ session.period }}</td>
+          <td><a href="{% url 'session_edit' session.pk %}">{{ session.klass }}</a></td>
+          <td>{{ session.room }}</td>
+          <td>{{ session.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% empty %}
+<p>No sessions in these dates.</p>
+{% endfor %}
+
+<section class="card"><div class="card__body flow">
+  <h2>Add a one-off session</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" name="add_session" data-variant="primary">Add session</button>
+  </form>
+</div></section>
+{% endblock %}

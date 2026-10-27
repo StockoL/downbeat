@@ -1,0 +1,46 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}{{ klass }} · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<p><a href="{% url 'class_list' %}">← Classes</a></p>
+<h1>{{ klass }}</h1>
+
+<div class="switcher">
+  <section class="flow">
+    <h2>Pupils ({{ pupils|length }})</h2>
+    {% if pupils %}
+    <ul class="flow" role="list">
+      {% for pupil in pupils %}
+      <li class="cluster">
+        <a href="{% url 'pupil_edit' pupil.pk %}">{{ pupil }}</a>
+        <form method="post" action="{% url 'class_remove_pupil' klass.pk pupil.pk %}">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small" aria-label="Remove {{ pupil }} from {{ klass }}">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ add_form }}
+      <button class="button" type="submit" name="add_pupils" data-variant="primary">Add pupils</button>
+    </form>
+  </section>
+
+  <section class="flow">
+    <h2>Details</h2>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      {{ form }}
+      <button class="button" type="submit" name="save_details" data-variant="primary">Save</button>
+    </form>
+    <form method="post" action="{% url 'class_delete' klass.pk %}" onsubmit="return confirm('Delete {{ klass|escapejs }}? Its slots go too.')">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="danger">Delete class</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

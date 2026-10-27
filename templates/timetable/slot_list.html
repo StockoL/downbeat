@@ -1,0 +1,45 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Weekly slots · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Weekly slots</h1>
+<p>The recurring pattern. Sessions are generated from these on the Sessions page.</p>
+
+{% for grid in grids %}
+<div class="table-wrapper">
+  <table class="table" data-density="compact">
+    {% if two_week %}<caption>Week {{ grid.week }}</caption>{% endif %}
+    <thead>
+      <tr><th scope="col">Period</th>{% for day, name in days %}<th scope="col">{{ name }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for row in grid.rows %}
+      <tr>
+        <th scope="row">{{ row.period.label }}</th>
+        {% for cell in row.cells %}
+        <td>{% for slot in cell %}<a href="{% url 'slot_edit' slot.pk %}">{{ slot.klass }}</a> <small>{{ slot.room }}</small>{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+{% if orphans %}
+<div class="alert" data-status="warning">
+  <p>These slots use a period the timetable no longer has:</p>
+  <ul>{% for slot in orphans %}<li><a href="{% url 'slot_edit' slot.pk %}">{{ slot }}</a></li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<section class="card"><div class="card__body flow">
+  <h2>Add a slot</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {% include "partials/form_row.html" %}
+    <button class="button" type="submit" data-variant="primary">Add slot</button>
+  </form>
+</div></section>
+{% endblock %}

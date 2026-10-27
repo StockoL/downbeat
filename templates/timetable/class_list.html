@@ -1,0 +1,33 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Classes · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Classes</h1>
+{% if classes %}
+<div class="table-wrapper">
+  <table class="table">
+    <thead><tr><th scope="col">Class</th><th scope="col">Kind</th><th scope="col">Year</th><th scope="col" data-align="end">Pupils</th></tr></thead>
+    <tbody>
+      {% for klass in classes %}
+      <tr>
+        <td><a href="{% url 'class_detail' klass.pk %}">{{ klass.name }}</a></td>
+        <td>{{ klass.get_kind_display }}</td>
+        <td>{{ klass.year_group|default:"" }}</td>
+        <td data-align="end">{{ klass.pupil_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<section class="card"><div class="card__body flow">
+  <h2>Add a class</h2>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Add class</button>
+  </form>
+</div></section>
+{% endblock %}

@@ -19,3 +19,15 @@ Choices the spec docs don't settle, made during the build. Newest at the bottom 
 **27 Oct 2026. The active timetable is the newest one.** The data model says "one active timetable; keep old ones for history" without an active field. `Timetable.active()` returns the most recently created, so no extra column is needed. A new timetable is made active by creating it.
 
 **27 Oct 2026. Note type icon is a short text field.** An emoji or symbol the teacher types (★, ✎, ⚠). No icon library and no images; it renders as the seat badge.
+
+**27 Oct 2026. Session carries a `period` label.** The data model gives Session a date and a nullable slot, but Today has to order sessions and know which one is live, and a one-off or moved session has no slot to read the period from. Session stores the period label, copied from its slot when generated and editable per day like the room. Times come from the active timetable's periods by label. Co-curricular sessions at lunch or after school use periods the teacher adds to the timetable ("Lunch", "After school").
+
+**27 Oct 2026. Slots and sessions refer to periods by label.** Renaming a period in the timetable doesn't rename the slots that use it; the slots page lists them as using a period the timetable no longer has, with a link to fix each one. This keeps periods as plain JSON, as the data model has them.
+
+**27 Oct 2026. Week A/B is chosen when generating.** The timetable doesn't record which calendar week is A. The generate form (and `manage.py generate_sessions --first-week`) asks which week the first date falls in, and alternates from that week's Monday. Holidays are handled by generating one half term at a time; generating again over the same dates never duplicates or overwrites a session.
+
+**27 Oct 2026. Pasted class lists keep the surname initial only.** Pupils are quickest to add by pasting one per line on the class page. The last word on each line is taken as the surname and cut to its first letter, so "Aleya Khan" from a register is stored as "Aleya K" and the full surname is never saved. Lines of one word are skipped and listed back.
+
+**27 Oct 2026. Deleting is guarded where history depends on it.** A class or room with sessions can't be deleted (the sessions will carry notes from step 7 onwards). Deleting a slot keeps its sessions, which become one-offs. Deleting a pupil removes them from every class.
+
+**27 Oct 2026. Pupil keeps the recording permission fields now.** recording_permitted, exemplar_reuse_permitted and recordings_delete_by are fields on the Phase 1 Pupil table in the data model, so they are in the schema and the pupil form from the start, defaulting to off. Nothing uses them until Phase 5.

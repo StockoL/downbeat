@@ -1,0 +1,19 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Timetable · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Timetable</h1>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ form }}
+  <fieldset class="fieldset flow">
+    <legend class="legend">Periods</legend>
+    <p class="field__hint">Clear a row to remove a period. Renaming a period doesn't rename the slots that use it; they show up as unplaced on the slots page.</p>
+    {{ periods.management_form }}
+    {% if periods.non_form_errors %}<div class="alert" data-status="danger" role="alert">{{ periods.non_form_errors|join:" " }}</div>{% endif %}
+    {% for form in periods %}{% include "partials/form_row.html" %}{% endfor %}
+  </fieldset>
+  <button class="button" type="submit" data-variant="primary">Save timetable</button>
+</form>
+{% endblock %}
