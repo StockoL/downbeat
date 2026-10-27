@@ -501,3 +501,74 @@
   background: var(--color-text);
   color: var(--color-text-inverse);
 }
+
+/* --- Overflow menu: in the bottom bar, so it opens upwards. --- */
+.room-bar__more {
+  margin-inline-start: auto;
+}
+
+.room-bar__more + .room-bar__next {
+  margin-inline-start: 0;
+}
+
+.room-bar__more .dropdown {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + var(--space-2xs));
+}
+
+/* --- Projector: black on white whatever the theme, via the light system colours. --- */
+.projector {
+  margin: 0;
+  color-scheme: light;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.projector__stage {
+  display: grid;
+  grid-template-columns: 100%;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-s);
+  min-block-size: 100dvh;
+  padding: var(--space-s);
+  background: Canvas;
+}
+
+.projector__stage .canvas {
+  --canvas-max-block: 100dvh - 6rem;
+  --seat-font: calc(var(--seat-w) / var(--canvas-w) * 100cqi * 0.22);
+  border: 2px solid CanvasText;
+  background: Canvas;
+}
+
+.projector__stage:fullscreen .canvas {
+  --canvas-max-block: 100dvh - 2rem;
+}
+
+.projector__stage .seat {
+  border: 2px solid CanvasText;
+  background: Canvas;
+  color: CanvasText;
+  font-weight: 700;
+}
+
+.projector__stage .seat[data-empty] {
+  border-style: dashed;
+}
+
+.projector__stage .teacher-marker {
+  border-color: CanvasText;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.projector__controls .button {
+  border: 1px solid CanvasText;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.projector__stage:fullscreen .projector__controls {
+  display: none;
+}

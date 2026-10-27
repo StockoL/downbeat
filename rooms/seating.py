@@ -144,3 +144,12 @@ def pop_undo(session, plan):
 
 def undo_count(session, plan):
     return len(session.get(f"undo:{plan.pk}", []))
+
+
+def seating_for(session):
+    """(plan or None, {seat_id: pupil}, [unseated pupils]) for a session's class in its room."""
+    plan = SeatingPlan.current(session.klass, session.room, session.date)
+    seated = {a.seat_id: a.pupil for a in plan.assignments.select_related("pupil")} if plan else {}
+    seated_ids = {p.pk for p in seated.values()}
+    unseated = [p for p in session.klass.pupils.all() if p.pk not in seated_ids]
+    return plan, seated, unseated

@@ -3,6 +3,7 @@
 //   data-canvas="room"  room editor: move seats, paint zones, place the teacher
 //   data-canvas="plan"  seating plan editor: drag pupils onto seats, swap, lock, bin, undo
 //   data-canvas="view"  room view: taps only, nothing moves; N goes to the next session
+//   data-canvas="projector"  names only, with a full-screen button
 // Coordinates are canvas units (the room's width and height), never pixels.
 
 const DRAG_THRESHOLD = 5; // pixels a press must travel before it counts as a drag
@@ -272,7 +273,15 @@ function initRoomView(root) {
   });
 }
 
-const modes = { room: initRoomEditor, plan: initPlanEditor, view: initRoomView };
+/* --- Projector ------------------------------------------------------------ */
+
+function initProjector(stage) {
+  stage.querySelector("[data-action=fullscreen]")?.addEventListener("click", () => {
+    stage.requestFullscreen?.();
+  });
+}
+
+const modes = { room: initRoomEditor, plan: initPlanEditor, view: initRoomView, projector: initProjector };
 
 for (const root of document.querySelectorAll("[data-canvas]")) {
   modes[root.dataset.canvas]?.(root);

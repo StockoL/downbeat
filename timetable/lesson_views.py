@@ -1,10 +1,14 @@
 """Catch tempo: Today and the room view. Nothing here asks for input."""
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.text import slugify
 
 from notes import services as notes
 from rooms.models import SEAT_HEIGHT, SEAT_WIDTH, SeatingPlan
+from rooms.cover import cover_pdf
+from rooms.seating import seating_for
 
 from .models import Session, Timetable
 from .services import live_session, next_session, sessions_on
@@ -34,17 +38,11 @@ def room_view(request, pk):
     timetable = Timetable.active()
     session.start, session.end = timetable.period_times(session.period)
     room = session.room
-    plan = SeatingPlan.current(session.klass, room, session.date)
-
-    seated = {}
+    plan, seated, unseated = seating_for(session)
     elsewhere = None
-    if plan:
-        seated = {a.seat_id: a.pupil for a in plan.assignments.select_related("pupil")}
-    else:
+    if plan is None:
         elsewhere = SeatingPlan.objects.filter(klass=session.klass).exclude(room=room).select_related("room").first()
 
-    seated_ids = {p.pk for p in seated.values()}
-    unseated = [p for p in session.klass.pupils.all() if p.pk not in seated_ids]
     states = {s["pupil"].pk: s for s in notes.seat_states(session, list(seated.values()) + unseated)}
     seats = []
     for seat in room.seats.all():
@@ -65,3 +63,25 @@ def room_view(request, pk):
         "seat_width": SEAT_WIDTH,
         "seat_height": SEAT_HEIGHT,
     })
+
+
+def projector(request, pk):
+    """Names on the room layout, high contrast, nothing else. The only view meant for a screen pupils see."""
+    session = get_object_or_404(Session.objects.select_related("klass", "room"), pk=pk)
+    _, seated, _ = seating_for(session)
+    return render(request, "timetable/projector.html", {
+        "session": session,
+        "room": session.room,
+        "seats": [{"seat": seat, "pupil": seated.get(seat.id)} for seat in session.room.seats.all()],
+        "seat_width": SEAT_WIDTH,
+        "seat_height": SEAT_HEIGHT,
+    })
+
+
+def cover(request, pk):
+    session = get_object_or_404(Session.objects.select_related("klass", "room"), pk=pk)
+    _, seated, unseated = seating_for(session)
+    response = HttpResponse(cover_pdf(session, seated, unseated), content_type="application/pdf")
+    filename = slugify(f"cover {session.klass} {session.room} {session.date:%Y-%m-%d}")
+    response["Content-Disposition"] = f'attachment; filename="{filename}.pdf"'
+    return response

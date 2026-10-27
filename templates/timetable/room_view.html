@@ -62,6 +62,13 @@
   <strong class="room-bar__session">{{ session.period }} · {{ session.klass }}</strong>
   {% include "notes/_actions_button.html" %}
   <button type="button" class="button" hx-post="{% url 'pick' session.pk %}" hx-target="#sheet-body">Pick</button>
+  <div class="dropdown-wrapper room-bar__more">
+    <button type="button" class="button" data-variant="ghost" data-toggle="dropdown" aria-label="More">⋯</button>
+    <div class="dropdown" data-align="end">
+      <a class="dropdown__item" href="{% url 'projector' session.pk %}" target="_blank" rel="noopener">Projector view</a>
+      <a class="dropdown__item" href="{% url 'cover_pdf' session.pk %}">Cover PDF</a>
+    </div>
+  </div>
   {% if next %}
   <a class="button room-bar__next" href="{% url 'room_view' next.pk %}" aria-keyshortcuts="N">Next: {{ next.period }} · {{ next.klass }} ›</a>
   {% endif %}
