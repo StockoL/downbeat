@@ -818,3 +818,23 @@ ol[role="list"] {
 .card[class*="group-tint-"] {
   background: var(--group-tint);
 }
+
+.room-bar__goals {
+  --cluster-space: var(--space-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.checklist__item {
+  inline-size: 100%;
+  justify-content: start;
+}
+
+.checklist__item[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+.checklist__item[aria-pressed="true"]::before {
+  content: "✓ ";
+}

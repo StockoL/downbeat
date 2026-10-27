@@ -39,6 +39,10 @@ def setup_post(**overrides):
         # a blank row, as a browser sends it: the dropdowns keep their defaults
         "flags-0-category": "other",
         "flags-0-placement_rule": "none",
+        "checklist-TOTAL_FORMS": "0",
+        "checklist-INITIAL_FORMS": "0",
+        "checklist-MIN_NUM_FORMS": "0",
+        "checklist-MAX_NUM_FORMS": "1000",
     }
     data.update(overrides)
     return data

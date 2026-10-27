@@ -21,4 +21,6 @@ urlpatterns = [
     path("sessions/<uuid:pk>/", views.session_edit, name="session_edit"),
     path("sessions/<uuid:pk>/delete/", views.session_delete, name="session_delete"),
     path("note-types/", note_settings.note_types, name="note_types"),
+    path("goals/", note_settings.goals, name="goals"),
+    path("checklist/", note_settings.checklist, name="checklist"),
 ]

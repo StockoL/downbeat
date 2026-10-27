@@ -311,6 +311,12 @@ function applyOp(s, op, graveyard) {
       s.absent = s.absent.filter((id) => id !== op.pupil);
       if (!op.present) s.absent.push(op.pupil);
       break;
+    case "checklist.tick":
+      s.ticked[op.item] = [...(s.ticked[op.item] ?? []), op.id];
+      break;
+    case "checklist.untick":
+      s.ticked[op.item] = [];
+      break;
   }
 }
 
@@ -345,6 +351,8 @@ function initRoomView(root) {
   const isSpoken = (s, pupil) => (s.spoken[pupil] ?? []).length > 0;
   const unread = (s, pupil) => (s.elsewhere[pupil] ?? 0) + s.actions.filter((n) => n.pupil === pupil).length;
   const byTime = (a, b) => a.at.localeCompare(b.at);
+  const isTicked = (s, item) => (s.ticked[item] ?? []).length > 0;
+  const ticked = (s) => s.checklist.filter((item) => isTicked(s, item.id)).length;
   const describe = (s, note) => `${iconOf(s, note)} ${labelOf(s, note)}${note.type && note.text ? `: ${note.text}` : ""}`;
 
   const saving = new Set(); // captures not yet written to the queue
@@ -436,8 +444,21 @@ function initRoomView(root) {
     }));
 
     document.querySelector("[data-actions-count]").textContent = s.actions.length || "";
+
+    // Goals: lessons with at least one note of the type, this one included once it has one.
+    const goalsSlot = document.querySelector("[data-goals]");
+    if (goalsSlot) {
+      goalsSlot.replaceChildren(...s.goals.map((goal) => {
+        const count = goal.others + (s.notes.some((n) => n.type === goal.noteType) ? 1 : 0);
+        return el("span", { class: "room-bar__goal", "aria-label": `${goal.label}: ${count} of ${goal.target}` },
+          `${goal.icon} ${count}/${goal.target}`);
+      }));
+    }
+    const checklistCount = document.querySelector("[data-checklist-count]");
+    if (checklistCount) checklistCount.textContent = `${ticked(s)}/${s.checklist.length}`;
     undoButton.hidden = undoStack().length === 0;
     if (sheet.open && body.dataset.sheet === "actions") fillActions(s);
+    if (sheet.open && body.dataset.sheet === "checklist") fillChecklist(s);
   }
 
   /* Sheets ----------------------------------------------------------------- */
@@ -522,6 +543,23 @@ function initRoomView(root) {
       );
       return item;
     }));
+  }
+
+  function fillChecklist(s) {
+    body.querySelector("[data-slot=list]").replaceChildren(...s.checklist.map((item) => {
+      const button = el("button", {
+        type: "button", class: "button checklist__item", "data-size": "large",
+        "data-action": "tick", "data-item": item.id, "aria-pressed": String(isTicked(s, item.id)),
+      }, item.text);
+      const row = el("li");
+      row.append(button);
+      return row;
+    }));
+  }
+
+  function openChecklist() {
+    show("tpl-checklist", "checklist");
+    fillChecklist(view());
   }
 
   function openActions() {
@@ -610,6 +648,14 @@ function initRoomView(root) {
       case "actions":
         openActions();
         break;
+      case "checklist":
+        openChecklist();
+        break;
+      case "tick": {
+        const item = target.dataset.item;
+        submit(isTicked(view(), item) ? { type: "checklist.untick", item } : { type: "checklist.tick", id: queue.uuid(), item });
+        break;
+      }
       case "shortcuts":
         show("tpl-shortcuts", "shortcuts");
         break;

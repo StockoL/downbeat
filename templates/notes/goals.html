@@ -1,0 +1,14 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Goals · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Goals</h1>
+<p>A goal counts lessons that got at least one note of a type, like "a house point in 20 lessons this week". The first two that apply show as quiet counters in the room's bottom bar.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save goals</button>
+</form>
+{% endblock %}

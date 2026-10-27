@@ -20,7 +20,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from core.data import delete_all
-from notes.models import Note, NoteType, SpokenTo
+from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from pupils.models import FlagType, Group, GroupMember, PupilFlag, Relationship
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
@@ -126,6 +126,13 @@ class Command(BaseCommand):
             for i, (label, icon, hp, act) in enumerate(NOTE_TYPES)
         ]
         rooms = {"M1": self.classroom(), "M2": self.keyboard_room(), "Hall": self.hall()}
+        house_point = next(t for t in note_types if t.is_house_point)
+        Goal.objects.create(
+            text="A house point in 20 lessons this week", target_count=20, counts_note_type=house_point,
+            week_start=today - datetime.timedelta(days=60),
+        )
+        for order, text in enumerate(["Starter", "Homework set", "Exit task"]):
+            ChecklistItem.objects.create(text=text, order=order)
 
         # Pupils, unique by name within the school so the demo reads clearly.
         names = [(f, i) for f in FIRST_NAMES for i in INITIALS]

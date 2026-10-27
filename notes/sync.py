@@ -12,6 +12,8 @@ resending after a dropped connection, changes nothing.
     spoken.remove   {spoken, at}
     spoken.clear    {session, pupil, at}
     attendance.set  {session, pupil, present, at}
+    checklist.tick  {id, session, item, at}
+    checklist.untick {session, item, at}
 """
 
 import datetime
@@ -24,7 +26,7 @@ from django.utils.dateparse import parse_datetime
 from pupils.models import Group
 from timetable.models import Pupil, Session, SessionAttendance
 
-from .models import Note, NoteType, SpokenTo
+from .models import ChecklistItem, ChecklistTick, Note, NoteType, SpokenTo
 
 
 class Rejected(Exception):
@@ -127,6 +129,21 @@ def attendance_set(op):
         SessionAttendance.objects.filter(pk=row.pk).update(present=bool(op.get("present")), updated_at=at)
 
 
+def checklist_tick(op):
+    tick_id = _uuid(op.get("id"))
+    if ChecklistTick.objects.filter(pk=tick_id).exists():
+        return
+    session, item, at = _get(Session, op.get("session")), _get(ChecklistItem, op.get("item")), _at(op)
+    if item.klass_id and item.klass_id != session.klass_id:
+        raise Rejected("that checklist item belongs to another class")
+    ChecklistTick.objects.create(id=tick_id, session=session, checklist_item=item, ticked_at=at)
+
+
+def checklist_untick(op):
+    session, item, at = _get(Session, op.get("session")), _get(ChecklistItem, op.get("item")), _at(op)
+    ChecklistTick.objects.filter(session=session, checklist_item=item, ticked_at__lte=at).delete()
+
+
 HANDLERS = {
     "note.add": note_add,
     "note.remove": note_remove,
@@ -136,6 +153,8 @@ HANDLERS = {
     "spoken.remove": spoken_remove,
     "spoken.clear": spoken_clear,
     "attendance.set": attendance_set,
+    "checklist.tick": checklist_tick,
+    "checklist.untick": checklist_untick,
 }
 
 

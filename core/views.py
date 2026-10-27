@@ -8,7 +8,8 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from notes.models import NoteType
+from notes.models import ChecklistItem, NoteType
+from notes.settings_views import ChecklistFormSet
 from pupils.forms import FlagTypeFormSet
 from pupils.models import FlagType
 from timetable.models import Timetable
@@ -41,7 +42,8 @@ def setup(request):
     note_types = NoteTypeFormSet(data, prefix="notetypes", queryset=NoteType.objects.none())
     room_form = RoomForm(data, prefix="room")
     flag_types = FlagTypeFormSet(data, prefix="flags", queryset=FlagType.objects.none())
-    forms = [f for f in [account_form, timetable_form, periods, note_types, room_form, flag_types] if f is not None]
+    checklist = ChecklistFormSet(data, prefix="checklist", queryset=ChecklistItem.objects.none())
+    forms = [f for f in [account_form, timetable_form, periods, note_types, room_form, flag_types, checklist] if f is not None]
 
     if data is not None and all(f.is_valid() for f in forms):
         with transaction.atomic():
@@ -54,6 +56,7 @@ def setup(request):
                 note_type.save()
             room_form.save()
             flag_types.save()
+            checklist.save()
         if user is not None:
             login(request, user)
         return redirect("today")
@@ -65,6 +68,7 @@ def setup(request):
         "note_types": note_types,
         "room_form": room_form,
         "flag_types": flag_types,
+        "checklist": checklist,
     })
 
 

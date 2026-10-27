@@ -1,0 +1,14 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Lesson checklist · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Lesson checklist</h1>
+<p>Things to tick off each lesson. Items for every class, or for one class only. Ticks reset each lesson.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}{% include "partials/form_row.html" %}{% endfor %}
+  <button class="button" type="submit" data-variant="primary">Save checklist</button>
+</form>
+{% endblock %}

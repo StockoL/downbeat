@@ -9,7 +9,7 @@ from collections import Counter
 from pupils.services import active_groups
 from rooms.seating import seating_for
 
-from . import services
+from . import goals, services
 from .models import Note
 
 
@@ -22,6 +22,10 @@ def lesson_state(session):
     totals = Counter(
         Note.objects.open_actions().filter(pupil_id__in=pupil_ids).values_list("pupil_id", flat=True)
     )
+
+    ticked = {}
+    for tick in session.checklist_ticks.order_by("ticked_at"):
+        ticked.setdefault(str(tick.checklist_item_id), []).append(str(tick.pk))
 
     spoken = {}
     for row in session.spoken_to.order_by("created_at"):
@@ -46,6 +50,17 @@ def lesson_state(session):
         "elsewhere": {str(pk): totals[pk] - in_class[pk] for pk in pupil_ids if totals[pk] > in_class[pk]},
         "spoken": spoken,
         "absent": [str(pk) for pk in services.absent(session)],
+        # Each goal's count from the other lessons in its window; the page adds this one.
+        "goals": [
+            {
+                "id": str(g.pk), "label": g.text, "icon": g.counts_note_type.icon or g.counts_note_type.label[:2],
+                "noteType": str(g.counts_note_type_id), "others": goals.tally(g, session.date, exclude=session),
+                "target": g.target_count,
+            }
+            for g in goals.goals_for(session)
+        ],
+        "checklist": [{"id": str(item.pk), "text": item.text} for item in goals.checklist_items(session)],
+        "ticked": ticked,
         "missed": [str(pk) for pk in services.missed_last_time(session)],
     }
 

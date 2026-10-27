@@ -61,6 +61,13 @@
       {{ flag_types.management_form }}
       {% for form in flag_types %}{% include "partials/form_row.html" %}{% endfor %}
     </div></section>
+
+    <section class="card"><div class="card__body flow">
+      <h2>Lesson checklist <small>(optional)</small></h2>
+      <p>Things to tick off each lesson, like the starter or setting homework. They show as a small counter in the room.</p>
+      {{ checklist.management_form }}
+      {% for form in checklist %}{% include "partials/form_row.html" %}{% endfor %}
+    </div></section>
     {% endif %}
 
     <button class="button" type="submit" data-variant="primary" data-size="large">Save and start</button>
