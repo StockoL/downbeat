@@ -79,6 +79,7 @@ device's unsent captures applied on top, so it works the same with or without a 
     <div class="dropdown" data-align="end">
       <a class="dropdown__item" href="{% url 'projector' session.pk %}" target="_blank" rel="noopener">Projector view</a>
       <a class="dropdown__item" href="{% url 'cover_pdf' session.pk %}">Cover PDF</a>
+      <button type="button" class="dropdown__item" data-action="shortcuts">Keyboard shortcuts</button>
     </div>
   </div>
   {% if next %}
@@ -95,8 +96,8 @@ device's unsent captures applied on top, so it works the same with or without a 
 {% comment %}Sheet templates, filled in by canvas.js. Names go in with textContent, never as HTML.{% endcomment %}
 <template id="tpl-note-sheet">
   <div class="cluster note-sheet__toggles">
-    <button type="button" class="button" data-size="large" data-action="spoken" aria-pressed="false">Spoken to</button>
-    <button type="button" class="button" data-size="large" data-variant="ghost" data-action="absent" aria-pressed="false">Absent</button>
+    <button type="button" class="button" data-size="large" data-action="spoken" aria-pressed="false">Spoken to<kbd class="key-hint">S</kbd></button>
+    <button type="button" class="button" data-size="large" data-variant="ghost" data-action="absent" aria-pressed="false">Absent<kbd class="key-hint">X</kbd></button>
   </div>
   <header class="note-sheet__head cluster">
     <h2 class="note-sheet__name" data-slot="name"></h2>
@@ -107,11 +108,11 @@ device's unsent captures applied on top, so it works the same with or without a 
   <div class="note-sheet__buttons">
     {% for note_type in note_types %}
     <button type="button" class="button" data-size="large" data-action="note" data-note-type="{{ note_type.pk }}">
-      {% if note_type.icon %}<span aria-hidden="true">{{ note_type.icon }}</span> {% endif %}{{ note_type.label }}
+      {% if note_type.icon %}<span aria-hidden="true">{{ note_type.icon }}</span> {% endif %}{{ note_type.label }}{% if forloop.counter < 10 %}<kbd class="key-hint">{{ forloop.counter }}</kbd>{% endif %}
     </button>
     {% endfor %}
     <button type="button" class="button" data-size="large" data-variant="ghost" data-action="free-text">
-      <span aria-hidden="true">✎</span> Free text
+      <span aria-hidden="true">✎</span> Free text<kbd class="key-hint">F</kbd>
     </button>
   </div>
 </template>
@@ -152,6 +153,23 @@ device's unsent captures applied on top, so it works the same with or without a 
     <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
   </header>
   <ol class="flow sheet-list" role="list" data-slot="list"></ol>
+</template>
+
+<template id="tpl-shortcuts">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name">Keyboard shortcuts</h2>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <dl class="shortcut-list">
+    <dt><kbd>N</kbd></dt><dd>Next lesson</dd>
+    <dt><kbd>P</kbd></dt><dd>Pick a name</dd>
+    <dt><kbd>A</kbd></dt><dd>Actions</dd>
+    <dt><kbd>U</kbd></dt><dd>Undo the last note change</dd>
+    <dt><kbd>L</kbd></dt><dd>Show or hide the log (narrow screens)</dd>
+    <dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>In a pupil's sheet: that note type</dd>
+    <dt><kbd>S</kbd> <kbd>X</kbd> <kbd>F</kbd></dt><dd>In a pupil's sheet: spoken to, absent, free text</dd>
+    <dt><kbd>Esc</kbd></dt><dd>Close the sheet</dd>
+  </dl>
 </template>
 
 <template id="tpl-offline">

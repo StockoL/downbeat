@@ -580,6 +580,9 @@ function initRoomView(root) {
       case "actions":
         openActions();
         break;
+      case "shortcuts":
+        show("tpl-shortcuts", "shortcuts");
+        break;
       case "done":
         submit({ type: "action.done", note: target.dataset.note });
         break;
@@ -631,11 +634,64 @@ function initRoomView(root) {
     else syncStatus.textContent = `${count} saved on this device`;
   });
 
+  /* The panel: a side column at desk width, a sheet docked above the bar when narrower.
+     Its handle opens and closes it with a tap, a key press or a swipe. */
+
+  const panel = document.getElementById("lesson-panel");
+  const handle = panel.querySelector(".room-layout__handle");
+  let swiped = false;
+
+  function setPanel(open) {
+    panel.dataset.state = open ? "open" : "closed";
+    handle.setAttribute("aria-expanded", String(open));
+    handle.setAttribute("aria-label", open ? "Hide the log" : "Show the log");
+  }
+
+  handle.addEventListener("click", () => {
+    if (swiped) swiped = false; // the click that ends a swipe has already been handled
+    else setPanel(panel.dataset.state !== "open");
+  });
+  onPress(panel, ".room-layout__handle", {
+    drop: (el, event, cancelled) => {
+      if (cancelled) return;
+      swiped = true;
+      setTimeout(() => (swiped = false), 100); // in case the browser sends no click after the swipe
+      const rise = el.getBoundingClientRect().top - event.clientY; // positive when dragged up
+      if (Math.abs(rise) > 20) setPanel(rise > 0);
+    },
+  });
+
+  /* Keys, for the laptop. None of them fire while typing. */
+
+  const KEYS = {
+    n: () => root.dataset.nextUrl && window.location.assign(root.dataset.nextUrl),
+    p: () => document.querySelector("[data-action=pick]").click(),
+    a: () => document.querySelector("[data-action=actions]").click(),
+    u: () => undoButton.hidden || undoButton.click(),
+    l: () => setPanel(panel.dataset.state !== "open"),
+    "?": () => show("tpl-shortcuts", "shortcuts"),
+  };
+  const SHEET_KEYS = { s: "spoken", x: "absent", f: "free-text" };
+
   document.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "n" || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target.closest("input, textarea, select, [contenteditable]")) return;
-    if (sheet.open) return;
-    if (root.dataset.nextUrl) window.location.assign(root.dataset.nextUrl);
+    const key = event.key.toLowerCase();
+    if (sheet.open) {
+      if (body.dataset.sheet !== "note") return;
+      const target = /^[1-9]$/.test(key)
+        ? body.querySelectorAll("[data-action=note]")[Number(key) - 1]
+        : SHEET_KEYS[key] && body.querySelector(`[data-action="${SHEET_KEYS[key]}"]`);
+      if (target) {
+        event.preventDefault();
+        target.click();
+      }
+      return;
+    }
+    if (KEYS[key]) {
+      event.preventDefault();
+      KEYS[key]();
+    }
   });
 
   // The page itself may be a saved copy from earlier in the lesson: draw it with this device's

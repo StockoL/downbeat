@@ -220,3 +220,25 @@ def test_inbox_lists_a_pupils_notes_newest_first(client, lesson, pupils, types):
     html = client.get(f"/room/{lesson.pk}/inbox/{pupils[0].pk}/").content.decode()
     assert html.index("Lovely phrasing") < html.index("House point")
     assert 'data-action="back"' in html
+
+
+# --- Layout and keys ---
+
+def test_room_view_has_the_docked_panel_handle(client, lesson):
+    html = client.get(f"/room/{lesson.pk}/").content.decode()
+    assert 'id="lesson-panel" data-state="closed"' in html
+    assert 'class="room-layout__handle" aria-expanded="false" aria-controls="lesson-panel"' in html
+
+
+def test_note_sheet_buttons_carry_their_key_hints(client, lesson, types):
+    sheet = client.get(f"/room/{lesson.pk}/").content.decode().split('id="tpl-note-sheet"')[1].split("</template>")[0]
+    for hint in ['<kbd class="key-hint">1</kbd>', '<kbd class="key-hint">2</kbd>', '<kbd class="key-hint">S</kbd>',
+                 '<kbd class="key-hint">X</kbd>', '<kbd class="key-hint">F</kbd>']:
+        assert hint in sheet, hint
+
+
+def test_keyboard_shortcuts_are_listed_from_the_overflow_menu(client, lesson):
+    html = client.get(f"/room/{lesson.pk}/").content.decode()
+    menu = html.split('class="dropdown"')[1].split("</div>")[0]
+    assert 'data-action="shortcuts"' in menu
+    assert 'id="tpl-shortcuts"' in html

@@ -11,7 +11,10 @@ Sheets open over the room and never navigate away from it.
   <main class="room-layout__canvas" id="main">
     {% block canvas %}{% endblock %}
   </main>
-  <aside class="room-layout__panel flow" aria-label="Lesson panel">
+  <aside class="room-layout__panel flow" id="lesson-panel" data-state="closed" aria-label="Lesson panel">
+    <button type="button" class="room-layout__handle" aria-expanded="false" aria-controls="lesson-panel" aria-label="Show the log">
+      <span class="room-layout__grabber" aria-hidden="true"></span>
+    </button>
     {% block panel %}{% endblock %}
   </aside>
   <footer class="room-layout__bar">

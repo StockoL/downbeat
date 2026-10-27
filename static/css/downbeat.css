@@ -3,22 +3,24 @@
    Semantic tokens only; container queries, not viewport queries.
    ========================================================================== */
 
-/* --- Room layout: canvas and panel side by side on a desk-width screen,
-       canvas full width with the panel below it otherwise. --- */
+/* --- Room layout. At desk width (76rem of its own container, wider than any iPad but the largest
+       in landscape) canvas and panel sit side by side.
+       Narrower, on the iPad in either orientation, the canvas takes the whole width and the panel
+       is a sheet docked above the bar: closed it shows its handle and the plan strip, open it
+       shows the log. --- */
 .room {
   container: room / inline-size;
-  min-block-size: 100dvh;
   margin: 0;
 }
 
 .room-layout {
+  --panel-peek: 7.5rem; /* roughly the closed sheet's height, kept clear below the room */
   display: grid;
   grid-template-areas:
     "canvas"
-    "panel"
     "bar";
-  grid-template-rows: 1fr auto auto;
-  min-block-size: 100dvh;
+  grid-template-rows: 1fr auto;
+  block-size: 100dvh;
   font-size: var(--step-1);
 }
 
@@ -26,38 +28,115 @@
   grid-area: canvas;
   min-block-size: 0;
   overflow: auto;
+  padding-block-end: calc(var(--panel-peek) + var(--space-s));
   background: var(--color-surface-sunken);
 }
 
 .room-layout__panel {
-  grid-area: panel;
+  grid-area: canvas;
+  align-self: end;
+  z-index: 2;
   overflow: auto;
-  padding: var(--space-s);
-  border-block-start: 1px solid var(--color-border);
+  padding: 0 var(--space-s) var(--space-s);
+  border: 1px solid var(--color-border);
+  border-block-end: 0;
+  border-start-start-radius: var(--radius-surface);
+  border-start-end-radius: var(--radius-surface);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-overlay);
+}
+
+/* Closed, the sheet is just its handle and the plan strip, sized to fit them. */
+.room-layout__panel[data-state="closed"] > :not(.room-layout__handle, .room-strip) {
+  display: none;
+}
+
+.room-layout__panel[data-state="open"] {
+  max-block-size: 70%;
+}
+
+.room-layout__handle {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.room-layout__grabber {
+  inline-size: 3rem;
+  block-size: 0.3rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
 }
 
 .room-layout__bar {
   grid-area: bar;
-  position: sticky;
-  inset-block-end: 0;
+  z-index: 3;
   padding: var(--space-2xs) var(--space-s);
   border-block-start: 1px solid var(--color-border);
   background: var(--color-surface-raised);
 }
 
-@container room (min-width: 64rem) {
+@container room (min-width: 76rem) {
   .room-layout {
     grid-template-areas:
       "canvas panel"
       "bar bar";
     grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1fr auto;
-    block-size: 100dvh;
   }
 
-  .room-layout__panel {
-    border-block-start: 0;
+  .room-layout__canvas {
+    padding-block-end: var(--space-s);
+  }
+
+  .room-layout__canvas .canvas {
+    --canvas-max-block: 100dvh - 7rem;
+  }
+
+  .room-layout__panel,
+  .room-layout__panel[data-state="open"] {
+    grid-area: panel;
+    align-self: stretch;
+    max-block-size: none;
+    overflow: auto;
+    padding-block-start: var(--space-s);
+    border: 0;
     border-inline-start: 1px solid var(--color-border);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .room-layout__handle {
+    display: none;
+  }
+
+  /* At desk width the log is always shown, whatever the sheet's state. */
+  .room-layout__panel[data-state="closed"] > :not(.room-layout__handle, .room-strip) {
+    display: block;
+  }
+}
+
+/* Keyboard hints, only where there is a keyboard-and-mouse kind of pointer. */
+.key-hint {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .key-hint {
+    display: inline-block;
+    margin-inline-start: 0.4em;
+    padding: 0 0.35em;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: 0.7em;
+    line-height: 1.5;
   }
 }
 
@@ -235,11 +314,13 @@
   align-content: start;
   justify-items: center;
   gap: var(--space-xs);
-  padding: var(--space-s);
+  padding-inline: var(--space-s);
+  padding-block-start: var(--space-s);
 }
 
 .room-layout__canvas .canvas {
-  --canvas-max-block: 100dvh - 7rem;
+  /* the whole room above the bar and the docked panel */
+  --canvas-max-block: 100dvh - 7rem - var(--panel-peek);
   /* a size up from the desk: names are read at arm's length */
   --seat-font: calc(var(--seat-w) / var(--canvas-w) * 100cqi * 0.2);
 }
@@ -571,4 +652,16 @@
 
 .projector__stage:fullscreen .projector__controls {
   display: none;
+}
+
+.shortcut-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2xs) var(--space-s);
+  margin: 0;
+  font-size: var(--step-0);
+}
+
+.shortcut-list dd {
+  margin: 0;
 }
