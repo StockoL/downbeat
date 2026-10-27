@@ -12,7 +12,7 @@ $env:DOWNBEAT_DEBUG = "1"
 .venv\Scripts\python manage.py runserver
 ```
 
-`requirements-dev.txt` adds ruff and Hypothesis; pytest and pytest-django are in `requirements.txt`. LooseLeaf-UI must be checked out at `../looseleaf-ui`.
+`requirements-dev.txt` adds ruff, Hypothesis and Playwright; pytest and pytest-django are in `requirements.txt`. LooseLeaf-UI must be checked out at `../looseleaf-ui`.
 
 ## Demo data
 
@@ -42,7 +42,7 @@ plans/        schemes, units, lessons, activities, resources; Sweep and Prep
 assessment/   strands, bands, components, feedback codes, observations; criteria files
 templates/    one base, two layouts (room and desk), partials for HTMX
 static/       css/downbeat.css, js/canvas.js, js/queue.js, theme/, icons/
-tools/        serve, scheduled tasks, Tailscale check, theme and icon builders
+tools/        serve, scheduled tasks, Tailscale check, theme and icon builders, screenshots
 docs/         the documentation
 ```
 
@@ -86,6 +86,18 @@ node tools/build-theme.mjs ../looseleaf-ui static/theme
 ```
 
 A bundle exported from the LooseLeaf configurator can replace it. Rebuild the icons after changing the theme, since they take the accent colour from `tokens.resolved.json`.
+
+## Screenshots
+
+`docs/screenshots/` and [SCREENSHOTS.md](SCREENSHOTS.md) show the journeys and key features. After a change that alters a screen, capture them again:
+
+```
+.venv\Scripts\python tools\screenshots.py
+```
+
+The tool rebuilds `demo.sqlite3` with `seed_demo --reset`, then serves it alongside an empty install (for the first-run setup) with waitress on ports 8765 and 8766. It drives Microsoft Edge through each journey with Playwright and stops both servers when it finishes. The browser's clock is set 27 minutes into the demo's first lesson with unit components, so the room view reads as it would mid-lesson. It fails if any page raises a JavaScript error. Use `--channel chromium` (after `.venv\Scripts\playwright install chromium`) on a machine without Edge, and `--port` if 8765 is taken.
+
+Only invented demo pupils appear in the screenshots, and they never come from `db.sqlite3`. When a new screen is built, add a capture to the tool and a section to SCREENSHOTS.md in the same commit.
 
 ## Gotchas
 

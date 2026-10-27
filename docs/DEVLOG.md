@@ -102,6 +102,8 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 **Went wrong, put right.**
 - Browser tests found by an element's accessible name broke when keyboard hints were added to button labels; they now match exact text.
 
+**Documentation.** The README became a signpost to `docs/`: user stories with MoSCoW priorities and BDD scenarios, architecture, operations, development, testing, this log, and screenshots of every built journey. `tools/screenshots.py` regenerates the screenshots from the demo school. Capturing them showed that after a lesson's period ends, the plan strip keeps counting ("836 min in"); to fix.
+
 **Next:**
 - 5.3 Hinge checks: a question bank with misconception-tagged distractors, a timer, a three-way decision, and the class-level judgement in the sweep.
 - 5.4 Feedback: done well, develop, how, with a recording timestamp; feedback codes as a projectable list; self and peer entry; the class-by-component heat view.

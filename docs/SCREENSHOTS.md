@@ -2,7 +2,9 @@
 
 Evidence of the user journeys and key features, captured from the demo school. Every pupil in the demo is invented (first name and initial, generated from a fixed seed), so no real pupil data appears here.
 
-Captured on 27 October 2026 at the end of step 5.2, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
+Captured on 27 October 2026 at the end of step 5.2, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
+
+Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
 
 ## Contents
 
