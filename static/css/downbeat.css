@@ -325,6 +325,21 @@
   --seat-font: calc(var(--seat-w) / var(--canvas-w) * 100cqi * 0.2);
 }
 
+/* On an iPad the room's shape leaves seats under 44px tall. Seats are placed and sized as a share
+   of the canvas's height, so below desk width the canvas may grow taller than its shape (as far as
+   the screen allows), spreading the rows and bringing every seat up to a tappable 44px. Its width
+   is unchanged: the height is worked out from it rather than from a ratio, which would widen it. */
+@container room (width < 76rem) {
+  .room-layout__canvas .canvas {
+    --canvas-inline: min(100cqi - 2 * var(--space-s), (var(--canvas-max-block)) * var(--canvas-w) / var(--canvas-h));
+    aspect-ratio: auto;
+    block-size: max(
+      calc(var(--canvas-inline) * var(--canvas-h) / var(--canvas-w)),
+      min(calc(44px * var(--canvas-h) / var(--seat-h)), calc(var(--canvas-max-block)))
+    );
+  }
+}
+
 .room-layout__canvas .seat {
   cursor: pointer;
 }
