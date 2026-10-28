@@ -194,12 +194,26 @@ function initPlanEditor(wrapper) {
   let ghost = null;
   let over = null;
 
+  // Only a board comes back into the page (409 is a board with a refusal on it). Anything else,
+  // an error page or no answer at all, leaves the board as it was and says so in its message line.
   async function send(url, data) {
-    const response = await fetch(url, {
-      method: "POST",
-      body: new URLSearchParams(data),
-      headers: { "X-CSRFToken": csrfToken() },
-    });
+    const say = (text) => {
+      const line = wrapper.querySelector(".plan-board__message");
+      if (line) line.textContent = text;
+    };
+    let response;
+    try {
+      response = await fetch(url, { method: "POST", body: new URLSearchParams(data), headers: { "X-CSRFToken": csrfToken() } });
+    } catch {
+      say("The laptop can't be reached, so that wasn't saved.");
+      return;
+    }
+    if (response.redirected || (!response.ok && response.status !== 409)) {
+      say(response.status === 403 || response.redirected
+        ? "That wasn't saved: the page has expired. Reload it and try again."
+        : "That wasn't saved: something went wrong on the laptop. Reload the page and try again.");
+      return;
+    }
     wrapper.innerHTML = await response.text();
   }
 

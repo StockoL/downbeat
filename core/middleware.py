@@ -2,8 +2,10 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 from timetable.models import Timetable
@@ -43,3 +45,21 @@ class GateMiddleware:
         if path != setup_url and not Timetable.objects.exists():
             return redirect(setup_url)
         return self.get_response(request)
+
+
+class BadInputMiddleware:
+    """
+    A malformed id or value that reaches a model lookup raises ValidationError. Forms catch their
+    own, so one escaping a view is bad input, not a fault: answer 400 with a plain page, not 500.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, ValidationError):
+            return HttpResponseBadRequest(render_to_string("400.html"))
+        return None

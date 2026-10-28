@@ -1243,3 +1243,17 @@ button.room-strip {
 .rollover__year {
   max-inline-size: 6rem;
 }
+
+/* --- A request that failed: one plain line at the foot of the screen, until the next request. --- */
+.request-error {
+  position: fixed;
+  inset-inline: var(--space-s);
+  inset-block-end: var(--space-s);
+  z-index: 10;
+  margin: 0;
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--color-status-danger-border);
+  border-radius: var(--radius-control);
+  background: var(--color-status-danger-surface);
+  color: var(--color-status-danger-text);
+}

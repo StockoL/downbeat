@@ -184,6 +184,18 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - The tests hung in SQLite's online backup, which waits on the open transaction each test runs inside. Real requests have none (no `ATOMIC_REQUESTS`), and the real backup was proven in the browser run; the rollover's tests record the backup call instead, and the backup itself is tested in `test_data.py`.
 - Pasting a class list made a new pupil for every line, which would have doubled every continuing pupil next September. It now reuses the one matching pupil.
 
+## Hardening: errors and bad input
+
+*Raised by the teacher on review: the app had no 404 page and similar safeguards.*
+
+- Its own 400, 403, 404, 500 and expired-form pages, each with a way back, in place of Django's bare defaults.
+- A malformed posted id answers 400 instead of 500 (eight views looked up posted ids directly).
+- The seating editor no longer pastes an error page into the board; a failed change says it wasn't saved, and why.
+- An alert line on every page for any HTMX request that fails.
+- The form field limit raised so a whole school's rollover fits.
+
+**Checked.** In Edge on the demo school: forcing the seating editor's request to fail with a server error, and then cutting it off entirely, left the board as it was with "That wasn't saved: something went wrong on the laptop…" and "The laptop can't be reached…"; an unknown address showed the Not found page with Today and Go back. The pages, the 400 for a malformed id and the expired-form page are covered by the tests.
+
 ## Still to come
 
 - **The real-iPad check** from Phase 2: install from the `ts.net` address, a lesson with the Wi-Fi off, and the laptop catching up.

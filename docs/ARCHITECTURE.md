@@ -107,6 +107,7 @@ Seating edits are not queued: they happen at the desk, online.
 | Nightly backup | `core/data.py` `backup`, scheduled by `tools/install-backup-task.ps1` |
 | Export and delete-all | `core/data.py` `export_json` and `delete_all`, over `APP_MODELS`; a test fails if a model is missing |
 | Last year is kept, not changed | An archived class's lessons are refused by sync, its seating editor and its sweep; the rollover backs up before it changes anything |
+| Errors say what happened | Own 400, 403, 404, 500 and expired-form pages with a way back; a ValidationError escaping a view is answered 400 (`BadInputMiddleware`); the seating editor and any HTMX request say when a change wasn't saved |
 | Concurrent writes | SQLite WAL mode, IMMEDIATE transactions, 20-second busy timeout |
 
 ## Front end

@@ -1,0 +1,9 @@
+{% extends "errors/page.html" %}
+
+{% block heading_title %}Something went wrong{% endblock %}
+{% block heading %}Something went wrong{% endblock %}
+
+{% block explanation %}
+<p>The laptop hit an error it didn't expect. What you were doing may not have been saved, so check it before carrying on.</p>
+<p>The details are in the laptop's log, <code>local\logs\downbeat.log</code>.</p>
+{% endblock %}

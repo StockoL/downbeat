@@ -46,6 +46,8 @@ SILENCED_SYSTEM_CHECKS = ["security.W008", "security.W005", "security.W021"]
 
 # One teacher, two devices: stay signed in for a term so the iPad never asks mid-lesson.
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 120
+# The rollover and the judgement grid post a few fields per pupil; a whole school passes Django's default of 1,000.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "today"
 AUTH_PASSWORD_VALIDATORS = [
@@ -81,6 +83,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.GateMiddleware",
+    "core.middleware.BadInputMiddleware",
 ]
 
 ROOT_URLCONF = "downbeat.urls"

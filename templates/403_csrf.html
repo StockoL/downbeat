@@ -1,0 +1,9 @@
+{% extends "errors/page.html" %}
+{% comment %}Shown when a form is sent after its page has expired (a CSRF failure).{% endcomment %}
+
+{% block heading_title %}Page expired{% endblock %}
+{% block heading %}This page had expired{% endblock %}
+
+{% block explanation %}
+<p>The form was sent from a page that had been open too long, or from before you last signed in, so nothing was saved. Go back, reload the page and send it again.</p>
+{% endblock %}

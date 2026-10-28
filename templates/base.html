@@ -14,7 +14,12 @@
     <script src="{% static 'js/queue.js' %}" defer></script>
     {% block head %}{% endblock %}
   </head>
-  <body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% comment %}A request HTMX sends that fails would otherwise change nothing on screen: say so in the alert line.{% endcomment %}
+  <body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-on::before-request="document.querySelector('[data-request-error]').hidden = true"
+        hx-on::response-error="const line = document.querySelector('[data-request-error]'); line.textContent = event.detail.xhr.status === 403 ? 'That was not saved: the page has expired. Reload it and try again.' : 'That was not saved: something went wrong on the laptop. Reload the page and try again.'; line.hidden = false"
+        hx-on::send-error="const line = document.querySelector('[data-request-error]'); line.textContent = 'The laptop cannot be reached, so that was not saved.'; line.hidden = false">
     {% block layout %}{% endblock %}
+    <p class="request-error" role="alert" data-request-error hidden></p>
   </body>
 </html>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% comment %}
+The error pages' shared layout. Kept to what base.html gives, because the 500 page is rendered
+without a request: no messages, no navigation that needs the signed-in user.
+{% endcomment %}
+
+{% block title %}{% block heading_title %}{% endblock %} · Downbeat{% endblock %}
+
+{% block layout %}
+<main class="wrapper region flow center">
+  <h1>{% block heading %}{% endblock %}</h1>
+  {% block explanation %}{% endblock %}
+  <p class="cluster">
+    <a class="button" data-variant="primary" href="/">Today</a>
+    <a class="button" href="javascript:history.back()">Go back</a>
+  </p>
+</main>
+{% endblock %}
