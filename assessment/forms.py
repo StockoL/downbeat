@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Check, Component, Feedback
+from .models import Check, Component, Exemplar, Feedback, Observation
 
 DISTRACTORS = 4
 
@@ -165,4 +165,65 @@ class FeedbackForm(forms.Form):
             session=self.session, pupil=data["pupil"], group=data["group"], component=data.get("component"),
             done_well=data["done_well"].strip(), develop=data["develop"].strip(), how=data["how"].strip(),
             recording_path=data["recording_path"].strip(), recording_seconds=data.get("recording_seconds"),
+        )
+
+
+class ExemplarForm(forms.ModelForm):
+    """An exemplar for a unit. The source pupil, if any, must have reuse for teaching permitted."""
+
+    class Meta:
+        model = Exemplar
+        fields = ["component", "level", "recording_path", "note", "source_pupil"]
+        labels = {"recording_path": "Recording", "source_pupil": "Whose work (optional)"}
+
+    def __init__(self, *args, unit, **kwargs):
+        super().__init__(*args, **kwargs)
+        from django.utils import timezone
+
+        from timetable.models import Pupil
+
+        self.instance.unit = unit
+        self.fields["component"].queryset = unit.components.all()
+        self.fields["source_pupil"].queryset = Pupil.objects.filter(exemplar_reuse_permitted=True, recording_permitted=True).exclude(
+            recordings_delete_by__lte=timezone.localdate())
+        self.fields["source_pupil"].help_text = "Only pupils whose families agreed to their work being reused for teaching."
+
+
+class RecordingForm(forms.Form):
+    """A recording of a pupil's work against a component, kept as an observation, for their timeline."""
+
+    lesson = LessonChoiceField(queryset=None, label="Lesson", empty_label=None)
+    component = forms.ModelChoiceField(queryset=None, label="Component")
+    state = forms.ChoiceField(choices=Observation.STATES, label="State")
+    recording_path = forms.CharField(max_length=500, label="Recording", help_text="A path or link. Downbeat never uploads it.")
+    next_step = forms.CharField(required=False, max_length=200, label="Next step (optional)",
+                                help_text="The recording is enough to keep it; a next step helps the timeline read.")
+
+    def __init__(self, *args, pupil, **kwargs):
+        super().__init__(*args, **kwargs)
+        from django.utils import timezone
+
+        from timetable.models import Session
+
+        self.pupil = pupil
+        lessons = (Session.objects.filter(klass__pupils=pupil, date__lte=timezone.localdate(), lesson__unit__components__isnull=False)
+                   .exclude(status=Session.CANCELLED).select_related("klass", "lesson").distinct().order_by("-date", "-period"))
+        self.fields["lesson"].queryset = lessons
+        self.fields["lesson"].initial = lessons.first()
+        self.fields["component"].queryset = Component.objects.filter(unit__lessons__sessions__in=lessons).distinct()
+
+    def clean(self):
+        data = super().clean()
+        lesson, component = data.get("lesson"), data.get("component")
+        if lesson and component and component.unit_id != lesson.lesson.unit_id:
+            self.add_error("component", "Choose a component from that lesson's unit.")
+        if not self.pupil.recording_permitted:
+            raise forms.ValidationError(f"Recordings aren't permitted for {self.pupil}.")
+        return data
+
+    def save(self):
+        data = self.cleaned_data
+        return Observation.objects.create(
+            session=data["lesson"], pupil=self.pupil, component=data["component"], state=data["state"],
+            recording_path=data["recording_path"].strip(), next_step=data["next_step"].strip(),
         )

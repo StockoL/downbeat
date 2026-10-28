@@ -1,4 +1,5 @@
 {% extends "layouts/desk.html" %}
+{% load recordings %}
 
 {% block title %}{{ pupil }} · Pupils · Downbeat{% endblock %}
 
@@ -7,6 +8,7 @@
 <div class="cluster">
   <h1>{{ pupil }}</h1>
   <a href="{% url 'pupil_edit' pupil.pk %}">Edit details</a>
+  <a href="{% url 'pupil_export' pupil.pk %}">Download everything held about {{ pupil }}</a>
 </div>
 <p>
   {% if pupil.year_group %}Year {{ pupil.year_group }}{% endif %}
@@ -136,4 +138,40 @@
     {% endif %}
   </section>
 </div>
+
+<section class="flow">
+  <h2 id="timeline">Recordings over time</h2>
+  <p class="field__hint">{{ pupil }}'s recordings, oldest first, one line per component, each with what was seen or said then. Compared with their own earlier work, never with anyone else's.</p>
+  {% if timeline %}
+  {% for line in timeline %}
+  <div class="flow">
+    <h3>{% if line.component %}{{ line.component }}{% else %}Other recordings{% endif %}</h3>
+    <ol class="timeline" role="list">
+      {% for point in line.points %}
+      <li class="timeline__point">
+        <span class="sheet-list__when">{{ point.date|date:"j M Y" }}{% if point.assessor and point.assessor != "teacher" %} · {{ point.assessor }}{% endif %}{% if point.group %} · with {{ point.group }}{% endif %}</span>
+        {% if point.state %}<strong>{{ point.state }}</strong>{% endif %}
+        {% if point.said %}<span>{{ point.said }}</span>{% endif %}
+        <span>{% recording point.path point.seconds %}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endfor %}
+  {% elif pupil.recording_permitted %}
+  <p>No recordings yet.</p>
+  {% else %}
+  <p>Recordings aren't permitted for {{ pupil }}. That is set in <a href="{% url 'pupil_edit' pupil.pk %}">Edit details</a>.</p>
+  {% endif %}
+  {% if recording_form %}
+  <details class="accordion"{% if recording_open %} open{% endif %}>
+    <summary class="accordion__trigger">Add a recording</summary>
+    <form method="post" class="accordion__content flow">
+      {% csrf_token %}
+      {{ recording_form }}
+      <button class="button" type="submit" name="add_recording" data-variant="primary">Add to the timeline</button>
+    </form>
+  </details>
+  {% endif %}
+</section>
 {% endblock %}

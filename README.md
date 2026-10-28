@@ -34,4 +34,4 @@ Open http://127.0.0.1:8000 and follow the first-run setup. To try it with an inv
 
 ## Status
 
-Phases 1 to 4 are complete. Phase 5 (assessment) is in progress: the assessment frame, observations from the seat, hinge checks and feedback are built; the exemplar bank and each pupil's timeline are next. See [docs/DEVLOG.md](docs/DEVLOG.md).
+Phases 1 to 5 are complete: the room, the iPad offline, flags and groups, plans and the sweep, and assessment. Phase 6 (summative judgements, reports and parents' evenings) is next. See [docs/DEVLOG.md](docs/DEVLOG.md).

@@ -55,7 +55,9 @@ Stop the server, copy a backup over `db.sqlite3`, start the server.
 
 ## Export and delete
 
-- **Download everything** (Settings → Data) or `manage.py export_json` writes every row as JSON that `manage.py loaddata` reads back. This also answers a subject access request.
+- **Download everything** (Settings → Data) or `manage.py export_json` writes every row as JSON that `manage.py loaddata` reads back.
+- **Everything held about one pupil**: "Download everything held about …" on their pupil page, for a subject access request.
+- **Recordings that may no longer be kept** (past a pupil's delete-by date, or without permission) are listed on Settings → Data with "Remove these references", or by `manage.py purge_recordings --dry-run` and `manage.py purge_recordings`. Downbeat holds paths, not files, so delete the listed files from their folder too.
 - **Delete everything** (Settings → Data) wipes every Downbeat row and signs every device out, after you type "delete everything". The account is kept and the app returns to first-run setup. Backup files are separate and left for you to remove.
 
 ## Settings reference

@@ -21,4 +21,5 @@ urlpatterns = [
     path("settings/data/backup/", views.data_backup, name="data_backup"),
     path("settings/data/export/", views.data_export, name="data_export"),
     path("settings/data/delete-all/", views.data_delete_all, name="data_delete_all"),
+    path("settings/data/recordings/", views.data_purge_recordings, name="data_purge_recordings"),
 ]

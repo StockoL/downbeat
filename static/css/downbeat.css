@@ -1147,3 +1147,19 @@ button.room-strip {
 .codes-slide__number {
   font-weight: 700;
 }
+
+/* --- A pupil's recordings over time: one line per component, oldest first. --- */
+.timeline {
+  display: grid;
+  gap: var(--space-xs);
+  padding: 0;
+  border-inline-start: 2px solid var(--color-border);
+}
+
+.timeline__point {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs) var(--space-xs);
+  align-items: baseline;
+  padding-inline-start: var(--space-s);
+}

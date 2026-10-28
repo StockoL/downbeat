@@ -41,11 +41,11 @@ Status key: **Built** (with the step that built it), **Planned** (with its phase
 | Catch | US-10, 11, 12, 13, 14, 15, 16, 17 | US-18, 19, 20, 21, 22, 23, 24, 25 | US-26, 27, 28 |
 | Plan | US-30, 31, 32, 33, 34, 42 | US-35, 36, 37, 38, 39, 43 | US-40, 41 |
 | Sweep | US-50, 51, 52, 53 | US-54, 55 | US-56, 57 |
-| Pupils | US-60 | US-61, 62, 63 | US-64, 65 |
+| Pupils | US-60 | US-61, 62, 63, 66 | US-64, 65 |
 | Reports and evenings | US-70, 71, 72, 75 | US-73, 74 | |
 | Data and safety | US-80, 81, 82, 83, 84, 85 | US-86 | |
 
-Of the Must haves, all but reports (US-70 to 72), rollover (US-75) and recordings with permission (US-85) are built. Those are Phase 5 and 6 work.
+Of the Must haves, all but reports (US-70 to 72) and rollover (US-75) are built: Phase 6 and the job before the second September.
 
 ## Won't have
 
@@ -580,12 +580,16 @@ Scenario: A file from another version
 
 ### US-41 An exemplar bank
 **As** the teacher, **I want** recordings of former pupils' work at low, mid and high per component, **so that** I can show the class what good looks like and judge against it.
-Could · Planned (Phase 5, step 5.5)
+Could · Built (Phase 5, step 5.5)
 
 ```gherkin
 Scenario: Only with permission
   Given Sam R does not have exemplar reuse permitted
-  Then I cannot add a recording of Sam R's work as an exemplar
+  Then Sam R isn't offered as the source of an exemplar, and one naming Sam R is refused
+
+Scenario: The department's own
+  When I add a "high" exemplar for "Plays a riff in time" with no pupil named
+  Then it is listed on the unit's Assessment tab with its recording and what to listen for
 ```
 
 ### US-42 Hinge checks, written once and reused
@@ -727,8 +731,8 @@ Scenario: Kept only with a decision
 ## 5. Pupils
 
 ### US-60 Everything about one pupil, in one place
-**As** the teacher, **I want** a pupil page with their flags, instrument, notes, observations and loans, **so that** I can prepare for a conversation at the desk.
-Must · Partly (Phase 3 onwards; observations and judgements join in Phases 5 and 6)
+**As** the teacher, **I want** a pupil page with their flags, instrument, notes, observations, feedback, recordings and loans, **so that** I can prepare for a conversation at the desk.
+Must · Partly (built through Phase 5; judgements join in Phase 6)
 
 ```gherkin
 Scenario: The only place labels appear
@@ -808,6 +812,22 @@ Could · Built (Phase 3)
 Scenario: One loan at a time
   Given headphones 3 are lent to Jojo P
   Then headphones 3 cannot be lent to anyone else until returned
+```
+
+### US-66 A pupil's progress against themselves
+**As** the teacher, **I want** a pupil's recordings in order with what I heard each time, **so that** I can hear and show their progress against their own earlier work.
+Should · Built (Phase 5, step 5.5)
+
+```gherkin
+Scenario: Oldest first, one line per piece
+  Given Ada M was recorded playing the riff on 22 and 27 October
+  When I open her pupil page
+  Then "Recordings over time" lists the riff on 22 October ("Partly") before 27 October ("Secure")
+  And a recording that is a web address opens at its moment
+
+Scenario: No permission, no recordings
+  Given Sam R's family has not agreed to recordings
+  Then Sam R's page offers no "Add a recording" and says why
 ```
 
 ---
@@ -923,13 +943,18 @@ Scenario: A checked copy
 
 ### US-83 Export everything
 **As** a pupil or parent, **I want** the teacher to be able to produce everything held, **so that** a subject access request can be answered.
-Must · Built (hardening; a per-pupil export comes with recordings)
+Must · Built (hardening; the per-pupil export in Phase 5, step 5.5)
 
 ```gherkin
 Scenario: Every table
   When I download everything
   Then the file contains every row of every Downbeat table
   And it loads back into an empty install
+
+Scenario: One pupil, for a subject access request
+  When I choose "Download everything held about Ada M" on her pupil page
+  Then the file has every row that points at her, from every table, and the group feedback she was part of
+  And no other pupil's name
 ```
 
 ### US-84 Delete everything
@@ -945,12 +970,19 @@ Scenario: A deliberate act
 
 ### US-85 Recordings only with permission
 **As** a pupil or parent, **I want** recordings kept only with permission, reused only with separate permission, and deleted by the agreed date.
-Must · Planned (Phase 5, step 5.5; deletion at rollover)
+Must · Built (Phase 5, step 5.5)
 
 ```gherkin
 Scenario: No permission, no recording
   Given Sam R does not have recording permitted
   Then no recording can be attached to Sam R's observations or feedback
+
+Scenario: Past the delete-by date
+  Given Aisha F's recordings were to be deleted by 25 October
+  When I open Settings → Data
+  Then her recordings' paths are listed under "Recordings"
+  When I choose "Remove these references"
+  Then Downbeat holds no reference to them and shows the paths once, for me to delete the files
 ```
 
 ### US-86 A clean install for another teacher

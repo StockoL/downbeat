@@ -30,7 +30,7 @@ The laptop's SQLite database is the only source of truth. The iPad holds a cache
 | `notes` | NoteType, Note, SpokenTo, Goal, ChecklistItem, ChecklistTick | `sync.py`, `state.py`, `goals.py` |
 | `pupils` | FlagType, PupilFlag, Relationship, Group, GroupMember, LoanItem, Loan; the Pupils area | `missing_out.py` |
 | `plans` | Scheme, Unit, LessonPlan, PlanActivity, Resource, ActivityStatus, SessionReflection, PrepItem; Sweep and Prep | `services.py`, `sweep.py`, `prep.py` |
-| `assessment` | Strand, Band, Component, FeedbackCode, Observation, Check, CheckResponse, Feedback | `criteria.py`, `hinge.py`, `forms.py`, `feedback_views.py` |
+| `assessment` | Strand, Band, Component, FeedbackCode, Observation, Check, CheckResponse, Feedback, Exemplar | `criteria.py`, `hinge.py`, `recordings.py`, `forms.py`, `feedback_views.py` |
 
 Areas map to tempos, not tables: Today (catch), Sweep and Prep (sweep), Plan (plan), Pupils (any time) and Settings.
 
@@ -100,7 +100,8 @@ Seating edits are not queued: they happen at the desk, online.
 | Flags are colour only | Flag labels are rendered on the pupil page only; lesson state, projector view and cover PDF carry no flags |
 | Bands never computed | No field or function derives a band, average or percentage |
 | Whole-class checks store the decision | Sync has no operation for a pupil's answer; answers are entered in the sweep only when the unit opts in, and kept only with a decision |
-| Recordings only with permission | Feedback refuses a recording for a pupil without `recording_permitted`, or for a group unless every member has it; recordings are paths, never uploads |
+| Recordings only with permission | Feedback and recordings are refused for a pupil without `recording_permitted` (a group needs every member); exemplars need `exemplar_reuse_permitted`; `assessment/recordings.py` finds references past a delete-by date or without permission, and Settings → Data or `manage.py purge_recordings` removes them; recordings are paths, never uploads |
+| A subject access request can be answered | `core/data.py` `export_pupil` follows every link to Pupil in Downbeat's tables; a test fails if one is missed |
 | Observations carry a next step | Sheet attaches the default, sync rejects without one, and a database check constraint refuses a row with neither a next step nor a recording |
 | Nightly backup | `core/data.py` `backup`, scheduled by `tools/install-backup-task.ps1` |
 | Export and delete-all | `core/data.py` `export_json` and `delete_all`, over `APP_MODELS`; a test fails if a model is missing |

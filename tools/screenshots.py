@@ -81,8 +81,9 @@ seated = [s for s in lessons if SeatingPlan.objects.filter(klass=s.klass, room=s
           and starts(s) + datetime.timedelta(minutes=30) < timezone.now()]
 observe = max(seated, key=starts)
 # Clear what the demo recorded in it, so the room reads as a lesson under way rather than history.
-for related in (observe.notes, observe.spoken_to, observe.attendance, observe.checklist_ticks, observe.observations, observe.checks):
+for related in (observe.notes, observe.spoken_to, observe.attendance, observe.checklist_ticks, observe.checks):
     related.all().delete()
+observe.observations.filter(recording_path="").delete()  # recordings stay, for the pupil's timeline
 start = Timetable.active().period_times(observe.period)[0]
 past = Session.objects.filter(date__lt=today, lesson__isnull=False).annotate(n=Count("notes")).filter(n__gt=2).order_by("-date").first()
 unit = Component.objects.order_by("unit__scheme__year_group", "unit__order").first().unit

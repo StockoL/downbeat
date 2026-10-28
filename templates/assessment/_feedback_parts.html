@@ -1,7 +1,8 @@
 {% comment %}A feedback's three parts and its recording anchor. Used on the lesson's feedback page and the pupil page.{% endcomment %}
+{% load recordings %}
 <dl class="feedback-parts">
   {% if f.done_well %}<dt>Done well</dt><dd>{{ f.done_well|linebreaksbr }}</dd>{% endif %}
   {% if f.develop %}<dt>To develop</dt><dd>{{ f.develop|linebreaksbr }}</dd>{% endif %}
   {% if f.how %}<dt>How</dt><dd>{{ f.how|linebreaksbr }}</dd>{% endif %}
-  {% if f.recording_path %}<dt>Recording</dt><dd><code>{{ f.recording_path }}</code>{% if f.at %} at {{ f.at }}{% endif %}</dd>{% endif %}
+  {% if f.recording_path %}<dt>Recording</dt><dd>{% recording f.recording_path f.recording_seconds %}</dd>{% endif %}
 </dl>

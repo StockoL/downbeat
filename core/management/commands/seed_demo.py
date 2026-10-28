@@ -19,7 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from assessment.models import Band, Check, Component, Feedback, FeedbackCode, Observation, Strand
+from assessment.models import Band, Check, Component, Exemplar, Feedback, FeedbackCode, Observation, Strand
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
@@ -370,14 +370,14 @@ class Command(BaseCommand):
 
         # Feedback: three parts, one anchored in a recording for a pupil whose family agreed to recordings.
         recorded = classes["9Y Mu"].pupils.first()
-        recorded.recording_permitted = True
-        recorded.save(update_fields=["recording_permitted"])
+        recorded.recording_permitted = recorded.exemplar_reuse_permitted = True
+        recorded.save(update_fields=["recording_permitted", "exemplar_reuse_permitted"])
         if latest:
             first = latest.lesson.unit.components.first()
             Feedback.objects.create(
                 session=latest, pupil=recorded, component=first, done_well="The riff sits right on the beat.",
                 develop="It speeds up when the band comes in.", how="Watch the drummer's hi-hat and lock to it.",
-                recording_path="Music/Recordings/9Y/riff-week-1.m4a", recording_seconds=102,
+                recording_path=f"Music/Recordings/9Y/{recorded.first_name}-riff-week-2.m4a", recording_seconds=102,
             )
             others = list(latest.klass.pupils.exclude(pk=recorded.pk))
             for pupil, (develop, how) in zip(rng.sample(others, 2), [
@@ -385,6 +385,32 @@ class Command(BaseCommand):
                 ("The ending is untidy.", "Agree a signal for the last bar."),
             ], strict=True):
                 Feedback.objects.create(session=latest, pupil=pupil, done_well="Kept going all the way through.", develop=develop, how=how)
+
+        # Recordings: the recorded pupil's riff, week by week, for their timeline; the department's
+        # exemplars, one of them the recorded pupil's (their family agreed to reuse); and a pupil whose
+        # delete-by date has passed, so Settings → Data has a recording to remove.
+        nine_y_past = list(Session.objects.filter(klass=classes["9Y Mu"], date__lt=today, lesson__isnull=False).order_by("date"))
+        riff = units[9].components.first()
+        for session, state, week in zip(nine_y_past, [Observation.PARTLY, Observation.SECURE], [1, 2], strict=False):
+            heard = Observation.objects.create(session=session, pupil=recorded, component=riff, state=state, next_step=riff.next_step_default,
+                                               recording_path=f"Music/Recordings/9Y/{recorded.first_name}-riff-week-{week}.m4a")
+            start, _ = timetable.period_times(session.period)
+            when = timezone.make_aware(datetime.datetime.combine(session.date, start)) + datetime.timedelta(minutes=20)
+            Observation.objects.filter(pk=heard.pk).update(created_at=when, updated_at=when)
+        for year in (8, 9):
+            first = units[year].components.first()
+            for level in ("low", "mid", "high"):
+                Exemplar.objects.create(unit=units[year], component=first, level=level, note=f"Department exemplar, {level}",
+                                        recording_path=f"Music/Exemplars/Y{year}/{units[year].name.lower()}-{level}.m4a")
+        Exemplar.objects.create(unit=units[9], component=riff, level="high", source_pupil=recorded, note="Locks to the hi-hat throughout",
+                                recording_path=f"Music/Recordings/9Y/{recorded.first_name}-riff-week-2.m4a")
+        leaver = classes["9Y Mu"].pupils.exclude(pk=recorded.pk).first()
+        leaver.recording_permitted = True
+        leaver.recordings_delete_by = today - datetime.timedelta(days=3)
+        leaver.save(update_fields=["recording_permitted", "recordings_delete_by"])
+        if nine_y_past:
+            Observation.objects.create(session=nine_y_past[0], pupil=leaver, component=riff, state=Observation.PARTLY,
+                                       next_step=riff.next_step_default, recording_path=f"Music/Recordings/9Y/{leaver.first_name}-riff-week-1.m4a")
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

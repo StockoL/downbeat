@@ -1,4 +1,5 @@
 {% extends "layouts/desk.html" %}
+{% load recordings %}
 
 {% block title %}Assessment · {{ unit }} · Plan · Downbeat{% endblock %}
 
@@ -60,5 +61,35 @@
   {% else %}
   <p>No hinge checks yet.</p>
   {% endif %}
+</section>
+
+<section class="flow">
+  <h2 id="exemplars">Exemplars</h2>
+  <p class="field__hint">Recordings of work at each level, to play to the class and to judge against. A pupil's work only with their family's agreement to reuse it for teaching; it goes when that permission or their delete-by date does.</p>
+  {% if exemplars %}
+  <ul class="flow" role="list">
+    {% for e in exemplars %}
+    <li class="cluster">
+      <strong>{{ e.get_level_display }}</strong>
+      <span>{% if e.component %}{{ e.component }}{% else %}Whole unit{% endif %}</span>
+      <span>{% recording e.recording_path %}</span>
+      {% if e.note %}<small>{{ e.note }}</small>{% endif %}
+      {% if e.source_pupil %}<small>by {{ e.source_pupil }}</small>{% endif %}
+      <form method="post" action="{% url 'exemplar_delete' e.pk %}">
+        {% csrf_token %}
+        <button class="button" type="submit" data-variant="ghost" data-size="small">Remove</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <details class="accordion">
+    <summary class="accordion__trigger">Add an exemplar</summary>
+    <form method="post" action="{% url 'exemplar_add' unit.pk %}" class="accordion__content flow">
+      {% csrf_token %}
+      {{ exemplar_form }}
+      <button class="button" type="submit" data-variant="primary">Add exemplar</button>
+    </form>
+  </details>
 </section>
 {% endblock %}

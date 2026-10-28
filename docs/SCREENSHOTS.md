@@ -2,7 +2,7 @@
 
 Evidence of the user journeys and key features, captured from the demo school. Every pupil in the demo is invented (first name and initial, generated from a fixed seed), so no real pupil data appears here.
 
-Captured on 28 October 2026 at the end of step 5.4, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
+Captured on 28 October 2026 at the end of Phase 5, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
 
 Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
 
@@ -118,7 +118,7 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 
 ![The lesson editor](screenshots/12-lesson-editor.png)
 
-**A unit's Assessment tab**: pupil-facing components, each with a strand and default next step, feedback codes, the criteria file to download or import, and the unit's bank of hinge checks.
+**A unit's Assessment tab**: pupil-facing components, each with a strand and default next step, feedback codes, the criteria file to download or import, the unit's bank of hinge checks, and its exemplars at three levels, one of them a pupil's whose family agreed to its reuse (US-41).
 
 ![Unit components and feedback codes](screenshots/11-unit-components.png)
 
@@ -148,7 +148,7 @@ The summary reads "1 keep-apart pair side by side. 3 seats not meeting a flag's 
 
 ![A pupil's page](screenshots/17-pupil-page.png)
 
-Further down the page, **their feedback and observations**: feedback with any recording moment, and each observation's component, state and next step, marked when it was a self- or peer-assessment.
+Further down the page, **their feedback and observations**, then **recordings over time** (US-66): each recording in order, one line per component, with what was heard or said then. A pupil is compared only with their own earlier work. The page also offers "Download everything held about …" for a subject access request (US-83).
 
 ![A pupil's feedback and observations](screenshots/36-pupil-feedback-and-observations.png)
 
@@ -178,7 +178,7 @@ Further down the page, **their feedback and observations**: feedback with any re
 | --- | --- |
 | ![Sign in](screenshots/02-sign-in.png) | ![Settings](screenshots/20-settings.png) |
 
-**Settings → Data**: back up now, download everything, and delete everything behind a typed phrase (US-82 to US-84).
+**Settings → Data**: back up now, download everything, recordings that may no longer be kept (here one past its pupil's delete-by date) with "Remove these references" (US-85), and delete everything behind a typed phrase (US-82 to US-84).
 
 ![Settings → Data](screenshots/21-data.png)
 

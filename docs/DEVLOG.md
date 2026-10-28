@@ -99,6 +99,8 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 | `424721e` | The plan strip stops counting once the period has ended |
 | `43a0aad` | 5.3 Hinge checks: written in the lesson editor with misconception-tagged wrong answers, a bank per unit, the bar's Hinge button with a timed sheet and three decisions, offline through the queue, the judgement in the sweep, and pupils' answers when a unit opts in |
 | `bf535a0` | 5.4 Feedback: three parts per lesson for a pupil or a group with a recording moment (permission enforced), codes as a slide, the class-by-component view, self and peer entry in one go, feedback and observations on the pupil page |
+| `c317a1f` | Feedback written whenever: from the pupil page and the room view's ⋯ menu as well as the sweep |
+| (this step) | 5.5 The exemplar bank, recordings on observations, each pupil's recordings over time, removing recordings that may no longer be kept, and everything held about one pupil in one file |
 
 **Checked.** On the demo school at iPad size: a long-press opened the sheet for the unit's three components; "Partly" saved with the default next step; "Change" replaced it; the Log showed the observation; after sync the laptop's database held it with the changed step.
 
@@ -122,8 +124,22 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - The codes slide's type was sized for a laptop, not the back of a classroom; it is now the largest step in the scale.
 - The demo's class-by-component table was nearly empty with six observations a lesson; the demo now makes ten, so the page shows what it is for.
 
-**Next:**
-- 5.5 The exemplar bank gated by permission, and the ipsative timeline on the pupil page.
+**5.5 checked.** The screenshot tool loaded the Assessment tab with the demo's exemplars, the pupil page with a recording timeline (week 1 "Partly", week 2 "Secure", then the feedback at 1:42) and Settings → Data listing a recording past its delete-by date, without a script error; each was checked by eye. Adding exemplars and recordings, the permission rules, removing references and the per-pupil export are covered by the tests.
+
+**5.5 went wrong, put right.**
+- The screenshot tool clears the lesson it uses for the room shots, which took a recording off the pupil's timeline; it now keeps recorded observations, and the demo stamps them inside their lesson.
+
+### Phase 5 review
+
+*Done when: a unit taught end to end with components declared in advance, and the sweep took under three minutes per lesson.*
+
+- **The frame exists before the lesson.** Each demo unit declares its components (with default next steps), feedback codes, a hinge check per lesson and exemplars at three levels, all at the desk on the unit's Assessment tab and in the lesson editor.
+- **The room catches it in two taps.** A long-press observes against a component with its next step attached; the Hinge button records the class's decision; nothing in the room asks for more, and a lesson with none of it shows nothing missing.
+- **The sweep stays one scroll.** Activities, caught notes and observations to keep or bin, the hinge decision (from memory if it wasn't made in the room), one reflection line. Feedback, self and peer assessment and recordings are their own pages, reached when wanted, so they never lengthen the two-minute sweep.
+- **The rules hold in code, not just in the interface.** No observation without a next step or recording (sync and a database constraint); no pupil's hinge answer unless the unit opts in, and only with a decision; no recording without permission, none past the delete-by date once removed; nothing anywhere adds states up.
+- **Not yet proven:** the three-minute sweep is a matter of use. It is checked against the demo school until real lessons begin, as every phase's "Done when" has been since the teacher chose to have the app finished first.
+
+**Next:** Phase 6, summative judgements and reports.
 
 ## Still to come
 

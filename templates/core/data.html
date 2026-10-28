@@ -20,8 +20,26 @@
 
 <section class="card"><div class="card__body flow">
   <h2>Export</h2>
-  <p>Every timetable, class, pupil, room, seating plan, session and note as one JSON file.</p>
+  <p>Every timetable, class, pupil, room, seating plan, session and note as one JSON file. Everything held about one pupil, for a subject access request, is on their pupil page.</p>
   <a class="button" href="{% url 'data_export' %}">Download everything</a>
+</div></section>
+
+<section class="card"><div class="card__body flow">
+  <h2>Recordings</h2>
+  <p>Recordings are kept only for pupils whose families agreed, reused as exemplars only with the separate agreement, and removed once a pupil's delete-by date passes. Downbeat holds where each recording is, never the file.</p>
+  {% if recordings_due %}
+  <p>These may no longer be kept. Remove the references here, then delete the files from their folder:</p>
+  <ul class="flow" role="list">{% for path in recordings_due %}<li><code>{{ path }}</code></li>{% endfor %}</ul>
+  <form method="post" action="{% url 'data_purge_recordings' %}">
+    {% csrf_token %}
+    <button class="button" type="submit">Remove these references</button>
+  </form>
+  {% elif purged %}
+  <p>Removed. If you haven't yet, delete these files from their folder:</p>
+  <ul class="flow" role="list">{% for path in purged %}<li><code>{{ path }}</code></li>{% endfor %}</ul>
+  {% else %}
+  <p>Nothing to remove.</p>
+  {% endif %}
 </div></section>
 
 <section class="card"><div class="card__body flow">

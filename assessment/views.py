@@ -16,7 +16,8 @@ from django.views.decorators.http import require_POST
 from plans.models import LessonPlan, Unit
 
 from . import criteria
-from .models import Band, Check, Component, FeedbackCode, Strand
+from .forms import ExemplarForm
+from .models import Band, Check, Component, Exemplar, FeedbackCode, Strand
 
 StrandFormSet = forms.modelformset_factory(
     Strand, fields=["order", "name"], extra=2, can_delete=True,
@@ -89,6 +90,8 @@ def unit_assessment(request, pk):
     return render(request, "assessment/unit.html", {
         "nav": "plan", "unit": unit, "components": components, "codes": codes, "has_strands": Strand.objects.exists(),
         "checks": Check.objects.filter(lesson_plan__unit=unit).select_related("lesson_plan").order_by("lesson_plan__order"),
+        "exemplars": unit.exemplars.select_related("component", "source_pupil"),
+        "exemplar_form": ExemplarForm(unit=unit, prefix="exemplar"),
     })
 
 
@@ -129,3 +132,23 @@ def hinge_copy(request, pk):
     })
     messages.success(request, f"Copied the hinge check from L{source.lesson_plan.order}. Change it below if this lesson needs it different.")
     return redirect(reverse("lesson", args=[lesson.pk]) + "#hinge")
+
+
+@require_POST
+def exemplar_add(request, pk):
+    unit = get_object_or_404(Unit, pk=pk)
+    form = ExemplarForm(request.POST, unit=unit, prefix="exemplar")
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Exemplar added.")
+    else:
+        messages.error(request, " ".join(e for errors in form.errors.values() for e in errors))
+    return redirect(reverse("unit_assessment", args=[unit.pk]) + "#exemplars")
+
+
+@require_POST
+def exemplar_delete(request, pk):
+    exemplar = get_object_or_404(Exemplar, pk=pk)
+    exemplar.delete()
+    messages.success(request, "Exemplar removed. The recording itself is still in its folder.")
+    return redirect(reverse("unit_assessment", args=[exemplar.unit_id]) + "#exemplars")

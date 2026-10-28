@@ -84,10 +84,27 @@ def account_only(request, data):
 # --- Settings → Data ----------------------------------------------------------
 
 def data_page(request):
+    from assessment import recordings
+
     return render(request, "core/data.html", {
         "nav": "settings", "section": "data",
         "backup_dir": settings.BACKUP_DIR, "backups": data.list_backups()[:10], "delete_phrase": DELETE_PHRASE,
+        "recordings_due": recordings.paths(recordings.due()),
+        "purged": request.session.pop("purged_recordings", None),  # shown once, after removing
     })
+
+
+@require_POST
+def data_purge_recordings(request):
+    """Rule 15: drops references to recordings that may no longer be kept; the files are the teacher's to delete."""
+    from assessment import recordings
+
+    removed = recordings.purge()
+    if removed:
+        messages.success(request, f"Removed {len(removed)} recording reference{'s' if len(removed) != 1 else ''}. "
+                                  "Delete the files listed from their folder too.")
+        request.session["purged_recordings"] = removed
+    return redirect("data_page")
 
 
 @require_POST

@@ -205,3 +205,27 @@ class Feedback(Base):
         if self.recording_seconds is None:
             return ""
         return f"{self.recording_seconds // 60}:{self.recording_seconds % 60:02d}"
+
+
+class Exemplar(Base):
+    """
+    A recording of work at a level, for showing the class and judging against. Only from pupils
+    whose families agreed to reuse for teaching, and gone when that permission or their delete-by
+    date does. The recording is a path; Downbeat never holds the file.
+    """
+
+    LEVELS = [("low", "Low"), ("mid", "Mid"), ("high", "High")]
+
+    unit = models.ForeignKey("plans.Unit", on_delete=models.CASCADE, related_name="exemplars")
+    component = models.ForeignKey(Component, on_delete=models.SET_NULL, null=True, blank=True, related_name="exemplars")
+    level = models.CharField(max_length=4, choices=LEVELS)
+    recording_path = models.CharField(max_length=500, help_text="A path or link to the recording. Never uploaded.")
+    note = models.CharField(max_length=200, blank=True, help_text="What to listen for.")
+    source_pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, null=True, blank=True, related_name="exemplars",
+                                     help_text="Whose work it is, if a pupil's. Only pupils with reuse permitted.")
+
+    class Meta:
+        ordering = ["unit", "component__order", "level"]
+
+    def __str__(self):
+        return f"{self.unit} · {self.get_level_display()}" + (f" · {self.component}" if self.component_id else "")

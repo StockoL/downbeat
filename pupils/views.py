@@ -6,12 +6,16 @@ the only place a flag's label is ever shown.
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count, ProtectedError, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
-from assessment.forms import FeedbackForm
+from assessment.forms import FeedbackForm, RecordingForm
 from assessment.models import Feedback
+from core.data import export_pupil
 from timetable.models import Class, Pupil, SessionAttendance
 
 from .forms import FlagTypeFormSet, PupilFlagForm, RelationshipForm
@@ -45,6 +49,12 @@ def pupil_page(request, pk):
     adding_flag = request.method == "POST" and "add_flag" in request.POST
     adding_relationship = request.method == "POST" and "add_relationship" in request.POST
     adding_feedback = request.method == "POST" and "add_feedback" in request.POST
+    adding_recording = request.method == "POST" and "add_recording" in request.POST
+    recording_form = RecordingForm(request.POST if adding_recording else None, pupil=pupil, prefix="recording")
+    if adding_recording and recording_form.is_valid():
+        recording_form.save()
+        messages.success(request, "Recording added to the timeline.")
+        return redirect(f"{reverse('pupil_page', args=[pupil.pk])}#timeline")
     feedback_form = FeedbackForm(request.POST if adding_feedback else None, pupil=pupil, prefix="feedback")
     if adding_feedback and feedback_form.is_valid():
         feedback_form.save()
@@ -78,9 +88,41 @@ def pupil_page(request, pk):
         "feedback": feedback,
         "feedback_form": feedback_form if feedback_form.fields["lesson"].queryset.exists() else None,
         "feedback_open": adding_feedback,
+        "timeline": timeline(pupil, groups),
+        "recording_form": recording_form if pupil.recording_permitted and recording_form.fields["lesson"].queryset.exists() else None,
+        "recording_open": adding_recording,
         "observations": observations,
         "loans": pupil.loans.filter(returned_at__isnull=True).select_related("item"),
     })
+
+
+def timeline(pupil, groups):
+    """
+    The ipsative timeline: the pupil's recordings, oldest first, one line per component (the same
+    piece of work), each with what was observed or said at that point. Compared with themselves only.
+    """
+    lines = {}
+    for o in pupil.observations.filter(deleted_at__isnull=True).exclude(recording_path="").select_related("component", "session"):
+        lines.setdefault(o.component, []).append({
+            "date": o.session.date, "state": o.get_state_display(), "said": o.next_step and f"Next: {o.next_step}",
+            "path": o.recording_path, "seconds": None, "assessor": o.assessor,
+        })
+    for f in (Feedback.objects.filter(Q(pupil=pupil) | Q(group__in=groups)).exclude(recording_path="")
+              .select_related("component", "session", "group")):
+        lines.setdefault(f.component, []).append({
+            "date": f.session.date, "state": "", "said": f.develop or f.done_well or f.how,
+            "path": f.recording_path, "seconds": f.recording_seconds, "group": f.group,
+        })
+    ordered = sorted(lines.items(), key=lambda item: (item[0] is None, str(item[0])))
+    return [{"component": component, "points": sorted(points, key=lambda p: p["date"])} for component, points in ordered]
+
+
+def pupil_export(request, pk):
+    """Everything held about this pupil, as one JSON file: the answer to a subject access request."""
+    pupil = get_object_or_404(Pupil, pk=pk)
+    response = HttpResponse(export_pupil(pupil), content_type="application/json")
+    response["Content-Disposition"] = f'attachment; filename="downbeat-{slugify(str(pupil))}-{timezone.localdate():%Y-%m-%d}.json"'
+    return response
 
 
 @require_POST

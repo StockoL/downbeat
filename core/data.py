@@ -4,16 +4,18 @@ The laptop's SQLite file is the only copy of the data, so these are its safety n
 """
 
 import io
+import json
 import sqlite3
 from pathlib import Path
 
 from django.conf import settings
 from django.contrib.sessions.models import Session as BrowserSession
 from django.core.management import call_command
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import connection, transaction
 from django.utils import timezone
 
-from assessment.models import Band, Check, CheckResponse, Component, Feedback, FeedbackCode, Observation, Strand
+from assessment.models import Band, Check, CheckResponse, Component, Exemplar, Feedback, FeedbackCode, Observation, Strand
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
 from plans.models import ActivityStatus, LessonPlan, PlanActivity, PrepItem, Resource, Scheme, SessionReflection, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
@@ -28,7 +30,7 @@ APP_MODELS = [
     # seating and sessions
     SeatAssignment, SeatingPlan, Session, Slot, Seat, Room,
     # assessment
-    FeedbackCode, Component, Strand, Band,
+    Exemplar, FeedbackCode, Component, Strand, Band,
     # plans
     Resource, PlanActivity, LessonPlan, Unit, Scheme,
     # pupils' records
@@ -84,6 +86,31 @@ def export_json():
     out = io.StringIO()
     call_command("dumpdata", *EXPORT_APPS, indent=2, stdout=out)
     return out.getvalue()
+
+
+def export_pupil(pupil):
+    """
+    Everything held about one pupil, for a subject access request (rule 15): their own row, their
+    classes' names, and every row in Downbeat's tables that points at them, found by following each
+    link to Pupil rather than a list, so a new table can't be missed. Group feedback they were part
+    of is included. Other pupils appear only as ids.
+    """
+    from django.apps import apps
+    from django.core import serializers
+
+    rows = [pupil]
+    for app in EXPORT_APPS:
+        for model in apps.get_app_config(app).get_models():
+            for field in model._meta.get_fields():
+                if field.many_to_one and field.related_model is Pupil:
+                    rows += model.objects.filter(**{field.name: pupil})
+    groups = GroupMember.objects.filter(pupil=pupil).values("group_id")
+    rows += Feedback.objects.filter(group__in=groups)
+    return json.dumps({
+        "format": "downbeat-pupil", "exported": timezone.now().isoformat(), "pupil": str(pupil),
+        "classes": [str(c) for c in pupil.classes.all()],
+        "records": serializers.serialize("python", rows),
+    }, cls=DjangoJSONEncoder, indent=2)
 
 
 @transaction.atomic
