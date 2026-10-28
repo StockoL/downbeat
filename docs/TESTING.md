@@ -10,7 +10,7 @@ How Downbeat is tested, how to run the tests, and what each part of the suite co
 .venv\Scripts\ruff check .
 ```
 
-The suite runs in about ten seconds: 350 tests pass and 3 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
+The suite runs in about ten seconds: 366 tests pass and 3 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs on every push and pull request. It checks out Downbeat and LooseLeaf-UI side by side, then runs:
 
@@ -57,7 +57,7 @@ Conventions:
 | `core/tests/test_auth.py` | 12 | The gate's three stages, the account section and account-only setup, login throttling, safe `next`, HTMX redirects |
 | `core/tests/test_data.py` | 11 | Backup, JSON export round trip, delete-all; every model is in both lists |
 | `core/tests/test_pwa.py` | 6 | Manifest, versioned service worker, every precached file exists, offline page holds no pupil data, sign-out clears saved pages |
-| `core/tests/test_audit.py` | 65 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
+| `core/tests/test_audit.py` | 67 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
 | `core/tests/test_seed_demo.py` | 4 | The demo builds, and refuses the real database |
 | `core/tests/test_scaffold.py` | 2 | The abstract Base model (UUID, timestamps) and the desk layout |
 | `timetable/tests/test_generate.py` | 5 | Session generation, week A/B, no duplicates on re-running |
@@ -80,6 +80,7 @@ Conventions:
 | `plans/test_prep.py` | 6 | Prep generated from resources and actions, ticks kept, manual items |
 | `assessment/tests.py` | 9 | Strands and bands, components and codes, criteria file round trip and refusal, duplicating a unit |
 | `assessment/test_observations.py` | 7 | Observations through sync, rule 4 in sync and in the database, backwards states, sweep bin |
+| `assessment/test_feedback.py` | 14 | Feedback for a pupil or a group, its three parts, recordings only with permission (every member for a group), the m:ss moment, codes as a slide with no pupil in it, the class-by-component view (latest state, by assessor, nothing added up), self and peer in one go with the next step attached |
 | `assessment/test_checks.py` | 18 | Hinge checks: misconception-tagged wrong answers, the bank and duplication, planned-or-asked constraint, decisions through sync (minutes in, idempotent, last write wins, two devices, taking back), the greyed button, the sweep's judgement, pupils' answers opt-in and only with a decision (rule 3) |
 
 ## Traceability to the "Done when" tests

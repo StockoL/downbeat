@@ -1,0 +1,38 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Feedback · {{ session.period }} {{ session.klass }} · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'session_sweep' session.pk %}">← Sweep this lesson</a></p>
+<h1>Feedback · {{ session.klass }} · {{ session.date|date:"D j M" }} {{ session.period }}</h1>
+{% if session.lesson %}<p>{{ session.lesson }}: {{ session.lesson.objective }}{% if session.lesson.unit.feedback_codes.exists %} · <a href="{% url 'codes_slide' session.lesson.unit.pk %}" target="_blank" rel="noopener">Feedback codes</a>{% endif %}</p>{% endif %}
+
+<div class="switcher">
+  <form method="post" class="flow">
+    {% csrf_token %}
+    <h2>Write feedback</h2>
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Save feedback</button>
+  </form>
+
+  <section class="flow">
+    <h2>This lesson</h2>
+    {% if feedback %}
+    <ul class="flow" role="list">
+      {% for f in feedback %}
+      <li class="card"><div class="card__body flow">
+        <p><strong>{% if f.pupil %}<a href="{% url 'pupil_page' f.pupil.pk %}">{{ f.pupil }}</a>{% else %}{{ f.group }}{% endif %}</strong>{% if f.component %} · {{ f.component }}{% endif %}</p>
+        {% include "assessment/_feedback_parts.html" %}
+        <form method="post" action="{% url 'feedback_delete' f.pk %}" onsubmit="return confirm('Delete this feedback?')">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small">Delete</button>
+        </form>
+      </div></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>None yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

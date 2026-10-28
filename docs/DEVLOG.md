@@ -97,7 +97,8 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 | `0bf637b` | 5.1 The frame: strands and bands, unit components with default next steps, feedback codes, criteria files to share between teachers |
 | `a597493` | 5.2 Observations from the seat: long-press, three states, default next step attached, offline through the queue, in the Log and the sweep |
 | `424721e` | The plan strip stops counting once the period has ended |
-| (this step) | 5.3 Hinge checks: written in the lesson editor with misconception-tagged wrong answers, a bank per unit, the bar's Hinge button with a timed sheet and three decisions, offline through the queue, the judgement in the sweep, and pupils' answers when a unit opts in |
+| `43a0aad` | 5.3 Hinge checks: written in the lesson editor with misconception-tagged wrong answers, a bank per unit, the bar's Hinge button with a timed sheet and three decisions, offline through the queue, the judgement in the sweep, and pupils' answers when a unit opts in |
+| (this step) | 5.4 Feedback: three parts per lesson for a pupil or a group with a recording moment (permission enforced), codes as a slide, the class-by-component view, self and peer entry in one go, feedback and observations on the pupil page |
 
 **Checked.** On the demo school at iPad size: a long-press opened the sheet for the unit's three components; "Partly" saved with the default next step; "Change" replaced it; the Log showed the observation; after sync the laptop's database held it with the changed step.
 
@@ -113,8 +114,13 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - The screenshot tool's mid-lesson captures came out stamped with the real time: it had chosen a future lesson, and sync holds a device clock in the future to now. It now uses the most recent past lesson with a seating plan, cleared of the demo's history first. It had also chosen the hall lesson the demo leaves without a seating plan, so there were no seats to tap.
 - The bar's "Hinge · moved on" showed a double gap, because the button's flex gap spaced its two text nodes. The label is now one node.
 
+**5.4 checked.** On the demo school at laptop width: feedback for a pupil and a group saved and showed on the lesson's page and the members' pupil pages; a recording was refused for a pupil without permission and kept with its "1:42" for one with; the codes slide opened from the room's ⋯ menu with nothing about any pupil; the Components tab showed latest states in greyscale words with self and peer kept apart; a class's self-assessment saved with the component's next step. All the new pages are in the screenshot tool.
+
+**5.4 went wrong, put right.**
+- The codes slide's type was sized for a laptop, not the back of a classroom; it is now the largest step in the scale.
+- The demo's class-by-component table was nearly empty with six observations a lesson; the demo now makes ten, so the page shows what it is for.
+
 **Next:**
-- 5.4 Feedback: done well, develop, how, with a recording timestamp; feedback codes as a projectable list; self and peer entry; the class-by-component heat view.
 - 5.5 The exemplar bank gated by permission, and the ipsative timeline on the pupil page.
 
 ## Still to come

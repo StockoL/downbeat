@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Check
+from .models import Check, Component, Feedback
 
 DISTRACTORS = 4
 
@@ -63,3 +63,70 @@ class HingeForm(forms.Form):
             "distractors": self.cleaned_data["distractors"], "threshold": self.cleaned_data["threshold"],
         })
         return check
+
+
+def parse_at(text):
+    """'1:42' or '102' as seconds; None for blank. Raises ValueError for anything else."""
+    text = text.strip()
+    if not text:
+        return None
+    minutes, _, seconds = text.rpartition(":")
+    if not seconds.isdigit() or (minutes and not minutes.isdigit()) or (minutes and int(seconds) > 59):
+        raise ValueError(text)
+    return int(minutes or 0) * 60 + int(seconds)
+
+
+class FeedbackForm(forms.Form):
+    """Feedback for one pupil or one group in a lesson. A recording only for pupils whose families agreed."""
+
+    who = forms.ChoiceField(label="For")
+    component = forms.ModelChoiceField(queryset=None, required=False, label="Component (optional)")
+    done_well = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 2}), label="Done well")
+    develop = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 2}), label="To develop")
+    how = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 2}), label="How")
+    recording_path = forms.CharField(required=False, max_length=500, label="Recording",
+                                     help_text="A path or link to the recording. Downbeat never uploads it.")
+    recording_at = forms.CharField(required=False, max_length=8, label="At (m:ss)",
+                                   help_text="The moment the feedback is about, e.g. 1:42 for bar 9.")
+
+    def __init__(self, *args, session, **kwargs):
+        super().__init__(*args, **kwargs)
+        from pupils.services import active_groups
+
+        self.session = session
+        self.pupils = {str(p.pk): p for p in session.klass.pupils.all()}
+        self.groups = {str(g.pk): g for g in active_groups(session.klass)}
+        choices = [("", "Choose…"), ("Pupils", [(f"pupil:{pk}", str(p)) for pk, p in self.pupils.items()])]
+        if self.groups:
+            choices.append(("Groups", [(f"group:{pk}", str(g)) for pk, g in self.groups.items()]))
+        self.fields["who"].choices = choices
+        self.fields["component"].queryset = session.lesson.unit.components.all() if session.lesson_id else Component.objects.none()
+
+    def clean(self):
+        data = super().clean()
+        kind, _, pk = data.get("who", "").partition(":")
+        data["pupil"] = self.pupils.get(pk) if kind == "pupil" else None
+        data["group"] = self.groups.get(pk) if kind == "group" else None
+        if not any(data.get(part, "").strip() for part in ("done_well", "develop", "how")):
+            raise forms.ValidationError("Write at least one of done well, to develop or how.")
+        try:
+            data["recording_seconds"] = parse_at(data.get("recording_at", ""))
+        except ValueError:
+            self.add_error("recording_at", "Write the time as minutes:seconds, e.g. 1:42.")
+        path = data.get("recording_path", "").strip()
+        if data.get("recording_seconds") is not None and not path:
+            self.add_error("recording_at", "A time needs the recording it's in.")
+        if path:
+            pupils = [data["pupil"]] if data["pupil"] else [m.pupil for m in data["group"].members.select_related("pupil")] if data["group"] else []
+            refused = [str(p) for p in pupils if not p.recording_permitted]
+            if refused:
+                self.add_error("recording_path", f"Recordings aren't permitted for {', '.join(refused)}.")
+        return data
+
+    def save(self):
+        data = self.cleaned_data
+        return Feedback.objects.create(
+            session=self.session, pupil=data["pupil"], group=data["group"], component=data.get("component"),
+            done_well=data["done_well"].strip(), develop=data["develop"].strip(), how=data["how"].strip(),
+            recording_path=data["recording_path"].strip(), recording_seconds=data.get("recording_seconds"),
+        )

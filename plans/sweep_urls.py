@@ -1,5 +1,7 @@
 from django.urls import path
 
+from assessment import feedback_views
+
 from . import prep, sweep_views
 
 urlpatterns = [
@@ -10,4 +12,6 @@ urlpatterns = [
     path("prep/items/<uuid:pk>/remove/", prep.prep_remove, name="prep_remove"),
     path("<uuid:pk>/", sweep_views.session_sweep, name="session_sweep"),
     path("notes/<uuid:pk>/members/", sweep_views.give_to_members, name="give_to_members"),
+    path("<uuid:pk>/feedback/", feedback_views.session_feedback, name="session_feedback"),
+    path("feedback/<uuid:pk>/delete/", feedback_views.feedback_delete, name="feedback_delete"),
 ]

@@ -64,7 +64,7 @@ def demo_ids():
 import datetime, json
 from django.db.models import Count
 from django.utils import timezone
-from assessment.models import Component
+from assessment.models import Component, Feedback
 from pupils.models import PupilFlag
 from rooms.models import Room, SeatingPlan
 from timetable.models import Class, Session, Timetable
@@ -97,6 +97,10 @@ print(json.dumps({
     "klass": str(Class.objects.filter(kind=Class.TIMETABLED).order_by("name").first().pk),
     "unit": str(unit.pk),
     "lesson": str(unit.lessons.first().pk),
+    "feedback_session": str(Feedback.objects.order_by("-session__date").first().session_id),
+    "recorded": str(Feedback.objects.exclude(recording_path="").first().pupil_id),
+    "nine_y": str(Class.objects.get(name="9Y Mu").pk),
+    "codes_unit": str(Component.objects.filter(unit__feedback_codes__isnull=False).first().unit_id),
 }))
 """
     env = environment(DEMO_DB)
@@ -199,6 +203,11 @@ def capture(ids, base, fresh, channel):
         visit(page, "/pupils/loans/", "19-loans")
         visit(page, "/settings/", "20-settings")
         visit(page, "/settings/data/", "21-data")
+        visit(page, f"/sweep/{ids['feedback_session']}/feedback/", "33-lesson-feedback")
+        visit(page, f"/pupils/class/{ids['nine_y']}/components/", "34-class-components")
+        visit(page, f"/pupils/class/{ids['nine_y']}/self-peer/", "35-self-and-peer")
+        visit(page, f"/pupils/{ids['recorded']}/", "36-pupil-feedback-and-observations")
+        visit(page, f"/plan/units/{ids['codes_unit']}/codes/", "37-feedback-codes-slide", full=False)
         ctx.close()
 
         ctx, page = signed_in(browser, LAPTOP, color_scheme="dark")

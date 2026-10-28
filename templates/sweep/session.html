@@ -6,6 +6,7 @@
 <p><a href="{% url 'sweep_home' %}?date={{ session.date|date:'Y-m-d' }}">← Sweep</a></p>
 <h1>{{ session.klass }} · {{ session.date|date:"D j M" }} {{ session.period }}</h1>
 {% if session.lesson %}<p>{{ session.lesson }}: {{ session.lesson.objective }}</p>{% endif %}
+{% with written=session.feedback.count %}<p><a href="{% url 'session_feedback' session.pk %}">Feedback for this lesson</a>{% if written %} ({{ written }} written){% endif %}</p>{% endwith %}
 
 {% if carried_in %}
 <section class="card"><div class="card__body flow">

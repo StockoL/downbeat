@@ -1,0 +1,7 @@
+{% comment %}The class's tabs in the Pupils area. `current` names the page showing.{% endcomment %}
+<nav class="cluster" aria-label="{{ klass }}">
+  <a href="{% url 'class_pupils' klass.pk %}"{% if current == "list" %} aria-current="page"{% endif %}>List</a>
+  <a href="{% url 'class_missing_out' klass.pk %}"{% if current == "missing" %} aria-current="page"{% endif %}>Missing out</a>
+  <a href="{% url 'class_components' klass.pk %}"{% if current == "components" %} aria-current="page"{% endif %}>Components</a>
+  <a href="{% url 'class_self_peer' klass.pk %}"{% if current == "self_peer" %} aria-current="page"{% endif %}>Self and peer</a>
+</nav>

@@ -92,4 +92,38 @@
     {% endif %}
   </section>
 </div>
+
+<div class="switcher">
+  <section class="flow">
+    <h2>Feedback</h2>
+    {% if feedback %}
+    <ul class="flow" role="list">
+      {% for f in feedback %}
+      <li class="flow">
+        <p class="sheet-list__when">{{ f.session.date|date:"j M" }} · {{ f.session.klass }}{% if f.group %} · with {{ f.group }}{% endif %}{% if f.component %} · {{ f.component }}{% endif %}</p>
+        {% include "assessment/_feedback_parts.html" %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No feedback yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>Observations</h2>
+    {% if observations %}
+    <ol class="flow sheet-list" role="list">
+      {% for o in observations %}
+      <li>
+        <span class="sheet-list__when">{{ o.created_at|date:"j M" }} · {{ o.session.klass }}{% if o.assessor != "teacher" %} · {{ o.get_assessor_display|lower }}{% endif %}</span>
+        <span>{{ o.component }}: <strong>{{ o.get_state_display|lower }}</strong>{% if o.next_step %} <small>next: {{ o.next_step }}</small>{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p>No observations yet.</p>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

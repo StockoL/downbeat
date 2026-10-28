@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% comment %}
+The unit's feedback codes as a slide for the class: numbers and words, black on white whatever
+the theme. Nothing about any pupil. Opens in its own window, to drag onto the projector's screen.
+{% endcomment %}
+
+{% block title %}Feedback codes · {{ unit }} · Downbeat{% endblock %}
+
+{% block body_class %}projector{% endblock %}
+
+{% block layout %}
+<main class="codes-slide flow">
+  <h1>{{ unit }}: feedback codes</h1>
+  {% if codes %}
+  <ol class="codes-slide__list" role="list">
+    {% for code in codes %}
+    <li><span class="codes-slide__number">{{ code.number }}</span> <span>{{ code.text }}{% if code.action %}<small>{{ code.action }}</small>{% endif %}</span></li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p>This unit has no feedback codes yet.</p>
+  {% endif %}
+</main>
+{% endblock %}

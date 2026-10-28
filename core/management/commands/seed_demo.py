@@ -19,7 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from assessment.models import Band, Check, Component, FeedbackCode, Strand
+from assessment.models import Band, Check, Component, Feedback, FeedbackCode, Observation, Strand
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
@@ -347,6 +347,44 @@ class Command(BaseCommand):
                 asked = session.lesson.checks.get().ask_in(session, decision=rng.choice(Check.DECISIONS)[0], minutes_in=minutes)
                 when = timezone.make_aware(datetime.datetime.combine(session.date, start)) + datetime.timedelta(minutes=minutes)
                 Check.objects.filter(pk=asked.pk).update(created_at=when, updated_at=when)
+
+        # Observations from past lessons: a handful each, states that wander (they may go backwards),
+        # each with its component's next step; and one lesson's self-assessment, entered afterwards.
+        for session in Session.objects.filter(date__lt=today, lesson__unit__components__isnull=False).distinct():
+            start, _ = timetable.period_times(session.period)
+            components = list(session.lesson.unit.components.all())
+            for pupil in rng.sample(list(session.klass.pupils.all()), 10):
+                component = rng.choice(components)
+                observation = Observation.objects.create(
+                    session=session, pupil=pupil, component=component, next_step=component.next_step_default,
+                    state=rng.choices([Observation.NOT_YET, Observation.PARTLY, Observation.SECURE], weights=[2, 4, 3])[0],
+                )
+                when = timezone.make_aware(datetime.datetime.combine(session.date, start)) + datetime.timedelta(minutes=rng.randint(10, 50))
+                Observation.objects.filter(pk=observation.pk).update(created_at=when, updated_at=when)
+        latest = Session.objects.filter(date__lt=today, klass=classes["9Y Mu"], lesson__isnull=False).order_by("-date").first()
+        if latest:
+            first = latest.lesson.unit.components.first()
+            for pupil in latest.klass.pupils.all():
+                Observation.objects.create(session=latest, pupil=pupil, component=first, assessor="self",
+                                           state=rng.choice([Observation.PARTLY, Observation.SECURE]), next_step=first.next_step_default)
+
+        # Feedback: three parts, one anchored in a recording for a pupil whose family agreed to recordings.
+        recorded = classes["9Y Mu"].pupils.first()
+        recorded.recording_permitted = True
+        recorded.save(update_fields=["recording_permitted"])
+        if latest:
+            first = latest.lesson.unit.components.first()
+            Feedback.objects.create(
+                session=latest, pupil=recorded, component=first, done_well="The riff sits right on the beat.",
+                develop="It speeds up when the band comes in.", how="Watch the drummer's hi-hat and lock to it.",
+                recording_path="Music/Recordings/9Y/riff-week-1.m4a", recording_seconds=102,
+            )
+            others = list(latest.klass.pupils.exclude(pk=recorded.pk))
+            for pupil, (develop, how) in zip(rng.sample(others, 2), [
+                ("The second riff clashes on beat three.", "Try starting it on the off-beat."),
+                ("The ending is untidy.", "Agree a signal for the last bar."),
+            ], strict=True):
+                Feedback.objects.create(session=latest, pupil=pupil, done_well="Kept going all the way through.", develop=develop, how=how)
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

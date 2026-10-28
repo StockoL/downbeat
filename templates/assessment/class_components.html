@@ -1,0 +1,48 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Components · {{ klass }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>{{ klass }}</h1>
+{% include "pupils/_class_tabs.html" with current="components" %}
+
+{% if not unit %}
+<p>Once {{ klass }} has had a lesson from a unit with components, each pupil's latest state on each of them shows here.</p>
+{% else %}
+<p>Each pupil's latest state on each of {{ unit }}'s components. States only: nothing here is added up, so each profile stays as uneven as it is.</p>
+<form method="get" class="cluster form-row">
+  <div class="field">
+    <label class="label" for="unit">Unit</label>
+    <select class="select" id="unit" name="unit">{% for u in units %}<option value="{{ u.pk }}" {% if u == unit %}selected{% endif %}>{{ u }}</option>{% endfor %}</select>
+  </div>
+  <div class="field">
+    <label class="label" for="assessor">Assessed by</label>
+    <select class="select" id="assessor" name="assessor">{% for value, label in assessors %}<option value="{{ value }}" {% if value == assessor %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+  </div>
+  <button class="button" type="submit">Show</button>
+</form>
+
+<div class="table-wrapper">
+  <table class="table heat" data-density="compact">
+    <thead>
+      <tr>
+        <th scope="col">Pupil</th>
+        {% for component in components %}<th scope="col">{{ component.text }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <th scope="row"><a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a></th>
+        {% for o in row.cells %}
+        {% if o %}<td class="heat__cell" data-state="{{ o.state }}" title="{{ o.created_at|date:'j M' }}{% if o.next_step %} · next: {{ o.next_step }}{% endif %}">{{ o.get_state_display }}</td>
+        {% else %}<td class="heat__cell"></td>{% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

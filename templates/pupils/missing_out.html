@@ -5,10 +5,7 @@
 {% block content %}
 <p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
 <h1>{{ klass }}</h1>
-<nav class="cluster" aria-label="{{ klass }}">
-  <a href="{% url 'class_pupils' klass.pk %}">List</a>
-  <a href="{% url 'class_missing_out' klass.pk %}" aria-current="page">Missing out</a>
-</nav>
+{% include "pupils/_class_tabs.html" with current="missing" %}
 
 <p>Who has had the fewest house points and the fewest turns since {{ since|date:"j F Y" }}, fewest first.</p>
 <form method="get" class="cluster form-row">

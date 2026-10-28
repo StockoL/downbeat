@@ -26,6 +26,7 @@ POST_ONLY = [
     ("seating_create", []), ("seating_move", [ANY]), ("seating_lock", [ANY]), ("seating_undo", [ANY]),
     ("seating_delete", [ANY]),
     ("hinge_copy", [ANY]),
+    ("feedback_delete", [ANY]),
     ("sync", []),
 ]
 

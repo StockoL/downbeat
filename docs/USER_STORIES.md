@@ -39,7 +39,7 @@ Status key: **Built** (with the step that built it), **Planned** (with its phase
 | --- | --- | --- | --- |
 | Setting up | US-01, 02, 03, 04, 05 | US-06 | US-07 |
 | Catch | US-10, 11, 12, 13, 14, 15, 16, 17 | US-18, 19, 20, 21, 22, 23, 24, 25 | US-26, 27, 28 |
-| Plan | US-30, 31, 32, 33, 34, 42 | US-35, 36, 37, 38, 39 | US-40, 41 |
+| Plan | US-30, 31, 32, 33, 34, 42 | US-35, 36, 37, 38, 39, 43 | US-40, 41 |
 | Sweep | US-50, 51, 52, 53 | US-54, 55 | US-56, 57 |
 | Pupils | US-60 | US-61, 62, 63 | US-64, 65 |
 | Reports and evenings | US-70, 71, 72, 75 | US-73, 74 | |
@@ -605,6 +605,18 @@ Scenario: The unit's bank
   And the unit's Assessment page lists both
 ```
 
+### US-43 Feedback codes on the projector
+**As** the teacher, **I want** a unit's numbered feedback codes as a slide, **so that** the whole class can look up what their number means.
+Should · Built (Phase 5, step 5.4)
+
+```gherkin
+Scenario: A slide with nothing about any pupil
+  Given "Riffs" has codes 1 and 2
+  When I choose "Feedback codes" from the room view's ⋯ menu
+  Then a new window shows "1 Count in before you start" and "2 …" in large type, black on white
+  And no pupil's name appears
+```
+
 ---
 
 ## 4. Sweep: at the desk, same day
@@ -737,33 +749,50 @@ Scenario: Plain counts
 
 ### US-62 Feedback in three parts
 **As** the teacher, **I want** to record feedback as done well, develop and how, optionally anchored to a moment in a recording, **so that** feedback is specific and actionable.
-Should · Planned (Phase 5, step 5.4)
+Should · Built (Phase 5, step 5.4)
 
 ```gherkin
 Scenario: Anchored to bar 9
-  When I add feedback with "how: left hand, bar 9" at 1:42 in the recording
-  Then the feedback plays the recording from 1:42
+  Given Ada M's family has agreed to recordings
+  When I write feedback for Ada M with "How: lock to the hi-hat", the recording's path and "1:42"
+  Then her pupil page shows the three parts and "Music/Recordings/9Y/riff-week-1.m4a at 1:42"
+
+Scenario: No permission, no recording
+  Given Sam R's family has not agreed to recordings
+  When I add a recording to Sam R's feedback
+  Then it isn't saved and I'm told recordings aren't permitted for Sam R
+
+Scenario: For a group
+  When I write feedback for "Band 1"
+  Then it shows on each member's pupil page, labelled with the group
 ```
 
 ### US-63 The class-by-component heat view
 **As** the teacher, **I want** to see where the whole class is not yet secure, **so that** I can review the unit, not rank pupils.
-Should · Planned (Phase 5, step 5.4)
+Should · Built (Phase 5, step 5.4)
 
 ```gherkin
 Scenario: States, never figures
-  When I open 9Y's heat view for "Blues"
-  Then each cell shows a pupil's latest state for a component
+  When I open 9Y's Components tab for "Riffs"
+  Then each cell shows a pupil's latest state on a component, in words
   And no total, average or percentage appears anywhere
+
+Scenario: Whose judgement
+  Given pupils have self-assessed
+  When I choose "Assessed by: Self"
+  Then the cells show their own latest states, kept apart from mine
 ```
 
 ### US-64 Self and peer assessment in batch
 **As** the teacher, **I want** to enter self- and peer-assessments from the class list in one pass, **so that** pupils' own judgements sit beside mine.
-Could · Planned (Phase 5, step 5.4)
+Could · Built (Phase 5, step 5.4)
 
 ```gherkin
 Scenario: Marked as self-assessed
-  When I enter a state for each pupil as "self"
-  Then each is recorded with the assessor "self"
+  Given 9Y's lesson on Tuesday was from "Riffs"
+  When I choose that lesson, "Plays a riff in time" and "Self", and mark each pupil's answer
+  Then each is recorded as a self-assessment with the component's next step
+  And pupils left at "None" have nothing recorded
 ```
 
 ### US-65 The equipment loan log

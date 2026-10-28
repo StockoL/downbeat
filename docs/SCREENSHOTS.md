@@ -2,7 +2,7 @@
 
 Evidence of the user journeys and key features, captured from the demo school. Every pupil in the demo is invented (first name and initial, generated from a fixed seed), so no real pupil data appears here.
 
-Captured on 28 October 2026 at the end of step 5.3, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
+Captured on 28 October 2026 at the end of step 5.4, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
 
 Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
 
@@ -102,6 +102,10 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 
 ![Prep for the next teaching day](screenshots/15-prep.png)
 
+**Feedback for a lesson**, from "Feedback for this lesson" at the top of its sweep (US-62). Done well, to develop and how, for a pupil or a group, optionally against a component. A recording is a path and a moment in it ("at 1:42"), and only for pupils whose families agreed.
+
+![A lesson's feedback page](screenshots/33-lesson-feedback.png)
+
 ## Journey: plan next week
 
 *Plan → class → unit → lesson → activities, components, resources.* (US-34, US-37, US-38, US-40)
@@ -117,6 +121,10 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 **A unit's Assessment tab**: pupil-facing components, each with a strand and default next step, feedback codes, the criteria file to download or import, and the unit's bank of hinge checks.
 
 ![Unit components and feedback codes](screenshots/11-unit-components.png)
+
+**The feedback codes as a slide** (US-43), opened in its own window from the Assessment tab, a lesson's feedback page or the room's ⋯ menu: large type, black on white, nothing about any pupil.
+
+![Feedback codes as a slide](screenshots/37-feedback-codes-slide.png)
 
 ## Journey: reshuffle a class
 
@@ -139,6 +147,18 @@ The summary reads "1 keep-apart pair side by side. 3 seats not meeting a flag's 
 **The pupil page** is the one place a flag's label, its note and "what works" appear (US-60). Relationships and notes sit beside them.
 
 ![A pupil's page](screenshots/17-pupil-page.png)
+
+Further down the page, **their feedback and observations**: feedback with any recording moment, and each observation's component, state and next step, marked when it was a self- or peer-assessment.
+
+![A pupil's feedback and observations](screenshots/36-pupil-feedback-and-observations.png)
+
+**The class by component** (US-63): each pupil's latest state on each of a unit's components, in words, greyscale only (an outline for not yet, a shade for partly, solid for secure). Teacher, self and peer are shown separately. Nothing is added up.
+
+![The class-by-component view](screenshots/34-class-components.png)
+
+**Self and peer in one go** (US-64): a lesson, a component, self or peer, then each pupil's answer. Each is kept with the component's next step.
+
+![Self- and peer-assessment entry](screenshots/35-self-and-peer.png)
 
 | Missing out (US-61) | Loans (US-65) |
 | --- | --- |
@@ -170,6 +190,7 @@ The summary reads "1 keep-apart pair side by side. 3 seats not meeting a flag's 
 | 2. A lesson with no input has no nags | The room view bar: plain counts, no colour, no prompts |
 | 3. Whole-class checks store the decision | The hinge sheet records a decision, never votes; pupils' answers only in the sweep, for a unit that opts in |
 | 4. An observation carries a next step | "Next step: Lock in with the drummer's snare" attached on the first tap |
+| 5. No progress arithmetic | The class-by-component view: states in words, no totals, averages or percentages |
 | 8. Flags are colour only | Seats show coloured edges; the label appears only on the pupil page |
 | 9. Projector and cover show names only | The projector view below: seats and names, black on white, no badges, flags, groups, dimming or absence |
 | 10. First name and initial | Every name in every shot |

@@ -1075,3 +1075,75 @@ button.room-strip {
   background: var(--color-text);
   color: var(--color-text-inverse);
 }
+
+/* --- Class-by-component view: three states in greyscale, words always shown. No red or green:
+       a state is not a grade, and the colour palettes are reserved for flags and groups. --- */
+.heat th[scope="col"] {
+  vertical-align: bottom;
+  min-inline-size: 7rem;
+}
+
+.heat__cell {
+  text-align: center;
+}
+
+.heat__cell[data-state="not_yet"] {
+  outline: 1px dashed var(--color-border-strong);
+  outline-offset: -4px;
+}
+
+.heat__cell[data-state="partly"] {
+  background: var(--color-surface-sunken);
+}
+
+.heat__cell[data-state="secure"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+/* --- Feedback's three parts --- */
+.feedback-parts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-3xs) var(--space-s);
+}
+
+.feedback-parts dt {
+  color: var(--color-text-muted);
+}
+
+.feedback-parts dd {
+  margin: 0;
+}
+
+/* --- Feedback codes as a slide: large type for the back of the room. --- */
+.codes-slide {
+  padding: var(--space-l);
+  font-size: var(--step-4);
+}
+
+.codes-slide h1 {
+  font-size: var(--step-5);
+}
+
+.codes-slide__list {
+  display: grid;
+  gap: var(--space-s);
+  padding: 0;
+}
+
+.codes-slide__list li {
+  display: grid;
+  grid-template-columns: 2em 1fr;
+  gap: var(--space-s);
+  align-items: baseline;
+}
+
+.codes-slide__list small {
+  display: block;
+  font-size: var(--step-2);
+}
+
+.codes-slide__number {
+  font-weight: 700;
+}

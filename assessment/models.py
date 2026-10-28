@@ -165,3 +165,43 @@ class CheckResponse(Base):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["check_asked", "pupil"], name="one_response_per_pupil")]
+
+
+class Feedback(Base):
+    """
+    Three-part feedback for a pupil or a group: what went well, what to develop, and how. An
+    optional point in a recording ("bar 9, left hand" at 1:42) anchors it to the performance.
+    """
+
+    session = models.ForeignKey("timetable.Session", on_delete=models.PROTECT, related_name="feedback")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, null=True, blank=True, related_name="feedback")
+    group = models.ForeignKey("pupils.Group", on_delete=models.PROTECT, null=True, blank=True, related_name="feedback")
+    component = models.ForeignKey(Component, on_delete=models.SET_NULL, null=True, blank=True, related_name="feedback")
+    done_well = models.TextField(blank=True)
+    develop = models.TextField(blank=True)
+    how = models.TextField(blank=True)
+    recording_path = models.CharField(max_length=500, blank=True, help_text="Where the recording lives. Never uploaded.")
+    recording_seconds = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(pupil__isnull=False, group__isnull=True) | models.Q(pupil__isnull=True, group__isnull=False),
+                name="feedback_is_for_a_pupil_or_a_group",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(recording_seconds__isnull=True) | ~models.Q(recording_path=""),
+                name="feedback_time_needs_a_recording",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.pupil or self.group} · {self.develop or self.done_well}"[:80]
+
+    @property
+    def at(self):
+        """The anchor as m:ss, or empty."""
+        if self.recording_seconds is None:
+            return ""
+        return f"{self.recording_seconds // 60}:{self.recording_seconds % 60:02d}"

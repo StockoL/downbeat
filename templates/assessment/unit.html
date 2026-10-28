@@ -23,7 +23,7 @@
   </section>
   <section class="flow">
     <h2>Feedback codes</h2>
-    <p class="field__hint">Numbered, for a whole-class slide: "3 = keep the pulse steady when you add the fill".</p>
+    <p class="field__hint">Numbered, for a whole-class slide: "3 = keep the pulse steady when you add the fill".{% if unit.feedback_codes.exists %} <a href="{% url 'codes_slide' unit.pk %}" target="_blank" rel="noopener">Show them as a slide</a>{% endif %}</p>
     {{ codes.management_form }}
     {% for f in codes %}{% include "partials/form_row.html" with form=f %}{% endfor %}
   </section>

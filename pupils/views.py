@@ -5,10 +5,11 @@ the only place a flag's label is ever shown.
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Count, ProtectedError
+from django.db.models import Count, ProtectedError, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from assessment.models import Feedback
 from timetable.models import Class, Pupil, SessionAttendance
 
 from .forms import FlagTypeFormSet, PupilFlagForm, RelationshipForm
@@ -52,6 +53,11 @@ def pupil_page(request, pk):
         messages.success(request, "Saved.")
         return redirect("pupil_page", pk=pupil.pk)
     notes = pupil.notes.live().select_related("note_type", "session__klass").order_by("-created_at")[:100]
+    groups = pupil.group_memberships.values_list("group_id", flat=True)
+    feedback = (Feedback.objects.filter(Q(pupil=pupil) | Q(group__in=groups))
+                .select_related("session__klass", "group", "component").order_by("-created_at")[:50])
+    observations = (pupil.observations.filter(deleted_at__isnull=True)
+                    .select_related("component", "session__klass").order_by("-created_at")[:50])
     return render(request, "pupils/pupil.html", {
         "nav": "pupils",
         "pupil": pupil,
@@ -61,6 +67,8 @@ def pupil_page(request, pk):
         "relationships": [{"r": r, "other": r.other(pupil)} for r in Relationship.involving(pupil)],
         "relationship_form": relationship_form if relationship_form.fields["other"].queryset.exists() else None,
         "notes": notes,
+        "feedback": feedback,
+        "observations": observations,
         "loans": pupil.loans.filter(returned_at__isnull=True).select_related("item"),
     })
 
