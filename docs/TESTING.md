@@ -10,7 +10,7 @@ How Downbeat is tested, how to run the tests, and what each part of the suite co
 .venv\Scripts\ruff check .
 ```
 
-The suite runs in about ten seconds: 445 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
+The suite runs in about ten seconds: 449 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs on every push and pull request. It checks out Downbeat and LooseLeaf-UI side by side, then runs:
 
@@ -59,6 +59,7 @@ Conventions:
 | `core/tests/test_pwa.py` | 6 | Manifest, versioned service worker, every precached file exists, offline page holds no pupil data, sign-out clears saved pages |
 | `core/tests/test_audit.py` | 87 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
 | `core/tests/test_errors.py` | 9 | The error pages with a way back (404, 403, 500 rendered without a request, the expired form), a malformed id answering 400, the failed-request line on every page, the form field limit |
+| `core/tests/test_records_kept.py` | 4 | Deleting a unit or a component never takes pupils' records with it: refused with the reason when observations or judgements point at it |
 | `core/tests/test_rollover.py` | 9 | The review page's defaults (no flag labels), archiving, moving up and leavers, kept and dropped flags, closed and carried actions, no rollover without a backup, the read-only archive, the working lists, bringing a class back, and pasting next year's lists (reuse, another year, a leaver, two matches) |
 | `core/tests/test_seed_demo.py` | 4 | The demo builds, and refuses the real database |
 | `core/tests/test_scaffold.py` | 2 | The abstract Base model (UUID, timestamps) and the desk layout |
@@ -85,7 +86,7 @@ Conventions:
 | `assessment/test_feedback.py` | 17 | Feedback for a pupil or a group, written from a lesson or a pupil's page, its three parts, recordings only with permission (every member for a group), the m:ss moment, codes as a slide with no pupil in it, the class-by-component view (latest state, by assessor, nothing added up), self and peer in one go with the next step attached |
 | `assessment/test_recordings.py` | 13 | The exemplar bank and its permission, recordings on the pupil's timeline in order, the link-or-path rule, removing references past the delete-by date or without permission (and from the Data page and the command), and the per-pupil export following every link to a pupil |
 | `reports/test_evenings.py` | 12 | Slots from the times and breaks, kept bookings when remade, the evening form, one time per family, booking from the class list and the return-address guard, freeing a time, the school's CSV and unique name matching, the follow-up action once, a note from the night |
-| `reports/test_reports.py` | 14 | Drafting from the bank (the unit's sentence first) and feedback, the house-style warnings, saving and redrafting, the count, the CSV (name, UPN, bands, comment, no overall), report settings, promote-a-note marked once |
+| `reports/test_reports.py` | 9 | Drafting from the bank (the unit's sentence first) and feedback, the house-style warnings, saving and redrafting, the count, the CSV (name, UPN, bands, comment, no overall), report settings, promote-a-note marked once |
 | `reports/test_judgements.py` | 5 | The judgement grid: evidence shown, no band suggested, saving and removing, the date kept on an unchanged save, waiting for bands and a unit, the UPN on the pupil form |
 | `assessment/test_checks.py` | 18 | Hinge checks: misconception-tagged wrong answers, the bank and duplication, planned-or-asked constraint, decisions through sync (minutes in, idempotent, last write wins, two devices, taking back), the greyed button, the sweep's judgement, pupils' answers opt-in and only with a decision (rule 3) |
 

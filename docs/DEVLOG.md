@@ -100,7 +100,7 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 | `43a0aad` | 5.3 Hinge checks: written in the lesson editor with misconception-tagged wrong answers, a bank per unit, the bar's Hinge button with a timed sheet and three decisions, offline through the queue, the judgement in the sweep, and pupils' answers when a unit opts in |
 | `bf535a0` | 5.4 Feedback: three parts per lesson for a pupil or a group with a recording moment (permission enforced), codes as a slide, the class-by-component view, self and peer entry in one go, feedback and observations on the pupil page |
 | `c317a1f` | Feedback written whenever: from the pupil page and the room view's ⋯ menu as well as the sweep |
-| (this step) | 5.5 The exemplar bank, recordings on observations, each pupil's recordings over time, removing recordings that may no longer be kept, and everything held about one pupil in one file |
+| `c6806b0` | 5.5 The exemplar bank, recordings on observations, each pupil's recordings over time, removing recordings that may no longer be kept, and everything held about one pupil in one file |
 
 **Checked.** On the demo school at iPad size: a long-press opened the sheet for the unit's three components; "Partly" saved with the default next step; "Change" replaced it; the Log showed the observation; after sync the laptop's database held it with the changed step.
 
@@ -176,7 +176,7 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 | Commit | Step |
 | --- | --- |
-| (this step) | The rollover: a review page that backs up, archives last year's classes read-only, moves pupils up or marks them as left, reviews flags and keep-aparts, closes or carries open actions, and removes recordings past their date; pasting a class list now reuses the pupils who stay |
+| `7a7b24a` | The rollover: a review page that backs up, archives last year's classes read-only, moves pupils up or marks them as left, reviews flags and keep-aparts, closes or carries open actions, and removes recordings past their date; pasting a class list now reuses the pupils who stay |
 
 **Checked.** In Edge on the demo school, a real rollover: the page offered 6 classes, 92 pupils and 9 open actions; applying it wrote a real backup file first, archived all six classes, moved 92 pupils up and closed 9 actions; the Pupils area then listed them under "Archived classes" and Plan had none. Leavers, dropped flags, carried actions, the read-only archive (sync, seating, sweep), pasting next year's lists and a failed backup stopping everything are covered by the tests.
 
@@ -195,6 +195,19 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - The form field limit raised so a whole school's rollover fits.
 
 **Checked.** In Edge on the demo school: forcing the seating editor's request to fail with a server error, and then cutting it off entirely, left the board as it was with "That wasn't saved: something went wrong on the laptop…" and "The laptop can't be reached…"; an unknown address showed the Not found page with Today and Go back. The pages, the 400 for a malformed id and the expired-form page are covered by the tests.
+
+## Review pass
+
+*Asked for once everything in the build order was built: read the whole app as a reviewer would.*
+
+| Commit | Found and put right |
+| --- | --- |
+| `f8988f8` | No error pages of its own; a malformed id answered 500; the seating editor would paste an error page into the board (see "Hardening: errors and bad input" above) |
+| `56303b5` | Deleting a unit whose components had observations failed with a server error, and would otherwise have deleted its summative judgements; a component with observations couldn't be removed cleanly. Records now keep their unit and component, and the refusal says why |
+| `dd3b3c2` | On an iPad the room's seats were 35 to 43px tall, under UX.md's 44-point minimum. Below desk width the canvas grows taller to fit them, without widening or overlapping |
+| docs | The docs checked against the code: test counts, story statuses and commit placeholders corrected |
+
+**Checked and found sound.** No unescaped output, no HTML from script except the laptop's own escaped templates, no raw SQL, no CSRF exemption, every POST form carries its token and every new-window link has `noopener`; `manage.py check --deploy` passes with its three documented silences; every protected key's parent is either guarded in its view or never deleted; at four iPad sizes and a laptop, nothing in the bar is under 44px, nothing overflows sideways, no seat hides under the bar or overlaps another, and the hinge sheet fits.
 
 ## Still to come
 

@@ -732,7 +732,7 @@ Scenario: Kept only with a decision
 
 ### US-60 Everything about one pupil, in one place
 **As** the teacher, **I want** a pupil page with their flags, instrument, notes, observations, feedback, recordings and loans, **so that** I can prepare for a conversation at the desk.
-Must · Partly (built through Phase 5; judgements join in Phase 6)
+Must · Built (Phases 3 to 6)
 
 ```gherkin
 Scenario: The only place labels appear
