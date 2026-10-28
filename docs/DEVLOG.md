@@ -147,7 +147,9 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 | Commit | Step |
 | --- | --- |
-| (this step) | 6.1 Summative judgements: a band per strand per unit on the class's Judgements tab, with each pupil's evidence and the unit's exemplars in view and nothing suggested; judgements on the pupil page; an optional UPN for the export |
+| `2cfa26a` | 6.1 Summative judgements: a band per strand per unit on the class's Judgements tab, with each pupil's evidence and the unit's exemplars in view and nothing suggested; judgements on the pupil page; an optional UPN for the export |
+
+| (this step) | 6.2 Reports: the comment bank and house style in Settings, each pupil's comment drafted from their bands and feedback, edited and kept, with a live count, house-style warnings and Copy; CSV export; promote-a-note |
 
 **6.1 checked.** The screenshot tool loaded 9Y's Judgements tab with the demo's judgements: evidence above each choice, "Not judged" where none was made. Saving, removing, keeping the date on an unchanged save, and the per-pupil export now including judgements are covered by the tests.
 
@@ -155,3 +157,5 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 - **Phase 6:** summative judgements entered against exemplars, report sentences, CSV and clipboard export with a character counter, promote-a-note, parents' evenings.
 - **Rollover**, before the second September.
+
+**6.2 checked.** In Edge on the demo school: 9Y's Reports tab drafted Ada M's comment from her three bands and her feedback (221 of 600 characters); typing updated the count; Copy put the text on the clipboard and the button said so; Save kept it. On a pupil page, "Copy for the school system" copied the note's words and marked it "promoted 28 Oct". Drafting, the house-style checks, the CSV and settings are covered by the tests.

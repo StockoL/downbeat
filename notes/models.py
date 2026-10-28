@@ -41,6 +41,7 @@ class Note(Base):
         "timetable.Session", on_delete=models.SET_NULL, null=True, blank=True, related_name="carried_notes",
     )
     deleted_at = models.DateTimeField(null=True, blank=True)
+    promoted_to_mis_at = models.DateTimeField(null=True, blank=True, help_text="When its text was copied for the school system.")
 
     objects = NoteQuerySet.as_manager()
 

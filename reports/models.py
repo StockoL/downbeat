@@ -26,3 +26,41 @@ class SummativeJudgement(Base):
 
     def __str__(self):
         return f"{self.pupil} · {self.unit} · {self.strand}: {self.band}"
+
+
+class ReportSentence(Base):
+    """The comment bank: a sentence for a band in a strand, for one unit or any. {name} becomes the pupil's first name."""
+
+    band = models.ForeignKey("assessment.Band", on_delete=models.CASCADE, related_name="sentences")
+    strand = models.ForeignKey("assessment.Strand", on_delete=models.CASCADE, related_name="sentences")
+    unit = models.ForeignKey("plans.Unit", on_delete=models.CASCADE, null=True, blank=True, related_name="sentences",
+                             help_text="Leave blank to use it for any unit.")
+    text = models.TextField(help_text="Third person; {name} becomes the pupil's first name.")
+
+    class Meta:
+        ordering = ["strand__order", "band__order"]
+
+    def __str__(self):
+        return self.text[:60]
+
+
+class ReportDraft(Base):
+    """A pupil's report comment for one class, as edited. Copied out; never sent anywhere."""
+
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="report_drafts")
+    klass = models.ForeignKey("timetable.Class", on_delete=models.CASCADE, related_name="report_drafts")
+    text = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["pupil", "klass"], name="one_draft_per_pupil_per_class")]
+
+
+class ReportStyle(Base):
+    """The school's house style, set by the teacher: one row, made the first time it is saved."""
+
+    length_cap = models.PositiveSmallIntegerField(null=True, blank=True, help_text="The school system's character limit, if it has one.")
+    third_person = models.BooleanField(default=True, help_text="Warn when a comment says \"you\", \"your\", \"I\" or \"my\".")
+
+    @classmethod
+    def current(cls):
+        return cls.objects.first() or cls()

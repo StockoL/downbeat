@@ -78,7 +78,7 @@
   </section>
 
   <section class="flow">
-    <h2>Notes</h2>
+    <h2 id="notes">Notes</h2>
     {% if notes %}
     <ol class="flow sheet-list" role="list">
       {% for note in notes %}
@@ -86,6 +86,14 @@
         <span class="sheet-list__when">{{ note.session.date|date:"j M" }} · {{ note.session.klass }}</span>
         <span>{{ note.icon }} {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
         {% if note.actionable %}<span class="sheet-list__state">{% if note.done_at %}done{% else %}open{% endif %}</span>{% endif %}
+        {% if note.promoted_to_mis_at %}<span class="sheet-list__state">promoted {{ note.promoted_to_mis_at|date:"j M" }}</span>
+        {% else %}
+        <form method="post" action="{% url 'note_promote' note.pk %}" data-text="{% if note.note_type %}{{ note.label }}{% if note.text %}: {{ note.text }}{% endif %}{% else %}{{ note.text }}{% endif %}"
+              onsubmit="event.preventDefault(); navigator.clipboard.writeText(this.dataset.text).finally(() => this.submit())">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small">Copy for the school system</button>
+        </form>
+        {% endif %}
       </li>
       {% endfor %}
     </ol>

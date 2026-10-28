@@ -1176,3 +1176,18 @@ button.room-strip {
   font-size: var(--step--1);
   color: var(--color-text-muted);
 }
+
+/* --- Report comments: the count and the house-style warnings under each. --- */
+.report__name {
+  font-size: var(--step-1);
+}
+
+.report__count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.report__warnings {
+  padding: 0;
+  color: var(--color-status-warning-text);
+}

@@ -852,7 +852,7 @@ Scenario: Saving again changes nothing it shouldn't
 
 ### US-71 Draft reports from sentences
 **As** the teacher, **I want** report text assembled from my comment bank and the pupil's feedback, with a live character count, **so that** a class's reports take one sitting.
-Must · Planned (Phase 6)
+Must · Built (Phase 6, step 6.2)
 
 ```gherkin
 Scenario: Within the MIS limit
@@ -860,26 +860,37 @@ Scenario: Within the MIS limit
   When I edit a pupil's assembled report
   Then a counter shows the characters used against 600
   And "Copy" puts the text on the clipboard
+
+Scenario: Drafted from my own words
+  Given Ada M was judged "Secure" for Performing in "Riffs"
+  And the comment bank has "{name} performs securely, keeping time with others." for Secure in Performing
+  When I open 9Y's Reports tab
+  Then Ada M's draft begins "Ada performs securely, keeping time with others."
+
+Scenario: The house style warns
+  When a comment says "you" or runs past the limit
+  Then a warning shows under it, and it can still be saved
 ```
 
 ### US-72 Export for the school system
 **As** the teacher, **I want** a CSV of names, bands per strand and comments, **so that** I can enter them into the MIS. Downbeat never writes to it.
-Must · Planned (Phase 6)
+Must · Built (Phase 6, step 6.2)
 
 ```gherkin
-Scenario: The derived figure is labelled
-  When I export a class's CSV with an overall figure
-  Then that column is labelled as derived
+Scenario: Bands and comments, nothing computed
+  When I download 9Y's reports as CSV
+  Then each row has the pupil's name, UPN, a band for each unit and strand they were judged in, and their comment
+  And there is no overall figure
 ```
 
 ### US-73 Promote a note to the school system
 **As** the teacher, **I want** to copy a private note for entry in the school's system and mark it promoted, **so that** I know what has been shared.
-Should · Planned (Phase 6)
+Should · Built (Phase 6, step 6.2)
 
 ```gherkin
 Scenario: Marked, not sent
-  When I promote a note
-  Then its text is copied to the clipboard and it shows as promoted
+  When I choose "Copy for the school system" on a note
+  Then its text is copied to the clipboard and it shows as promoted with the date
   And nothing is sent anywhere
 ```
 

@@ -3,6 +3,7 @@ from django.urls import include, path
 from assessment.views import bands, strands
 from notes.views import sync_ops
 from pupils.views import flag_types
+from reports.report_views import report_settings
 
 urlpatterns = [
     path("", include("core.urls")),
@@ -16,6 +17,7 @@ urlpatterns = [
     path("settings/flags/", flag_types, name="flag_types"),
     path("settings/strands/", strands, name="strands"),
     path("settings/bands/", bands, name="bands"),
+    path("settings/reports/", report_settings, name="report_settings"),
     path("settings/", include("timetable.urls")),
     path("settings/rooms/", include("rooms.urls")),
 ]

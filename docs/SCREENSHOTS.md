@@ -168,6 +168,14 @@ Further down the page, **their feedback and observations**, then **recordings ov
 
 ![The judgement grid](screenshots/38-class-judgements.png)
 
+**Reports** (US-71, US-72): each pupil's comment drafted from their bands and the comment bank, then their latest feedback, with the count against the school's limit, Save, Copy and Draft again. The whole class downloads as CSV.
+
+![The class's reports](screenshots/39-class-reports.png)
+
+**Settings → Reports**: the house style (the character limit and the third-person check) and the comment bank.
+
+![Report settings](screenshots/40-report-settings.png)
+
 **The ensemble register** for a choir rehearsal (US-24).
 
 ![The choir register](screenshots/31-ipad-ensemble-register.png)

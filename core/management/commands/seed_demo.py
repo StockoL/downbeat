@@ -25,7 +25,7 @@ from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
 from plans.services import fill_from_unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
-from reports.models import SummativeJudgement
+from reports.models import ReportSentence, ReportStyle, SummativeJudgement
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
@@ -419,6 +419,20 @@ class Command(BaseCommand):
             for strand in Strand.objects.filter(components__unit=units[9]).distinct():
                 SummativeJudgement.objects.create(pupil=pupil, unit=units[9], strand=strand, band=rng.choice(bands[:2]),
                                                   judged_at=today - datetime.timedelta(days=1))
+
+        # The comment bank and house style: a sentence for each band in each strand, and the school's limit.
+        ReportStyle.objects.create(length_cap=600, third_person=True)
+        words = {
+            "Performing": ["{name} is beginning to hold a part steady in an ensemble.", "{name} performs securely, keeping time with others.",
+                           "{name} performs with control and leads others in the group."],
+            "Composing": ["{name} is starting to shape short musical ideas.", "{name} composes ideas that fit together and repeat with purpose.",
+                          "{name} develops ideas inventively and with a clear structure."],
+            "Listening": ["{name} is learning to describe what is heard.", "{name} identifies how music is built and changed.",
+                          "{name} listens with real precision, naming devices confidently."],
+        }
+        for strand in Strand.objects.all():
+            for band, text in zip(Band.objects.order_by("order"), words[strand.name], strict=True):
+                ReportSentence.objects.create(band=band, strand=strand, text=text)
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

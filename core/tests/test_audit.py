@@ -28,6 +28,7 @@ POST_ONLY = [
     ("hinge_copy", [ANY]),
     ("feedback_delete", [ANY]),
     ("exemplar_add", [ANY]), ("exemplar_delete", [ANY]), ("data_purge_recordings", []),
+    ("note_promote", [ANY]),
     ("sync", []),
 ]
 

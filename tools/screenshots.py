@@ -210,6 +210,8 @@ def capture(ids, base, fresh, channel):
         visit(page, f"/pupils/{ids['recorded']}/", "36-pupil-feedback-and-observations")
         visit(page, f"/plan/units/{ids['codes_unit']}/codes/", "37-feedback-codes-slide", full=False)
         visit(page, f"/pupils/class/{ids['nine_y']}/judgements/", "38-class-judgements")
+        visit(page, f"/pupils/class/{ids['nine_y']}/reports/", "39-class-reports", full=False)
+        visit(page, "/settings/reports/", "40-report-settings", full=False)
         ctx.close()
 
         ctx, page = signed_in(browser, LAPTOP, color_scheme="dark")

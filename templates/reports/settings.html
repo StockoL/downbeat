@@ -1,0 +1,22 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Reports · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Reports</h1>
+<p>Your house style and comment bank. Report comments are drafted from the bank's sentence for each band you judged, then edited and copied into the school system. Downbeat never sends them anywhere.</p>
+<form method="post" class="flow">
+  {% csrf_token %}
+  <section class="flow">
+    <h2>House style</h2>
+    {{ style_form }}
+  </section>
+  <section class="flow">
+    <h2>Comment bank</h2>
+    <p class="field__hint">A sentence for a band in a strand, for one unit or (left blank) any. Write it in the third person; <code>{name}</code> becomes the pupil's first name.</p>
+    {{ sentences.management_form }}
+    {% for form in sentences %}{% include "partials/form_row.html" %}{% endfor %}
+  </section>
+  <button class="button" type="submit" data-variant="primary">Save report settings</button>
+</form>
+{% endblock %}

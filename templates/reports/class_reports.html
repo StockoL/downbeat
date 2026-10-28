@@ -1,0 +1,39 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Reports · {{ klass }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>{{ klass }}</h1>
+{% include "pupils/_class_tabs.html" with current="reports" %}
+
+<p>Each pupil's comment, drafted from your judgements and the <a href="{% url 'report_settings' %}">comment bank</a>, then their latest feedback on what to develop. Edit, save, and copy it into the school system{% if style.length_cap %}, which takes up to {{ style.length_cap }} characters{% endif %}.</p>
+<p><a class="button" href="{% url 'reports_csv' klass.pk %}">Download as CSV</a></p>
+{% if not has_bank %}<p>The comment bank is empty, so drafts hold only feedback. Its sentences are written in <a href="{% url 'report_settings' %}">Settings → Reports</a>.</p>{% endif %}
+
+<ul class="flow" role="list">
+  {% for row in rows %}
+  <li class="card" id="pupil-{{ row.pupil.pk }}"><div class="card__body flow">
+    <div class="cluster">
+      <h2 class="report__name"><a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a></h2>
+      {% for j in row.judgements %}<small>{{ j.unit }} · {{ j.strand }}: <strong>{{ j.band }}</strong></small>{% empty %}<small>Not judged yet</small>{% endfor %}
+      {% if not row.saved %}<small>(a draft, not saved yet)</small>{% endif %}
+    </div>
+    <form method="post" class="flow">
+      {% csrf_token %}
+      <input type="hidden" name="pupil" value="{{ row.pupil.pk }}">
+      <label class="visually-hidden" for="text-{{ row.pupil.pk }}">{{ row.pupil }}'s comment</label>
+      <textarea class="textarea" id="text-{{ row.pupil.pk }}" name="text" rows="4"
+                oninput="this.form.querySelector('[data-count]').textContent = this.value.length">{{ row.text }}</textarea>
+      <p class="report__count"><span data-count>{{ row.text|length }}</span>{% if style.length_cap %} of {{ style.length_cap }}{% endif %} characters</p>
+      {% if row.warnings %}<ul class="report__warnings" role="list">{% for w in row.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+      <div class="cluster">
+        <button class="button" type="submit" data-variant="primary">Save</button>
+        <button class="button" type="button" onclick="navigator.clipboard.writeText(this.form.elements.text.value).then(() => { this.textContent = 'Copied'; })">Copy</button>
+        <button class="button" type="submit" name="assemble" data-variant="ghost" onclick="return confirm('Replace this comment with a fresh draft from the comment bank?')">Draft again</button>
+      </div>
+    </form>
+  </div></li>
+  {% endfor %}
+</ul>
+{% endblock %}

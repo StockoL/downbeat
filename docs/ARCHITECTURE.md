@@ -30,7 +30,7 @@ The laptop's SQLite database is the only source of truth. The iPad holds a cache
 | `notes` | NoteType, Note, SpokenTo, Goal, ChecklistItem, ChecklistTick | `sync.py`, `state.py`, `goals.py` |
 | `pupils` | FlagType, PupilFlag, Relationship, Group, GroupMember, LoanItem, Loan; the Pupils area | `missing_out.py` |
 | `plans` | Scheme, Unit, LessonPlan, PlanActivity, Resource, ActivityStatus, SessionReflection, PrepItem; Sweep and Prep | `services.py`, `sweep.py`, `prep.py` |
-| `reports` | SummativeJudgement (Phase 6) | `views.py` (the judgement grid) |
+| `reports` | SummativeJudgement, ReportSentence, ReportDraft, ReportStyle (Phase 6) | `views.py` (the judgement grid), `compose.py` (drafting and house style), `report_views.py` |
 | `assessment` | Strand, Band, Component, FeedbackCode, Observation, Check, CheckResponse, Feedback, Exemplar | `criteria.py`, `hinge.py`, `recordings.py`, `forms.py`, `feedback_views.py` |
 
 Areas map to tempos, not tables: Today (catch), Sweep and Prep (sweep), Plan (plan), Pupils (any time) and Settings.
