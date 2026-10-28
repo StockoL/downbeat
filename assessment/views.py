@@ -82,10 +82,15 @@ def unit_assessment(request, pk):
     for form in codes.forms:
         form.fields["component"].queryset = unit.components.all()
     if data is not None and components.is_valid() and codes.is_valid():
-        with transaction.atomic():
-            components.save()
-            codes.save()
-        messages.success(request, "Saved.")
+        try:
+            with transaction.atomic():
+                components.save()
+                codes.save()
+        except ProtectedError:
+            messages.error(request, "A component with observations against it can't be deleted: they are part of pupils' "
+                                    "records. Change its words instead. Nothing was saved.")
+        else:
+            messages.success(request, "Saved.")
         return redirect("unit_assessment", pk=unit.pk)
     return render(request, "assessment/unit.html", {
         "nav": "plan", "unit": unit, "components": components, "codes": codes, "has_strands": Strand.objects.exists(),

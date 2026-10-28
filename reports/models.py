@@ -14,7 +14,7 @@ class SummativeJudgement(Base):
     """One band for one strand of one unit, entered by the teacher."""
 
     pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="judgements")
-    unit = models.ForeignKey("plans.Unit", on_delete=models.CASCADE, related_name="judgements")
+    unit = models.ForeignKey("plans.Unit", on_delete=models.PROTECT, related_name="judgements")  # a record, not a plan
     strand = models.ForeignKey("assessment.Strand", on_delete=models.PROTECT, related_name="judgements")
     band = models.ForeignKey("assessment.Band", on_delete=models.PROTECT, related_name="judgements")
     evidence_note = models.CharField(max_length=300, blank=True)

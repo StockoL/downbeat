@@ -4,6 +4,7 @@ import datetime
 
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -70,7 +71,12 @@ def unit_duplicate(request, pk):
 def unit_delete(request, pk):
     unit = get_object_or_404(Unit, pk=pk)
     scheme_pk = unit.scheme_id
-    unit.delete()
+    try:
+        unit.delete()
+    except ProtectedError:
+        messages.error(request, f"{unit} has observations or judgements recorded against it, so it is kept: they are part of "
+                                "pupils' records. Its lessons and components can still be changed.")
+        return redirect("unit", pk=unit.pk)
     messages.success(request, f"Deleted {unit}. Sessions that taught it keep their notes.")
     return redirect("scheme", pk=scheme_pk)
 
