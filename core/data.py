@@ -19,13 +19,14 @@ from assessment.models import Band, Check, CheckResponse, Component, Exemplar, F
 from notes.models import ChecklistItem, ChecklistTick, Goal, Note, NoteType, SpokenTo
 from plans.models import ActivityStatus, LessonPlan, PlanActivity, PrepItem, Resource, Scheme, SessionReflection, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
+from reports.models import SummativeJudgement
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from timetable.models import Class, Pupil, PupilRotation, Rotation, Session, SessionAttendance, Slot, Timetable
 
 # Every Downbeat table, children before parents, so deleting in this order never trips a protected key.
 APP_MODELS = [
     # what happened in lessons (checks and observations first: they protect their session)
-    CheckResponse, Check, Feedback, Observation, PrepItem, SessionReflection, ActivityStatus,
+    SummativeJudgement, CheckResponse, Check, Feedback, Observation, PrepItem, SessionReflection, ActivityStatus,
     ChecklistTick, ChecklistItem, Goal, SpokenTo, Note, SessionAttendance,
     # seating and sessions
     SeatAssignment, SeatingPlan, Session, Slot, Seat, Room,
@@ -38,7 +39,7 @@ APP_MODELS = [
     # the frame
     Class, Pupil, NoteType, Timetable,
 ]
-EXPORT_APPS = ["timetable", "rooms", "notes", "pupils", "plans", "assessment"]
+EXPORT_APPS = ["timetable", "rooms", "notes", "pupils", "plans", "assessment", "reports"]
 BACKUP_GLOB = "downbeat-*.sqlite3"
 
 

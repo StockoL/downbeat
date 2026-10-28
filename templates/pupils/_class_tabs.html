@@ -4,4 +4,5 @@
   <a href="{% url 'class_missing_out' klass.pk %}"{% if current == "missing" %} aria-current="page"{% endif %}>Missing out</a>
   <a href="{% url 'class_components' klass.pk %}"{% if current == "components" %} aria-current="page"{% endif %}>Components</a>
   <a href="{% url 'class_self_peer' klass.pk %}"{% if current == "self_peer" %} aria-current="page"{% endif %}>Self and peer</a>
+  <a href="{% url 'class_judgements' klass.pk %}"{% if current == "judgements" %} aria-current="page"{% endif %}>Judgements</a>
 </nav>

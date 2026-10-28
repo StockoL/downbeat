@@ -140,6 +140,19 @@
 </div>
 
 <section class="flow">
+  <h2>Judgements</h2>
+  {% if judgements %}
+  <ul class="flow sheet-list" role="list">
+    {% for j in judgements %}
+    <li><span class="sheet-list__when">{{ j.judged_at|date:"j M Y" }} · {{ j.unit }}</span> <span>{{ j.strand }}: <strong>{{ j.band }}</strong>{% if j.evidence_note %} <small>{{ j.evidence_note }}</small>{% endif %}</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No judgements yet. They are made per unit on the class's <em>Judgements</em> tab.</p>
+  {% endif %}
+</section>
+
+<section class="flow">
   <h2 id="timeline">Recordings over time</h2>
   <p class="field__hint">{{ pupil }}'s recordings, oldest first, one line per component, each with what was seen or said then. Compared with their own earlier work, never with anyone else's.</p>
   {% if timeline %}

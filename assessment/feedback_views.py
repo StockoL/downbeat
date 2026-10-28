@@ -46,7 +46,7 @@ def codes_slide(request, pk):
     return render(request, "assessment/codes_slide.html", {"unit": unit, "codes": unit.feedback_codes.all()})
 
 
-def _units_taught(klass):
+def units_taught(klass):
     """Units with components that this class has had a lesson from, most recent first."""
     seen = []
     sessions = Session.objects.filter(klass=klass, lesson__unit__components__isnull=False).exclude(status=Session.CANCELLED)
@@ -69,7 +69,7 @@ def class_components(request, pk):
     percentage, so it shows where the class is not yet secure without turning it into a score.
     """
     klass = get_object_or_404(Class, pk=pk)
-    units = _units_taught(klass)
+    units = units_taught(klass)
     unit = _chosen(request, units, "unit")
     assessor = request.GET.get("assessor") if request.GET.get("assessor") in dict(Observation.ASSESSORS) else "teacher"
     components = list(unit.components.all()) if unit else []

@@ -1,0 +1,72 @@
+{% extends "layouts/desk.html" %}
+{% load recordings %}
+
+{% block title %}Judgements · {{ klass }} · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>{{ klass }}</h1>
+{% include "pupils/_class_tabs.html" with current="judgements" %}
+
+{% if not bands %}
+<p>Judgements use your bands, which are set up in <a href="{% url 'bands' %}">Settings → Bands</a>.</p>
+{% elif not unit %}
+<p>Once {{ klass }} has had a lesson from a unit with components, its judgements are made here.</p>
+{% else %}
+<p>A band for each strand of {{ unit }}, chosen by you with the evidence beside it. Nothing here is worked out for you: each pupil's latest state on the strand's components is shown, and the band is yours to choose.</p>
+<form method="get" class="cluster form-row">
+  <div class="field">
+    <label class="label" for="unit">Unit</label>
+    <select class="select" id="unit" name="unit">{% for u in units %}<option value="{{ u.pk }}" {% if u == unit %}selected{% endif %}>{{ u }}</option>{% endfor %}</select>
+  </div>
+  <button class="button" type="submit">Show</button>
+</form>
+
+{% if exemplars %}
+<details class="accordion">
+  <summary class="accordion__trigger">{{ unit }}'s exemplars, to listen against</summary>
+  <ul class="accordion__content flow" role="list">
+    {% for e in exemplars %}
+    <li class="cluster"><strong>{{ e.get_level_display }}</strong> <span>{% if e.component %}{{ e.component }}{% else %}Whole unit{% endif %}</span> <span>{% recording e.recording_path %}</span>{% if e.note %} <small>{{ e.note }}</small>{% endif %}</li>
+    {% endfor %}
+  </ul>
+</details>
+{% endif %}
+
+<form method="post" class="flow">
+  {% csrf_token %}
+  <input type="hidden" name="unit" value="{{ unit.pk }}">
+  <div class="table-wrapper">
+    <table class="table judgements" data-density="compact">
+      <thead>
+        <tr><th scope="col">Pupil</th>{% for strand in strands %}<th scope="col">{{ strand }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <th scope="row"><a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a></th>
+          {% for cell in row.cells %}
+          <td class="flow judgements__cell">
+            <ul class="judgements__evidence" role="list">
+              {% for component, o in cell.evidence %}
+              <li><span>{{ component }}</span> <strong>{% if o %}{{ o.get_state_display|lower }}{% else %}–{% endif %}</strong></li>
+              {% endfor %}
+            </ul>
+            <label class="visually-hidden" for="band-{{ row.pupil.pk }}-{{ cell.strand.pk }}">{{ row.pupil }}, {{ cell.strand }}: band</label>
+            <select class="select" id="band-{{ row.pupil.pk }}-{{ cell.strand.pk }}" name="band-{{ row.pupil.pk }}-{{ cell.strand.pk }}">
+              <option value="">Not judged</option>
+              {% for band in bands %}<option value="{{ band.pk }}" {% if cell.judgement.band_id == band.pk %}selected{% endif %}>{{ band }}</option>{% endfor %}
+            </select>
+            <label class="visually-hidden" for="note-{{ row.pupil.pk }}-{{ cell.strand.pk }}">{{ row.pupil }}, {{ cell.strand }}: evidence note</label>
+            <input class="input" type="text" id="note-{{ row.pupil.pk }}-{{ cell.strand.pk }}" name="note-{{ row.pupil.pk }}-{{ cell.strand.pk }}" maxlength="300" placeholder="Evidence (optional)" value="{{ cell.judgement.evidence_note }}">
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button class="button" type="submit" data-variant="primary">Save judgements</button>
+</form>
+{% endif %}
+{% endblock %}

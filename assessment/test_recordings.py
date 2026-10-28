@@ -8,11 +8,12 @@ from django.template import Context, Template
 from django.utils import timezone
 
 from assessment import recordings
-from assessment.models import Check, CheckResponse, Component, Exemplar, Feedback, Observation, Strand
+from assessment.models import Band, Check, CheckResponse, Component, Exemplar, Feedback, Observation, Strand
 from core.data import EXPORT_APPS, export_pupil
 from notes.models import Note, SpokenTo
 from plans.models import LessonPlan, Scheme, Unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
+from reports.models import SummativeJudgement
 from rooms.models import Seat, SeatAssignment, SeatingPlan
 from timetable.models import Pupil, PupilRotation, Rotation, Session, SessionAttendance
 
@@ -191,6 +192,7 @@ def test_the_pupil_export_follows_every_link_to_a_pupil(client, lesson, unit, ad
     SeatAssignment.objects.create(seating_plan=plan, seat=Seat.objects.create(room=room, x=0, y=0), pupil=ada)
     asked = Check.objects.create(session=lesson, question="?", answer="!", decision="moved_on")
     CheckResponse.objects.create(check_asked=asked, pupil=ada, option=0)
+    SummativeJudgement.objects.create(pupil=ada, unit=unit, strand=Strand.objects.first(), band=Band.objects.create(name="Secure"))
 
     data = json.loads(client.get(f"/pupils/{ada.pk}/export.json").content)
     assert data["pupil"] == str(ada) and data["classes"] == [str(klass)]

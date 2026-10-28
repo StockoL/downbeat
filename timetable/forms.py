@@ -24,7 +24,7 @@ class PupilForm(forms.ModelForm):
         fields = [
             "first_name", "surname_initial", "year_group", "instrument", "instrument_teacher",
             "lessons_in_school", "remember", "recording_permitted", "exemplar_reuse_permitted",
-            "recordings_delete_by",
+            "recordings_delete_by", "upn",
         ]
         labels = {"lessons_in_school": "Has instrumental lessons in school"}
         help_texts = {"surname_initial": "One letter. Downbeat never stores a full surname."}

@@ -836,13 +836,18 @@ Scenario: No permission, no recordings
 
 ### US-70 Enter a band, never compute one
 **As** the teacher, **I want** to set a band per strand per unit with the component evidence and exemplars beside me, **so that** the judgement is mine and evidenced.
-Must · Planned (Phase 6)
+Must · Built (Phase 6, step 6.1)
 
 ```gherkin
 Scenario: No suggested band
-  When I open the judgement grid for 9Y
-  Then each pupil's observations are shown beside the band choices
-  And no band is pre-selected or suggested
+  When I open the judgement grid for 9Y and "Riffs"
+  Then each pupil's latest state on each strand's components is shown beside the band choices
+  And every choice starts at "Not judged"
+
+Scenario: Saving again changes nothing it shouldn't
+  Given I judged Ada M "Secure" for Performing yesterday
+  When I save the grid again without changing her band
+  Then her judgement keeps yesterday's date
 ```
 
 ### US-71 Draft reports from sentences

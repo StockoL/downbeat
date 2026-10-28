@@ -25,6 +25,7 @@ from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
 from plans.services import fill_from_unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
+from reports.models import SummativeJudgement
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
@@ -411,6 +412,13 @@ class Command(BaseCommand):
         if nine_y_past:
             Observation.objects.create(session=nine_y_past[0], pupil=leaver, component=riff, state=Observation.PARTLY,
                                        next_step=riff.next_step_default, recording_path=f"Music/Recordings/9Y/{leaver.first_name}-riff-week-1.m4a")
+
+        # Summative judgements: a few of 9Y's, chosen against the evidence, as the teacher would at a desk.
+        bands = list(Band.objects.order_by("order"))
+        for pupil in list(classes["9Y Mu"].pupils.all())[:6]:
+            for strand in Strand.objects.filter(components__unit=units[9]).distinct():
+                SummativeJudgement.objects.create(pupil=pupil, unit=units[9], strand=strand, band=rng.choice(bands[:2]),
+                                                  judged_at=today - datetime.timedelta(days=1))
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

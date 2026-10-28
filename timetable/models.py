@@ -47,6 +47,7 @@ class Pupil(Base):
     recording_permitted = models.BooleanField(default=False)
     exemplar_reuse_permitted = models.BooleanField(default=False)
     recordings_delete_by = models.DateField(null=True, blank=True)
+    upn = models.CharField("UPN", max_length=13, blank=True, help_text="Optional. Used only to match the report export to the school system.")
 
     class Meta:
         ordering = ["first_name", "surname_initial"]

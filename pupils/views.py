@@ -92,6 +92,7 @@ def pupil_page(request, pk):
         "recording_form": recording_form if pupil.recording_permitted and recording_form.fields["lesson"].queryset.exists() else None,
         "recording_open": adding_recording,
         "observations": observations,
+        "judgements": pupil.judgements.select_related("unit", "strand", "band").order_by("-judged_at"),
         "loans": pupil.loans.filter(returned_at__isnull=True).select_related("item"),
     })
 

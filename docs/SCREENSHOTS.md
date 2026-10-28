@@ -164,6 +164,10 @@ Further down the page, **their feedback and observations**, then **recordings ov
 | --- | --- |
 | ![Missing out: fewest first, plain counts](screenshots/18-missing-out.png) | ![The equipment loan log](screenshots/19-loans.png) |
 
+**Judgements** (US-70): a band per strand of a unit, with each pupil's latest state on the strand's components above the choice. Every choice starts at "Not judged": nothing is suggested.
+
+![The judgement grid](screenshots/38-class-judgements.png)
+
 **The ensemble register** for a choir rehearsal (US-24).
 
 ![The choir register](screenshots/31-ipad-ensemble-register.png)

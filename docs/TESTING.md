@@ -10,7 +10,7 @@ How Downbeat is tested, how to run the tests, and what each part of the suite co
 .venv\Scripts\ruff check .
 ```
 
-The suite runs in about ten seconds: 387 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
+The suite runs in about ten seconds: 392 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs on every push and pull request. It checks out Downbeat and LooseLeaf-UI side by side, then runs:
 
@@ -82,6 +82,7 @@ Conventions:
 | `assessment/test_observations.py` | 7 | Observations through sync, rule 4 in sync and in the database, backwards states, sweep bin |
 | `assessment/test_feedback.py` | 17 | Feedback for a pupil or a group, written from a lesson or a pupil's page, its three parts, recordings only with permission (every member for a group), the m:ss moment, codes as a slide with no pupil in it, the class-by-component view (latest state, by assessor, nothing added up), self and peer in one go with the next step attached |
 | `assessment/test_recordings.py` | 13 | The exemplar bank and its permission, recordings on the pupil's timeline in order, the link-or-path rule, removing references past the delete-by date or without permission (and from the Data page and the command), and the per-pupil export following every link to a pupil |
+| `reports/test_judgements.py` | 5 | The judgement grid: evidence shown, no band suggested, saving and removing, the date kept on an unchanged save, waiting for bands and a unit, the UPN on the pupil form |
 | `assessment/test_checks.py` | 18 | Hinge checks: misconception-tagged wrong answers, the bank and duplication, planned-or-asked constraint, decisions through sync (minutes in, idempotent, last write wins, two devices, taking back), the greyed button, the sweep's judgement, pupils' answers opt-in and only with a decision (rule 3) |
 
 ## Traceability to the "Done when" tests
