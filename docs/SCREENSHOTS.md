@@ -102,7 +102,7 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 
 ![Prep for the next teaching day](screenshots/15-prep.png)
 
-**Feedback for a lesson**, from "Feedback for this lesson" at the top of its sweep (US-62). Done well, to develop and how, for a pupil or a group, optionally against a component. A recording is a path and a moment in it ("at 1:42"), and only for pupils whose families agreed.
+**Feedback for a lesson**, from "Feedback for this lesson" at the top of its sweep or in the room view's ⋯ menu; the pupil page has its own "Write feedback" too (US-62). Done well, to develop and how, for a pupil or a group, optionally against a component. A recording is a path and a moment in it ("at 1:42"), and only for pupils whose families agreed.
 
 ![A lesson's feedback page](screenshots/33-lesson-feedback.png)
 

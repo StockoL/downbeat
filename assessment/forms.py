@@ -76,8 +76,18 @@ def parse_at(text):
     return int(minutes or 0) * 60 + int(seconds)
 
 
+class LessonChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, session):
+        return f"{session.date:%a} {session.date.day} {session.date:%b} {session.period} · {session.klass}" + (
+            f" · {session.lesson}" if session.lesson_id else "")
+
+
 class FeedbackForm(forms.Form):
-    """Feedback for one pupil or one group in a lesson. A recording only for pupils whose families agreed."""
+    """
+    Feedback for one pupil or one group, written whenever. From a lesson's page it asks who it's
+    for; from a pupil's page it asks which of their lessons it belongs to. A recording only for
+    pupils whose families agreed.
+    """
 
     who = forms.ChoiceField(label="For")
     component = forms.ModelChoiceField(queryset=None, required=False, label="Component (optional)")
@@ -89,11 +99,14 @@ class FeedbackForm(forms.Form):
     recording_at = forms.CharField(required=False, max_length=8, label="At (m:ss)",
                                    help_text="The moment the feedback is about, e.g. 1:42 for bar 9.")
 
-    def __init__(self, *args, session, **kwargs):
+    def __init__(self, *args, session=None, pupil=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.session, self.pupil = session, pupil
+        if pupil is not None:
+            self._for_pupil(pupil)
+            return
         from pupils.services import active_groups
 
-        self.session = session
         self.pupils = {str(p.pk): p for p in session.klass.pupils.all()}
         self.groups = {str(g.pk): g for g in active_groups(session.klass)}
         choices = [("", "Choose…"), ("Pupils", [(f"pupil:{pk}", str(p)) for pk, p in self.pupils.items()])]
@@ -102,11 +115,34 @@ class FeedbackForm(forms.Form):
         self.fields["who"].choices = choices
         self.fields["component"].queryset = session.lesson.unit.components.all() if session.lesson_id else Component.objects.none()
 
+    def _for_pupil(self, pupil):
+        """The pupil's lessons, newest first, the latest chosen; components from those lessons' units."""
+        from django.utils import timezone
+
+        from timetable.models import Session
+
+        lessons = (Session.objects.filter(klass__pupils=pupil, date__lte=timezone.localdate())
+                   .exclude(status=Session.CANCELLED).select_related("klass", "lesson").order_by("-date", "-period"))
+        del self.fields["who"]
+        self.fields = {"lesson": LessonChoiceField(queryset=lessons, label="Lesson", empty_label=None), **self.fields}
+        self.fields["lesson"].initial = lessons.first()
+        self.fields["component"].queryset = Component.objects.filter(unit__lessons__sessions__in=lessons).distinct()
+
     def clean(self):
         data = super().clean()
-        kind, _, pk = data.get("who", "").partition(":")
-        data["pupil"] = self.pupils.get(pk) if kind == "pupil" else None
-        data["group"] = self.groups.get(pk) if kind == "group" else None
+        if self.pupil is not None:
+            data["pupil"], data["group"] = self.pupil, None
+            lesson = data.get("lesson")
+            if lesson is None:
+                raise forms.ValidationError("Choose the lesson this feedback belongs to.")
+            self.session = lesson
+            component = data.get("component")
+            if component and (not lesson.lesson_id or component.unit_id != lesson.lesson.unit_id):
+                self.add_error("component", "Choose a component from that lesson's unit, or none.")
+        else:
+            kind, _, pk = data.get("who", "").partition(":")
+            data["pupil"] = self.pupils.get(pk) if kind == "pupil" else None
+            data["group"] = self.groups.get(pk) if kind == "group" else None
         if not any(data.get(part, "").strip() for part in ("done_well", "develop", "how")):
             raise forms.ValidationError("Write at least one of done well, to develop or how.")
         try:

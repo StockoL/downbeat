@@ -165,3 +165,32 @@ def test_self_and_peer_refuses_a_teacher_entry_or_a_stray_component(client, klas
     client.post(f"/pupils/class/{klass.pk}/self-peer/", {"session": lesson.pk, "component": riff.pk, "assessor": "teacher",
                                                         f"state-{pupils[0].pk}": "secure"})
     assert not Observation.objects.exists()
+
+
+# --- Written whenever ---
+
+def test_feedback_from_the_pupil_page_belongs_to_a_lesson_of_theirs(client, lesson, unit, pupils):
+    page = client.get(f"/pupils/{pupils[0].pk}/").content.decode()
+    assert "Write feedback" in page and "Mon 19 Oct P1" in page
+    riff = unit.components.get(order=0)
+    response = client.post(f"/pupils/{pupils[0].pk}/", {
+        "add_feedback": "", "feedback-lesson": lesson.pk, "feedback-component": riff.pk, "feedback-develop": "Steadier fills",
+    })
+    assert response.url == f"/pupils/{pupils[0].pk}/#feedback"
+    f = Feedback.objects.get()
+    assert (f.session, f.pupil, f.group, f.component) == (lesson, pupils[0], None, riff)
+
+
+def test_pupil_page_feedback_refuses_a_component_from_another_unit(client, lesson, pupils, klass, room):
+    other_unit = Unit.objects.create(scheme=Scheme.objects.create(name="Y7"), name="Other")
+    stray = Component.objects.create(unit=other_unit, order=0, text="Elsewhere", strand=Strand.objects.first(), next_step_default="x")
+    other = Session.objects.create(date=D, period="P2", klass=klass, room=room,
+                                   lesson=LessonPlan.objects.create(unit=other_unit, order=1, objective="Other"))
+    client.post(f"/pupils/{pupils[0].pk}/", {
+        "add_feedback": "", "feedback-lesson": lesson.pk, "feedback-component": stray.pk, "feedback-develop": "x",
+    })
+    assert not Feedback.objects.exists() and other.lesson.unit == stray.unit
+
+
+def test_the_room_menu_leads_to_the_lessons_feedback(client, lesson):
+    assert f"/sweep/{lesson.pk}/feedback/" in client.get(f"/room/{lesson.pk}/").content.decode()

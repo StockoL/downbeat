@@ -765,6 +765,11 @@ Scenario: No permission, no recording
 Scenario: For a group
   When I write feedback for "Band 1"
   Then it shows on each member's pupil page, labelled with the group
+
+Scenario: Whenever, from the pupil page
+  Given I am on Ada M's pupil page
+  When I open "Write feedback", keep her latest lesson and write "To develop: steadier fills"
+  Then the feedback belongs to that lesson and shows on her page
 ```
 
 ### US-63 The class-by-component heat view

@@ -95,7 +95,17 @@
 
 <div class="switcher">
   <section class="flow">
-    <h2>Feedback</h2>
+    <h2 id="feedback">Feedback</h2>
+    {% if feedback_form %}
+    <details class="accordion"{% if feedback_open %} open{% endif %}>
+      <summary class="accordion__trigger">Write feedback</summary>
+      <form method="post" class="accordion__content flow">
+        {% csrf_token %}
+        {{ feedback_form }}
+        <button class="button" type="submit" name="add_feedback" data-variant="primary">Save feedback</button>
+      </form>
+    </details>
+    {% endif %}
     {% if feedback %}
     <ul class="flow" role="list">
       {% for f in feedback %}

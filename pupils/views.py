@@ -7,8 +7,10 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count, ProtectedError, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from assessment.forms import FeedbackForm
 from assessment.models import Feedback
 from timetable.models import Class, Pupil, SessionAttendance
 
@@ -42,6 +44,12 @@ def pupil_page(request, pk):
     pupil = get_object_or_404(Pupil, pk=pk)
     adding_flag = request.method == "POST" and "add_flag" in request.POST
     adding_relationship = request.method == "POST" and "add_relationship" in request.POST
+    adding_feedback = request.method == "POST" and "add_feedback" in request.POST
+    feedback_form = FeedbackForm(request.POST if adding_feedback else None, pupil=pupil, prefix="feedback")
+    if adding_feedback and feedback_form.is_valid():
+        feedback_form.save()
+        messages.success(request, "Feedback saved.")
+        return redirect(f"{reverse('pupil_page', args=[pupil.pk])}#feedback")
     form = PupilFlagForm(request.POST if adding_flag else None, pupil=pupil)
     relationship_form = RelationshipForm(request.POST if adding_relationship else None, pupil=pupil)
     if adding_flag and form.is_valid():
@@ -68,6 +76,8 @@ def pupil_page(request, pk):
         "relationship_form": relationship_form if relationship_form.fields["other"].queryset.exists() else None,
         "notes": notes,
         "feedback": feedback,
+        "feedback_form": feedback_form if feedback_form.fields["lesson"].queryset.exists() else None,
+        "feedback_open": adding_feedback,
         "observations": observations,
         "loans": pupil.loans.filter(returned_at__isnull=True).select_related("item"),
     })

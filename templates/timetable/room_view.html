@@ -123,6 +123,7 @@ device's unsent captures applied on top, so it works the same with or without a 
     <div class="dropdown" data-align="end">
       <a class="dropdown__item" href="{% url 'projector' session.pk %}" target="_blank" rel="noopener">Projector view</a>
       <a class="dropdown__item" href="{% url 'cover_pdf' session.pk %}">Cover PDF</a>
+      <a class="dropdown__item" href="{% url 'session_feedback' session.pk %}">Feedback for this lesson</a>
       {% if lesson and lesson.unit.feedback_codes.exists %}<a class="dropdown__item" href="{% url 'codes_slide' lesson.unit.pk %}" target="_blank" rel="noopener">Feedback codes</a>{% endif %}
       <button type="button" class="dropdown__item" data-action="shortcuts">Keyboard shortcuts</button>
     </div>

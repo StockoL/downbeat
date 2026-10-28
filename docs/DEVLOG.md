@@ -116,6 +116,8 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 **5.4 checked.** The screenshot tool loaded every new page in Edge on the demo school without a script error, and each was checked by eye: the lesson's feedback page with a recording moment, the codes slide with nothing about any pupil, the Components tab in greyscale words, the self-and-peer table, and the pupil page's feedback and observations. Saving feedback, the recording permission (pupil and group), self- and peer-assessment and the latest-state rule are covered by the tests rather than clicked through in the browser.
 
+**5.4 changed on review.** The teacher ruled that feedback can be written whenever, not only from the sweep: the pupil page gained a "Write feedback" form that asks which of the pupil's lessons it belongs to, and the room view's ⋯ menu gained "Feedback for this lesson". The room view itself still opens no form (rule 1).
+
 **5.4 went wrong, put right.**
 - The codes slide's type was sized for a laptop, not the back of a classroom; it is now the largest step in the scale.
 - The demo's class-by-component table was nearly empty with six observations a lesson; the demo now makes ten, so the page shows what it is for.
