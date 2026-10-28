@@ -2,7 +2,7 @@ from django.urls import path
 
 from timetable import lesson_views
 
-from . import pwa, views
+from . import pwa, rollover_views, views
 from .auth_views import LoginView, LogoutView
 
 urlpatterns = [
@@ -22,4 +22,6 @@ urlpatterns = [
     path("settings/data/export/", views.data_export, name="data_export"),
     path("settings/data/delete-all/", views.data_delete_all, name="data_delete_all"),
     path("settings/data/recordings/", views.data_purge_recordings, name="data_purge_recordings"),
+    path("settings/rollover/", rollover_views.rollover_page, name="rollover"),
+    path("settings/classes/<uuid:pk>/unarchive/", rollover_views.class_unarchive, name="class_unarchive"),
 ]

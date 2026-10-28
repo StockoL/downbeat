@@ -198,6 +198,10 @@ Further down the page, **their feedback and observations**, then **recordings ov
 | --- | --- |
 | ![Sign in](screenshots/02-sign-in.png) | ![Settings](screenshots/20-settings.png) |
 
+**Settings → Rollover**, before a new school year (US-75): classes to archive, each pupil's next year group or whether they have left, then flags and keep-aparts to review, open actions to close or carry, and recordings past their date. A backup is taken first.
+
+![The rollover review](screenshots/44-rollover.png)
+
 **Settings → Data**: back up now, download everything, recordings that may no longer be kept (here one past its pupil's delete-by date) with "Remove these references" (US-85), and delete everything behind a typed phrase (US-82 to US-84).
 
 ![Settings → Data](screenshots/21-data.png)
@@ -219,4 +223,4 @@ Further down the page, **their feedback and observations**, then **recordings ov
 
 ## Still to come
 
-Every journey in UX.md now has its screens. Still to come is the rollover before the second September, which is a job rather than a journey.
+Every journey in UX.md has its screens, and so does the rollover. What remains is real use: the iPad in a real lesson, a report season and a parents' evening.

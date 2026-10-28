@@ -79,7 +79,7 @@ class AddPupilsForm(forms.Form):
 
     def __init__(self, *args, klass, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["existing"].queryset = Pupil.objects.exclude(classes=klass)
+        self.fields["existing"].queryset = Pupil.objects.exclude(classes=klass).filter(left_on__isnull=True)
 
 
 class SlotForm(forms.ModelForm):

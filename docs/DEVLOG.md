@@ -88,7 +88,7 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - A carried-forward activity vanished when the class's next session had no lesson yet, because the Plan panel only existed with a lesson. The panel now exists whenever there is something carried.
 - UX.md's Tab-to-flip would have broken keyboard navigation; Tab flips the panel only when nothing has focus.
 
-## Phase 5: assessment (in progress)
+## Phase 5: assessment
 
 *Goal: a unit taught end to end with components declared in advance; the sweep under three minutes a lesson.*
 
@@ -151,14 +151,9 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 | `35b5bce` | 6.2 Reports: the comment bank and house style in Settings, each pupil's comment drafted from their bands and feedback, edited and kept, with a live count, house-style warnings and Copy; CSV export; promote-a-note |
 
-| (this step) | 6.3 Parents' evenings: an evening's slots from its times, booking from the class list in two taps or the school's CSV, and the night on the iPad with came or didn't, a note, and a follow-up action for a family who didn't come |
+| `f78871b` | 6.3 Parents' evenings: an evening's slots from its times, booking from the class list in two taps or the school's CSV, and the night on the iPad with came or didn't, a note, and a follow-up action for a family who didn't come |
 
 **6.1 checked.** The screenshot tool loaded 9Y's Judgements tab with the demo's judgements: evidence above each choice, "Not judged" where none was made. Saving, removing, keeping the date on an unchanged save, and the per-pupil export now including judgements are covered by the tests.
-
-## Still to come
-
-- **Phase 6:** summative judgements entered against exemplars, report sentences, CSV and clipboard export with a character counter, promote-a-note, parents' evenings.
-- **Rollover**, before the second September.
 
 **6.2 checked.** In Edge on the demo school: 9Y's Reports tab drafted Ada M's comment from her three bands and her feedback (221 of 600 characters); typing updated the count; Copy put the text on the clipboard and the button said so; Save kept it. On a pupil page, "Copy for the school system" copied the note's words and marked it "promoted 28 Oct". Drafting, the house-style checks, the CSV and settings are covered by the tests.
 
@@ -176,4 +171,21 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - **The evening needs no paper.** Slots from the times, booking from the class list or the school's file, and the night as one list with the pupil page a tap away; a family who didn't come becomes an action in the next lesson.
 - **Not yet proven:** both halves of "Done when" are about a real sitting and a real evening, and are checked against the demo school until then. Booking and the night need the laptop reachable; if the school's Wi-Fi fails on the evening, the iPad shows the last copy it saved but can't record.
 
-**Still to come:** the rollover job before the second September, and the outstanding real-device and real-lesson checks.
+
+## Before the second September: rollover
+
+| Commit | Step |
+| --- | --- |
+| (this step) | The rollover: a review page that backs up, archives last year's classes read-only, moves pupils up or marks them as left, reviews flags and keep-aparts, closes or carries open actions, and removes recordings past their date; pasting a class list now reuses the pupils who stay |
+
+**Checked.** In Edge on the demo school, a real rollover: the page offered 6 classes, 92 pupils and 9 open actions; applying it wrote a real backup file first, archived all six classes, moved 92 pupils up and closed 9 actions; the Pupils area then listed them under "Archived classes" and Plan had none. Leavers, dropped flags, carried actions, the read-only archive (sync, seating, sweep), pasting next year's lists and a failed backup stopping everything are covered by the tests.
+
+**Went wrong, put right.**
+- The tests hung in SQLite's online backup, which waits on the open transaction each test runs inside. Real requests have none (no `ATOMIC_REQUESTS`), and the real backup was proven in the browser run; the rollover's tests record the backup call instead, and the backup itself is tested in `test_data.py`.
+- Pasting a class list made a new pupil for every line, which would have doubled every continuing pupil next September. It now reuses the one matching pupil.
+
+## Still to come
+
+- **The real-iPad check** from Phase 2: install from the `ts.net` address, a lesson with the Wi-Fi off, and the laptop catching up.
+- **Real use.** Every phase's "Done when" has been checked against the demo school; the two-minute sweep, a report season and a parents' evening are proven only by doing them.
+- **The open questions** in BUILD_ORDER: the school system's report character limit (set in Settings → Reports once known) and a transcription route for voice notes.

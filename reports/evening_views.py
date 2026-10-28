@@ -62,7 +62,8 @@ def evening(request, pk):
     evening = get_object_or_404(ParentsEvening, pk=pk)
     slots = list(evening.slots.select_related("pupil"))
     booked = {s.pupil_id for s in slots if s.pupil_id}
-    classes = [(c, [p for p in c.pupils.all() if p.pk not in booked]) for c in Class.objects.prefetch_related("pupils")]
+    current = Class.objects.filter(archived_on__isnull=True).prefetch_related("pupils")
+    classes = [(c, [p for p in c.pupils.all() if p.pk not in booked and not p.left_on]) for c in current]
     return render(request, "reports/evening.html", {
         "nav": "pupils", "evening": evening, "slots": slots, "free": [s for s in slots if s.pupil_id is None],
         "classes": [(c, pupils) for c, pupils in classes if pupils],

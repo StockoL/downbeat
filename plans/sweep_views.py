@@ -36,6 +36,9 @@ def sweep_home(request):
 
 def session_sweep(request, pk):
     session = get_object_or_404(Session.objects.select_related("klass", "lesson__unit"), pk=pk)
+    if request.method == "POST" and session.klass.archived_on:
+        messages.error(request, f"{session.klass} is archived, so its lessons are read-only.")
+        return redirect("session_sweep", pk=session.pk)
     if request.method == "POST":
         activity_ids = [str(a.pk) for a in session.lesson.activities.all()] if session.lesson else []
         statuses = {a: request.POST[f"status-{a}"] for a in activity_ids if request.POST.get(f"status-{a}")}

@@ -45,7 +45,7 @@ Status key: **Built** (with the step that built it), **Planned** (with its phase
 | Reports and evenings | US-70, 71, 72, 75 | US-73, 74 | |
 | Data and safety | US-80, 81, 82, 83, 84, 85 | US-86 | |
 
-Of the Must haves, all but the rollover (US-75), the job before the second September, are built.
+Every Must have is built. What remains is proving them in real use.
 
 ## Won't have
 
@@ -916,13 +916,24 @@ Scenario: The school's bookings
 
 ### US-75 Roll over to a new school year
 **As** the teacher, **I want** last year archived and pupils, flags and rotations carried forward with a review, **so that** September doesn't start from nothing or from stale data.
-Must · Planned (before the second September)
+Must · Built (before the second September)
 
 ```gherkin
 Scenario: Stale flags are reviewed
-  When I run the rollover
-  Then I review each carried flag and keep-apart before it applies
-  And last year's observations stay on each pupil's record
+  When I open Settings → Rollover
+  Then each flag and keep-apart is listed to keep or drop, those over a year old marked
+  And last year's observations stay on each pupil's record after it runs
+
+Scenario: Last year kept, read-only
+  When I roll over with 8X ticked to archive
+  Then a backup is taken first
+  And 8X's lessons, notes and seating are kept but can't be changed
+  And 8X no longer appears in Plan
+
+Scenario: Next year's lists
+  Given Aleya K moved up to Year 9
+  When I paste "Aleya Khan" into 9A's class list
+  Then 9A gains the same Aleya K, not a new one
 ```
 
 ---

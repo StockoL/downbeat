@@ -48,6 +48,7 @@ class Pupil(Base):
     exemplar_reuse_permitted = models.BooleanField(default=False)
     recordings_delete_by = models.DateField(null=True, blank=True)
     upn = models.CharField("UPN", max_length=13, blank=True, help_text="Optional. Used only to match the report export to the school system.")
+    left_on = models.DateField(null=True, blank=True, help_text="Set at the rollover for a pupil who has left. Their records stay.")
 
     class Meta:
         ordering = ["first_name", "surname_initial"]
@@ -70,6 +71,7 @@ class Class(Base):
 
     name = models.CharField(max_length=60)
     kind = models.CharField(max_length=20, choices=KINDS, default=TIMETABLED)
+    archived_on = models.DateField(null=True, blank=True, help_text="Set at the rollover. An archived class is kept, read-only.")
     year_group = models.PositiveSmallIntegerField(null=True, blank=True)
     pupils = models.ManyToManyField(Pupil, related_name="classes", blank=True)
     term_start = models.DateField(null=True, blank=True)

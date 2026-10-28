@@ -14,4 +14,11 @@
   <p>Classes are added in <a href="{% url 'class_list' %}">Settings</a>.</p>
   {% endfor %}
 </div>
+{% if archived %}
+<section class="flow">
+  <h2>Archived classes</h2>
+  <p class="field__hint">Kept from earlier years, read-only.</p>
+  <ul class="cluster" role="list">{% for klass in archived %}<li><a href="{% url 'class_pupils' klass.pk %}">{{ klass }}</a> <small>{{ klass.archived_on|date:"Y" }}</small></li>{% endfor %}</ul>
+</section>
+{% endif %}
 {% endblock %}

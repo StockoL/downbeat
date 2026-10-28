@@ -125,15 +125,28 @@ def class_detail(request, pk):
 
     if is_add and add_form.is_valid():
         new, skipped = parse_pupil_lines(add_form.cleaned_data["names"])
+        ambiguous = []
         with transaction.atomic():
             for first_name, initial in new:
-                pupil = Pupil.objects.create(first_name=first_name, surname_initial=initial, year_group=klass.year_group)
+                # A pupil carried over from last year is reused, not made twice: the one current pupil
+                # with this name, initial and (if the class has one) year group.
+                same = Pupil.objects.filter(first_name__iexact=first_name, surname_initial__iexact=initial, left_on__isnull=True)
+                if klass.year_group:
+                    same = same.filter(year_group=klass.year_group)
+                matches = list(same[:2])
+                if len(matches) > 1:
+                    ambiguous.append(f"{first_name} {initial}")
+                    continue
+                pupil = matches[0] if matches else Pupil.objects.create(
+                    first_name=first_name, surname_initial=initial, year_group=klass.year_group)
                 klass.pupils.add(pupil)
             klass.pupils.add(*add_form.cleaned_data["existing"])
-        added = len(new) + len(add_form.cleaned_data["existing"])
+        added = len(new) - len(ambiguous) + len(add_form.cleaned_data["existing"])
         messages.success(request, f"Added {added} pupil{'s' if added != 1 else ''}.")
         if skipped:
             messages.warning(request, "Skipped lines without a surname initial: " + "; ".join(skipped))
+        if ambiguous:
+            messages.warning(request, "More than one pupil matches, so choose them from Existing pupils: " + "; ".join(ambiguous))
         return redirect("class_detail", pk=klass.pk)
 
     return _render(request, "timetable/class_detail.html", {

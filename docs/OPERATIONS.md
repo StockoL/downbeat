@@ -79,4 +79,4 @@ Warnings and errors are logged to `local\logs\downbeat.log`, rotated.
 ## Housekeeping
 
 - Sessions are generated a half term at a time (Settings → Timetable → Generate, or `manage.py generate_sessions`). Generating over the same dates never duplicates or overwrites.
-- Before the second September the rollover job will archive the year; it is not built yet (see [BUILD_ORDER.md](BUILD_ORDER.md#before-the-second-september-rollover)).
+- **Before a new school year**, Settings → Rollover archives last year's classes (kept, read-only), moves pupils up or marks them as left, reviews flags and keep-aparts, and closes or carries open actions. It takes a backup first. Then set up the new timetable's slots and classes; pasting class lists reuses the pupils who stay.

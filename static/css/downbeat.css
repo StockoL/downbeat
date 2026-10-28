@@ -1239,3 +1239,7 @@ button.room-strip {
   background: var(--color-text);
   color: var(--color-text-inverse);
 }
+
+.rollover__year {
+  max-inline-size: 6rem;
+}

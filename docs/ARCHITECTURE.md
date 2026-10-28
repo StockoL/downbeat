@@ -24,7 +24,7 @@ The laptop's SQLite database is the only source of truth. The iPad holds a cache
 
 | App | Owns | Notable modules |
 | --- | --- | --- |
-| `core` | `Base` (UUID key, timestamps), the gate, first-run setup, sign-in, Settings → Data, PWA endpoints | `middleware.py`, `data.py`, `pwa.py`, `auth_views.py` |
+| `core` | `Base` (UUID key, timestamps), the gate, first-run setup, sign-in, Settings → Data, the rollover, PWA endpoints | `middleware.py`, `data.py`, `rollover.py`, `pwa.py`, `auth_views.py` |
 | `timetable` | Timetable, Slot, Session, Class, Pupil, SessionAttendance, Rotation, PupilRotation; Today and the room view | `services.py` (sessions, live and next), `rotations.py`, `lesson_views.py` |
 | `rooms` | Room, Seat, SeatingPlan, SeatAssignment | `seating.py`, `adjacency.py`, `solver.py`, `cover.py` |
 | `notes` | NoteType, Note, SpokenTo, Goal, ChecklistItem, ChecklistTick | `sync.py`, `state.py`, `goals.py` |
@@ -106,6 +106,7 @@ Seating edits are not queued: they happen at the desk, online.
 | Observations carry a next step | Sheet attaches the default, sync rejects without one, and a database check constraint refuses a row with neither a next step nor a recording |
 | Nightly backup | `core/data.py` `backup`, scheduled by `tools/install-backup-task.ps1` |
 | Export and delete-all | `core/data.py` `export_json` and `delete_all`, over `APP_MODELS`; a test fails if a model is missing |
+| Last year is kept, not changed | An archived class's lessons are refused by sync, its seating editor and its sweep; the rollover backs up before it changes anything |
 | Concurrent writes | SQLite WAL mode, IMMEDIATE transactions, 20-second busy timeout |
 
 ## Front end

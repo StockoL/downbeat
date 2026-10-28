@@ -10,7 +10,7 @@ How Downbeat is tested, how to run the tests, and what each part of the suite co
 .venv\Scripts\ruff check .
 ```
 
-The suite runs in about ten seconds: 425 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
+The suite runs in about ten seconds: 436 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs on every push and pull request. It checks out Downbeat and LooseLeaf-UI side by side, then runs:
 
@@ -57,7 +57,8 @@ Conventions:
 | `core/tests/test_auth.py` | 12 | The gate's three stages, the account section and account-only setup, login throttling, safe `next`, HTMX redirects |
 | `core/tests/test_data.py` | 11 | Backup, JSON export round trip, delete-all; every model is in both lists |
 | `core/tests/test_pwa.py` | 6 | Manifest, versioned service worker, every precached file exists, offline page holds no pupil data, sign-out clears saved pages |
-| `core/tests/test_audit.py` | 85 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
+| `core/tests/test_audit.py` | 87 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
+| `core/tests/test_rollover.py` | 9 | The review page's defaults (no flag labels), archiving, moving up and leavers, kept and dropped flags, closed and carried actions, no rollover without a backup, the read-only archive, the working lists, bringing a class back, and pasting next year's lists (reuse, another year, a leaver, two matches) |
 | `core/tests/test_seed_demo.py` | 4 | The demo builds, and refuses the real database |
 | `core/tests/test_scaffold.py` | 2 | The abstract Base model (UUID, timestamps) and the desk layout |
 | `timetable/tests/test_generate.py` | 5 | Session generation, week A/B, no duplicates on re-running |

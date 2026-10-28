@@ -11,7 +11,8 @@ device's unsent captures applied on top, so it works the same with or without a 
 {% block head %}<script type="module" src="{% static 'js/canvas.js' %}"></script>{% endblock %}
 
 {% block canvas %}
-{% if not plan and seats %}
+{% if session.klass.archived_on %}<p class="room-offer">{{ session.klass }} is archived: this lesson is kept as it was, and nothing new is saved.</p>
+{% elif not plan and seats %}
 <form class="room-offer cluster" method="post" action="{% url 'seating_create' %}">
   {% csrf_token %}
   <input type="hidden" name="klass" value="{{ session.klass.pk }}">

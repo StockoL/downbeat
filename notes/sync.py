@@ -58,9 +58,13 @@ def _uuid(value):
 
 def _get(model, pk):
     try:
-        return model.objects.get(pk=_uuid(pk))
+        row = model.objects.get(pk=_uuid(pk))
     except model.DoesNotExist as error:
         raise Rejected(f"no such {model._meta.model_name}") from error
+    session = row if isinstance(row, Session) else getattr(row, "session", None)
+    if session is not None and session.klass.archived_on:
+        raise Rejected("that class is archived, so its lessons are read-only")
+    return row
 
 
 def _newer(note, at):

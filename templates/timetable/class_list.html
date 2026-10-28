@@ -11,7 +11,7 @@
     <tbody>
       {% for klass in classes %}
       <tr>
-        <td><a href="{% url 'class_detail' klass.pk %}">{{ klass.name }}</a></td>
+        <td><a href="{% url 'class_detail' klass.pk %}">{{ klass.name }}</a>{% if klass.archived_on %} <small>archived {{ klass.archived_on|date:"j M Y" }}</small>{% endif %}</td>
         <td>{{ klass.get_kind_display }}</td>
         <td>{{ klass.year_group|default:"" }}</td>
         <td data-align="end">{{ klass.pupil_count }}</td>

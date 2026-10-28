@@ -1,0 +1,100 @@
+{% extends "layouts/settings.html" %}
+
+{% block title %}Rollover · Settings · Downbeat{% endblock %}
+
+{% block settings %}
+<h1>Rollover</h1>
+<p>Before a new school year: last year's classes are archived and kept read-only, pupils move up or are marked as having left, and what may be stale is reviewed. Observations, feedback and judgements stay with each pupil, so their timeline carries on. A backup is taken first.</p>
+
+<form method="post" class="flow" onsubmit="return confirm('Back up, then roll over with these choices?')">
+  {% csrf_token %}
+
+  <section class="flow">
+    <h2>1 · Classes to archive</h2>
+    {% if classes %}
+    <p class="field__hint">An archived class keeps its lessons, notes and seating as they were, and stops appearing in Plan and Pupils. Its weekly slots and any lessons not yet taught are removed. Set up next year's classes afterwards, in Settings → Classes.</p>
+    <ul class="cluster" role="list">
+      {% for klass in classes %}
+      <li><label class="choice"><input class="choice__input" type="checkbox" name="archive" value="{{ klass.pk }}" checked> {{ klass }} <small>({{ klass.pupils.count }})</small></label></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p>Every class is already archived.</p>{% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>2 · Pupils</h2>
+    <p class="field__hint">Each pupil moves up a year unless you change it. One who has left keeps their records but leaves every list and picker; pasting next year's class lists reuses the pupils who stay.</p>
+    <div class="table-wrapper">
+      <table class="table" data-density="compact">
+        <thead><tr><th scope="col">Pupil</th><th scope="col">Now</th><th scope="col">Next year</th><th scope="col">Has left</th></tr></thead>
+        <tbody>
+          {% for row in pupils %}
+          <tr>
+            <th scope="row"><a href="{% url 'pupil_page' row.pupil.pk %}">{{ row.pupil }}</a></th>
+            <td>{% if row.pupil.year_group %}Year {{ row.pupil.year_group }}{% endif %}</td>
+            <td><label class="visually-hidden" for="year-{{ row.pupil.pk }}">{{ row.pupil }}: next year's year group</label>
+              <input class="input rollover__year" type="number" min="1" max="14" id="year-{{ row.pupil.pk }}" name="year-{{ row.pupil.pk }}" value="{{ row.next_year|default:'' }}"></td>
+            <td><input class="choice__input" type="checkbox" name="leaving" value="{{ row.pupil.pk }}" aria-label="{{ row.pupil }} has left"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="flow">
+    <h2>3 · Flags and seating notes</h2>
+    <p class="field__hint">A year on, some may no longer hold. Untick any to remove. Flag labels are only on each pupil's page.</p>
+    {% if flags %}
+    <ul class="flow" role="list">
+      {% for row in flags %}
+      <li class="cluster">
+        <label class="choice"><input class="choice__input" type="checkbox" name="keep_flag" value="{{ row.flag.pk }}" checked> Keep</label>
+        <span class="flag-swatch flag-{{ row.flag.flag_type.colour }}" aria-hidden="true"></span>
+        <a href="{% url 'pupil_page' row.flag.pupil.pk %}">{{ row.flag.pupil }}</a>
+        <small>since {% if row.flag.since %}{{ row.flag.since|date:"M Y" }}{% else %}{{ row.flag.created_at|date:"M Y" }}{% endif %}{% if row.stale %} · over a year old{% endif %}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if relationships %}
+    <ul class="flow" role="list">
+      {% for row in relationships %}
+      <li class="cluster">
+        <label class="choice"><input class="choice__input" type="checkbox" name="keep_relationship" value="{{ row.relationship.pk }}" checked> Keep</label>
+        <span>{{ row.relationship.get_kind_display }}: {{ row.relationship.pupil_a }} and {{ row.relationship.pupil_b }}</span>
+        <small>{% if row.relationship.source %}{{ row.relationship.source }}, {% endif %}since {% if row.relationship.since %}{{ row.relationship.since|date:"M Y" }}{% else %}{{ row.relationship.created_at|date:"M Y" }}{% endif %}{% if row.stale %} · over a year old{% endif %}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if not flags and not relationships %}<p>None.</p>{% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>4 · Open actions</h2>
+    {% if actions %}
+    <p class="field__hint">In the classes being archived. Each is closed unless you tick it to carry on; a carried action stays on the pupil's open count in their new classes.</p>
+    <ul class="flow" role="list">
+      {% for note in actions %}
+      <li class="cluster">
+        <label class="choice"><input class="choice__input" type="checkbox" name="carry" value="{{ note.pk }}"> Carry on</label>
+        <span>{{ note.session.klass }} · {{ note.pupil|default:note.group }} · {{ note.label }}{% if note.note_type and note.text %}: {{ note.text }}{% endif %}</span>
+        <small>{{ note.session.date|date:"j M" }}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p>None open.</p>{% endif %}
+  </section>
+
+  <section class="flow">
+    <h2>5 · Recordings</h2>
+    {% if recordings %}
+    <p>These may no longer be kept and are removed; delete the files from their folder too:</p>
+    <ul class="flow" role="list">{% for path in recordings %}<li><code>{{ path }}</code></li>{% endfor %}</ul>
+    {% else %}<p>Nothing past its delete-by date.</p>{% endif %}
+  </section>
+
+  <button class="button" type="submit" data-variant="primary">Back up, then roll over</button>
+</form>
+{% endblock %}

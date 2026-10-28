@@ -31,6 +31,7 @@ POST_ONLY = [
     ("note_promote", [ANY]),
     ("evening_book", [ANY]), ("evening_unbook", [ANY, ANY]), ("evening_import", [ANY]), ("evening_delete", [ANY]),
     ("tonight_mark", [ANY, ANY]),
+    ("class_unarchive", [ANY]),
     ("sync", []),
 ]
 

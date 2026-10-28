@@ -26,7 +26,9 @@ from .services import flag_colours
 
 def pupils_home(request):
     classes = Class.objects.annotate(pupil_count=Count("pupils"))
-    return render(request, "pupils/home.html", {"nav": "pupils", "classes": classes})
+    return render(request, "pupils/home.html", {
+        "nav": "pupils", "classes": classes.filter(archived_on__isnull=True), "archived": classes.filter(archived_on__isnull=False),
+    })
 
 
 def class_pupils(request, pk):

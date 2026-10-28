@@ -17,7 +17,7 @@ from .solver import NoArrangement
 
 
 def plan_home(request):
-    classes = Class.objects.prefetch_related("seating_plans__room")
+    classes = Class.objects.filter(archived_on__isnull=True).prefetch_related("seating_plans__room")
     return render(request, "rooms/plan_home.html", {"nav": "plan", "classes": classes, "rooms": Room.objects.all()})
 
 
@@ -77,10 +77,17 @@ def _board(request, plan, message="", status=200):
     return render(request, "rooms/_plan_board.html", board_context(request, plan, message), status=status)
 
 
+def _archived(request, plan):
+    return _board(request, plan, f"{plan.klass} is archived: its seating is kept as it was.", status=409)
+
+
 @require_POST
 def seating_create(request):
     klass = get_object_or_404(Class, pk=request.POST.get("klass"))
     room = get_object_or_404(Room, pk=request.POST.get("room"))
+    if klass.archived_on:
+        messages.error(request, f"{klass} is archived, so it has no new seating plans.")
+        return redirect("plan_home")
     plan, source = seating.create_plan(klass, room, timezone.localdate())
     if source:
         messages.success(request, f"Seated {plan.assignments.count()} of {klass.pupils.count()} by zone from {source.room}.")
@@ -94,6 +101,8 @@ def seating_create(request):
 def seating_move(request, pk):
     """Drop a pupil on a seat, or on the bin (seat="bin") to unseat them."""
     plan = get_object_or_404(SeatingPlan, pk=pk)
+    if plan.klass.archived_on:
+        return _archived(request, plan)
     pupil = get_object_or_404(Pupil, pk=request.POST.get("pupil"))
     try:
         if request.POST.get("seat") == "bin":
@@ -109,6 +118,8 @@ def seating_move(request, pk):
 @require_POST
 def seating_lock(request, pk):
     plan = get_object_or_404(SeatingPlan, pk=pk)
+    if plan.klass.archived_on:
+        return _archived(request, plan)
     seat = get_object_or_404(Seat, pk=request.POST.get("seat"), room=plan.room)
     seating.push_undo(request.session, plan, seating.toggle_lock(plan, seat))
     return _board(request, plan)
@@ -117,6 +128,8 @@ def seating_lock(request, pk):
 @require_POST
 def seating_undo(request, pk):
     plan = get_object_or_404(SeatingPlan, pk=pk)
+    if plan.klass.archived_on:
+        return _archived(request, plan)
     snap = seating.pop_undo(request.session, plan)
     if snap:
         seating.restore(plan, snap)
@@ -126,6 +139,8 @@ def seating_undo(request, pk):
 @require_POST
 def seating_shuffle(request, pk):
     plan = get_object_or_404(SeatingPlan.objects.select_related("klass", "room"), pk=pk)
+    if plan.klass.archived_on:
+        return _archived(request, plan)
     try:
         snap = seating.shuffle_plan(plan)
     except NoArrangement:
@@ -141,6 +156,9 @@ def seating_shuffle(request, pk):
 @require_POST
 def seating_duplicate(request, pk):
     plan = get_object_or_404(SeatingPlan, pk=pk)
+    if plan.klass.archived_on:
+        messages.error(request, f"{plan.klass} is archived: its seating is kept as it was.")
+        return redirect("seating_edit", pk=plan.pk)
     copy = seating.duplicate_plan(plan, timezone.localdate())
     messages.success(request, "A new plan from today; the old one is kept as history.")
     return redirect("seating_edit", pk=copy.pk)

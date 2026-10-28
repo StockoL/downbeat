@@ -5,6 +5,13 @@
 {% block settings %}
 <p><a href="{% url 'class_list' %}">← Classes</a></p>
 <h1>{{ klass }}</h1>
+{% if klass.archived_on %}
+<form method="post" action="{% url 'class_unarchive' klass.pk %}" class="cluster">
+  {% csrf_token %}
+  <p>Archived on {{ klass.archived_on|date:"j F Y" }}: read-only.</p>
+  <button class="button" type="submit">Bring back from the archive</button>
+</form>
+{% endif %}
 
 <div class="switcher">
   <section class="flow">
