@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
 
+from assessment.models import Check
 from notes.services import sheet_types
 from notes.state import lesson_state
 from plans.sweep import carried_into
@@ -66,6 +67,7 @@ def room_view(request, pk):
         "carried_in": carried_into(session),
         "state": lesson_state(session),
         "note_types": sheet_types(),
+        "decisions": Check.DECISIONS,
         "next": next_session(session, timetable),
         "seat_width": SEAT_WIDTH,
         "seat_height": SEAT_HEIGHT,

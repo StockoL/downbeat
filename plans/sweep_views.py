@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from assessment import hinge
 from notes.models import Goal, Note, NoteType
 from timetable.models import Session, Timetable
 from timetable.services import sessions_on
@@ -46,6 +47,9 @@ def session_sweep(request, pk):
         session.observations.filter(pk__in=request.POST.getlist("bin_observation"), deleted_at__isnull=True).update(
             deleted_at=timezone.now(), updated_at=timezone.now(),
         )
+        _, dropped = hinge.judge(session, request.POST.get("hinge_decision", ""), _responses(request, session))
+        if dropped:
+            messages.error(request, "Pupils' answers are kept only with a decision, so they weren't saved.")
         goal = _spawn_goal(request, session)
         if goal:
             messages.success(request, f"New goal: {goal}. It shows in the room's bar from today.")
@@ -63,6 +67,7 @@ def session_sweep(request, pk):
         activities.append({"activity": activity, "status": status.status if status else "", "carried": bool(status and status.carried_to_session_id)})
     reflection = SessionReflection.objects.filter(session=session).first()
     return render(request, "sweep/session.html", {
+        **_hinge_context(session),
         "nav": "sweep",
         "session": session,
         "activities": activities,
@@ -76,6 +81,30 @@ def session_sweep(request, pk):
         "chosen_tags": reflection.tags if reflection else [],
         "note_types": NoteType.objects.all(),
     })
+
+
+def _responses(request, session):
+    """Each pupil's answer from the sweep, only when the unit opts in: {pupil id: option index or None}."""
+    if not (session.lesson_id and session.lesson.unit.check_responses):
+        return None
+    answers = {}
+    for pk in session.klass.pupils.values_list("pk", flat=True):
+        value = request.POST.get(f"response-{pk}", "")
+        answers[str(pk)] = int(value) if value.isdigit() else None
+    return answers
+
+
+def _hinge_context(session):
+    asked, planned = hinge.asked_in(session), hinge.planned_for(session)
+    check = asked or planned
+    if check is None:
+        return {}
+    context = {"check": check, "asked": asked, "decisions": check.DECISIONS}
+    if session.lesson_id and session.lesson.unit.check_responses:
+        given = dict(asked.responses.values_list("pupil_id", "option")) if asked else {}
+        context["options"] = list(enumerate(check.options))
+        context["responses"] = [{"pupil": p, "option": given.get(p.pk)} for p in session.klass.pupils.all()]
+    return context
 
 
 def _spawn_goal(request, session):

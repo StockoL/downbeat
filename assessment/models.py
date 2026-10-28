@@ -103,3 +103,65 @@ class Observation(Base):
 
     def __str__(self):
         return f"{self.pupil} · {self.component}: {self.get_state_display().lower()}"
+
+
+class Check(Base):
+    """
+    A hinge question. Planned on a lesson (the unit's lessons together are the bank), or asked in
+    a session: a copy of the planned question with the decision it led to. The decision is the
+    record, never the votes, so a session's check exists only once something was decided. Taking
+    a decision back blanks it rather than deleting the row, so a late resend can't revive it.
+    """
+
+    RE_TAUGHT = "re_taught"
+    MOVED_ON = "moved_on"
+    PAIRED = "paired"
+    DECISIONS = [(RE_TAUGHT, "Re-taught"), (MOVED_ON, "Moved on"), (PAIRED, "Paired")]
+
+    lesson_plan = models.ForeignKey("plans.LessonPlan", on_delete=models.CASCADE, null=True, blank=True, related_name="checks")
+    session = models.ForeignKey("timetable.Session", on_delete=models.PROTECT, null=True, blank=True, related_name="checks")
+    source = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="asked")
+    question = models.TextField()
+    answer = models.CharField(max_length=200)
+    distractors = models.JSONField(default=list, blank=True, help_text='[{"text": ..., "misconception": ...}]')
+    threshold = models.PositiveSmallIntegerField(default=80, help_text="Move on if at least this percentage get it right.")
+    decision = models.CharField(max_length=12, choices=DECISIONS, blank=True)
+    minutes_in = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(lesson_plan__isnull=False, session__isnull=True)
+                | models.Q(lesson_plan__isnull=True, session__isnull=False),
+                name="check_is_planned_or_asked",
+            ),
+            models.UniqueConstraint(fields=["lesson_plan"], condition=models.Q(lesson_plan__isnull=False), name="one_check_per_lesson"),
+            models.UniqueConstraint(fields=["session", "source"], condition=models.Q(session__isnull=False), name="one_decision_per_check"),
+        ]
+
+    def __str__(self):
+        return self.question
+
+    @property
+    def options(self):
+        """The answer first, then each distractor; a response stores its position in this list."""
+        return [{"text": self.answer, "misconception": ""}, *self.distractors]
+
+    def ask_in(self, session, **fields):
+        """This planned check's copy for a session, so the record survives later edits to the plan."""
+        return Check.objects.create(
+            session=session, source=self, question=self.question, answer=self.answer,
+            distractors=self.distractors, threshold=self.threshold, **fields,
+        )
+
+
+class CheckResponse(Base):
+    """One pupil's answer to a check. Opt-in per unit and entered in the sweep; empty by default."""
+
+    check_asked = models.ForeignKey(Check, on_delete=models.CASCADE, related_name="responses")
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.CASCADE, related_name="check_responses")
+    option = models.PositiveSmallIntegerField(help_text="0 is the answer; 1 onwards the distractors in order.")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["check_asked", "pupil"], name="one_response_per_pupil")]

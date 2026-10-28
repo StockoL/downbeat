@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from assessment.forms import HingeForm
+from assessment.models import Check
 from timetable.models import Class, Session
 
 from . import services
@@ -80,16 +82,21 @@ def lesson(request, pk):
     form = LessonForm(data, instance=lesson)
     activities = ActivityFormSet(data, instance=lesson, prefix="activities")
     resources = ResourceFormSet(data, instance=lesson, prefix="resources")
-    if data is not None and form.is_valid() and activities.is_valid() and resources.is_valid():
+    hinge = HingeForm(data, prefix="hinge", check=lesson.checks.first())
+    if data is not None and all([form.is_valid(), activities.is_valid(), resources.is_valid(), hinge.is_valid()]):
         with transaction.atomic():
             form.save()
             activities.save()
             resources.save()
+            hinge.save(lesson)
         messages.success(request, "Lesson saved.")
         return redirect("lesson", pk=lesson.pk)
     total = sum(a.minutes for a in lesson.activities.all())
+    # The unit's other lessons' checks: the bank to start this one from.
+    bank = Check.objects.filter(lesson_plan__unit=lesson.unit).exclude(lesson_plan=lesson).select_related("lesson_plan")
     return _render(request, "plans/lesson.html", {
         "lesson": lesson, "form": form, "activities": activities, "resources": resources, "total_minutes": total,
+        "hinge": hinge, "bank": bank,
     })
 
 

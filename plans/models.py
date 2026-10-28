@@ -24,6 +24,9 @@ class Unit(Base):
     lessons_planned = models.PositiveSmallIntegerField(default=6)
     assessment_notes = models.TextField(blank=True)
     purpose = models.TextField(blank=True, help_text="Why assess this, and what happens to the results?")
+    check_responses = models.BooleanField(
+        default=False, help_text="Record each pupil's answer to hinge checks in the sweep. Off by default: the decision is the record.",
+    )
 
     class Meta:
         ordering = ["scheme", "order", "name"]

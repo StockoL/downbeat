@@ -14,8 +14,9 @@ class SchemeForm(forms.ModelForm):
 class UnitForm(forms.ModelForm):
     class Meta:
         model = Unit
-        fields = ["name", "order", "lessons_planned", "purpose", "assessment_notes"]
+        fields = ["name", "order", "lessons_planned", "purpose", "assessment_notes", "check_responses"]
         widgets = {"purpose": forms.Textarea(attrs=AREA), "assessment_notes": forms.Textarea(attrs=AREA)}
+        labels = {"check_responses": "Record each pupil's hinge answer"}
 
 
 class LessonForm(forms.ModelForm):

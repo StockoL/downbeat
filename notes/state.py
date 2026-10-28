@@ -80,6 +80,23 @@ def lesson_state(session):
              "nextStep": o.next_step, "at": o.created_at.isoformat()}
             for o in session.observations.filter(deleted_at__isnull=True)
         ],
+        # The lesson's hinge check, and what was decided (a blank decision was taken back).
+        "hinge": _hinge(session),
+        "decisions": [
+            {"id": str(c.pk), "source": str(c.source_id) if c.source_id else None, "decision": c.decision,
+             "minutesIn": c.minutes_in, "at": c.updated_at.isoformat()}
+            for c in session.checks.all()
+        ],
+    }
+
+
+def _hinge(session):
+    check = session.lesson.checks.first() if session.lesson_id else None
+    if check is None:
+        return None
+    return {
+        "id": str(check.pk), "question": check.question, "answer": check.answer,
+        "distractors": check.distractors, "threshold": check.threshold,
     }
 
 

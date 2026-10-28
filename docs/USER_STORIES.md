@@ -39,13 +39,13 @@ Status key: **Built** (with the step that built it), **Planned** (with its phase
 | --- | --- | --- | --- |
 | Setting up | US-01, 02, 03, 04, 05 | US-06 | US-07 |
 | Catch | US-10, 11, 12, 13, 14, 15, 16, 17 | US-18, 19, 20, 21, 22, 23, 24, 25 | US-26, 27, 28 |
-| Plan | US-30, 31, 32, 33, 34 | US-35, 36, 37, 38, 39 | US-40, 41 |
-| Sweep | US-50, 51, 52, 53 | US-54, 55 | US-56 |
+| Plan | US-30, 31, 32, 33, 34, 42 | US-35, 36, 37, 38, 39 | US-40, 41 |
+| Sweep | US-50, 51, 52, 53 | US-54, 55 | US-56, 57 |
 | Pupils | US-60 | US-61, 62, 63 | US-64, 65 |
 | Reports and evenings | US-70, 71, 72, 75 | US-73, 74 | |
 | Data and safety | US-80, 81, 82, 83, 84, 85 | US-86 | |
 
-Of the Must haves, all but the hinge check (US-17), the hinge judgement (US-53), reports (US-70 to 72) and rollover (US-75) are built. Those are Phase 5 and 6 work.
+Of the Must haves, all but reports (US-70 to 72), rollover (US-75) and recordings with permission (US-85) are built. Those are Phase 5 and 6 work.
 
 ## Won't have
 
@@ -276,16 +276,23 @@ Scenario: A lesson without components
 
 ### US-17 Log the hinge decision
 **As** the teacher, **I want** one button that shows the lesson's hinge question with a timer and lets me record what I decided, **so that** the decision is the record, not the votes.
-Must · Planned (Phase 5, step 5.3)
+Must · Built (Phase 5, step 5.3)
 
 ```gherkin
 Scenario: Moving on
   Given the lesson plan has a hinge check
   When I tap the hinge button
-  Then the question, the distractors and a running timer are shown
+  Then the question, the right answer, each wrong answer with its misconception, and a running timer are shown
   When I tap "Moved on"
-  Then the decision and the minutes into the lesson are recorded for the class
-  And no per-pupil response is recorded
+  Then the sheet closes and the bar reads "Hinge · moved on"
+  And the Log shows "Hinge · moved on"
+  And the decision and the minutes into the lesson are recorded for the class
+  And no pupil's answer is recorded
+
+Scenario: Changing my mind
+  Given I recorded "Re-taught"
+  When I open the hinge check again and tap "Paired"
+  Then the lesson has one decision, "Paired"
 
 Scenario: No check planned
   Given the lesson has no hinge check
@@ -581,6 +588,23 @@ Scenario: Only with permission
   Then I cannot add a recording of Sam R's work as an exemplar
 ```
 
+### US-42 Hinge checks, written once and reused
+**As** the teacher, **I want** to write a lesson's hinge question with wrong answers that each name a misconception, and start another lesson's check from it, **so that** a good question is written once.
+Must · Built (Phase 5, step 5.3)
+
+```gherkin
+Scenario: Every wrong answer names its misconception
+  Given I am editing a lesson
+  When I add a wrong answer without saying which misconception it shows
+  Then the lesson isn't saved and I am asked for the misconception
+
+Scenario: The unit's bank
+  Given lesson 1 of "Blues" has a hinge check
+  When I open lesson 2 and choose "Start from another lesson's check"
+  Then lesson 2 has a copy I can change without changing lesson 1
+  And the unit's Assessment page lists both
+```
+
 ---
 
 ## 4. Sweep: at the desk, same day
@@ -623,13 +647,18 @@ Scenario: Printing found from the plan
 
 ### US-53 Record the hinge judgement from memory
 **As** the teacher, **I want** to record the class-level hinge decision in the sweep if I didn't in the room, **so that** the record exists without a tap mid-lesson.
-Must · Planned (Phase 5, step 5.3)
+Must · Built (Phase 5, step 5.3)
 
 ```gherkin
 Scenario: Judged afterwards
   Given the lesson had a hinge check with no decision recorded
+  When I sweep it and choose "Re-taught"
+  Then the decision is recorded for the class, with no minutes into the lesson
+
+Scenario: Confirming the room's decision
+  Given I tapped "Moved on" 23 minutes into the lesson
   When I sweep it
-  Then I can choose re-taught, moved on or paired
+  Then "Moved on" is chosen and the sweep says "Decided in the lesson, 23 min in"
 ```
 
 ### US-54 One line of reflection
@@ -663,6 +692,22 @@ Scenario: Spawning a goal
   When I tick "Turn this into a goal" and give a note type and target
   Then a weekly goal starting today appears on the bar
   And the reflection reads "Became the goal …"
+```
+
+### US-57 Each pupil's hinge answer, when the unit asks for it
+**As** the teacher, **I want** to record each pupil's answer to a hinge check in the sweep for units where I've chosen to, **so that** I can see who holds which misconception when it matters, without it becoming the default.
+Could · Built (Phase 5, step 5.3)
+
+```gherkin
+Scenario: Off by default
+  Given the unit doesn't record pupils' answers
+  When I sweep a lesson with a hinge check
+  Then there is no per-pupil grid
+
+Scenario: Kept only with a decision
+  Given the unit records pupils' answers
+  When I enter answers but leave the decision as "Not asked"
+  Then the answers aren't saved and I'm told why
 ```
 
 ---

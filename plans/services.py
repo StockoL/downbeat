@@ -10,12 +10,14 @@ from .models import LessonPlan, PlanActivity, Resource, Unit
 
 @transaction.atomic
 def duplicate_unit(unit, scheme=None):
-    """A copy of a unit with its lessons, activities, resources, components and codes: next year's start."""
+    """A copy of a unit with its lessons, activities, resources, hinge checks, components and codes: next year's start."""
+    from assessment.models import Check
+
     copy = Unit.objects.create(
         scheme=scheme or unit.scheme, name=f"{unit.name} (copy)", order=unit.order + 1,
         lessons_planned=unit.lessons_planned, assessment_notes=unit.assessment_notes, purpose=unit.purpose,
     )
-    for lesson in unit.lessons.prefetch_related("activities", "resources"):
+    for lesson in unit.lessons.prefetch_related("activities", "resources", "checks"):
         new = LessonPlan.objects.create(
             unit=copy, order=lesson.order, objective=lesson.objective, starter=lesson.starter, main=lesson.main,
             assessment=lesson.assessment, differentiation=lesson.differentiation, homework=lesson.homework,
@@ -27,6 +29,10 @@ def duplicate_unit(unit, scheme=None):
             Resource(lesson_plan=new, title=r.title, path_or_url=r.path_or_url, needs_print=r.needs_print,
                      copies=r.copies, setup_note=r.setup_note)
             for r in lesson.resources.all()
+        ])
+        Check.objects.bulk_create([
+            Check(lesson_plan=new, question=c.question, answer=c.answer, distractors=c.distractors, threshold=c.threshold)
+            for c in lesson.checks.all()
         ])
     # Components and feedback codes travel the same way a shared criteria file does.
     from assessment import criteria

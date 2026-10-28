@@ -1001,3 +1001,77 @@ button.room-strip {
   background: var(--color-surface-sunken);
   --cluster-justify: space-between;
 }
+
+/* --- Hinge check: a full-height sheet. The question large, the answers with their
+       misconceptions (the teacher's screen only), a timer, three decisions at the foot. --- */
+.note-sheet:has(.hinge__question) {
+  block-size: 90dvh;
+  max-block-size: 90dvh;
+}
+
+.note-sheet:has(.hinge__question) #sheet-body {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+}
+
+.hinge__timer {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.hinge__timer + .note-sheet__close {
+  margin-inline-start: 0;
+}
+
+.hinge__question {
+  font-size: var(--step-3);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hinge__options {
+  display: grid;
+  gap: var(--space-2xs);
+  padding: 0;
+}
+
+.hinge__option {
+  display: grid;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.hinge__option[data-correct] {
+  border-color: var(--color-text);
+  font-weight: 700;
+}
+
+.hinge__misconception {
+  color: var(--color-text-muted);
+  font-size: var(--step--1);
+  font-weight: 400;
+}
+
+.hinge__threshold {
+  color: var(--color-text-muted);
+}
+
+.hinge__decisions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+  margin-block-start: auto;
+}
+
+.hinge__decisions .button {
+  min-block-size: 4rem;
+  font-size: var(--step-1);
+}
+
+.hinge__decisions .button[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}

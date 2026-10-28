@@ -19,7 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from assessment.models import Band, Component, FeedbackCode, Strand
+from assessment.models import Band, Check, Component, FeedbackCode, Strand
 from core.data import delete_all
 from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
@@ -307,9 +307,46 @@ class Command(BaseCommand):
             FeedbackCode.objects.create(unit=units[year], number=1, text="Count in before you start", component=made[0])
             FeedbackCode.objects.create(unit=units[year], number=2, text="Leave space between phrases", component=made[-1])
 
+        # Hinge checks for the first four lessons of each unit, each wrong answer tagged with its misconception.
+        hinges = {
+            8: [("How many bars are in a twelve-bar blues?", "Twelve, in three lines of four",
+                 [("Twelve beats", "Confuses bars with beats"), ("Eight", "Expects a pop verse length")]),
+                ("Which notes does a walking bass mostly use?", "Chord notes, stepping between them",
+                 [("Only the root", "Hasn't heard the line move"), ("Any scale notes, at random", "Thinks walking means free")]),
+                ("Which note of the blues scale is the blue note?", "The flattened fifth",
+                 [("The root", "Mixes up home and colour"), ("The major third", "Confuses the blues scale with the major")]),
+                ("In AAB form, which line is different?", "The third",
+                 [("The first", "Reads the letters as a ranking"), ("None of them", "Thinks A means any line")])],
+            9: [("What makes a riff a riff?", "A short pattern that repeats",
+                 [("A long tune that never repeats", "Mixes up riff and melody"), ("Any guitar part", "Ties riffs to one instrument")]),
+                ("A riff is four beats long. How many times does it fit in two bars of 4/4?", "Twice",
+                 [("Four times", "Counts beats, not bars"), ("Once", "Thinks a riff fills a bar")]),
+                ("Two riffs are layered. What must they share?", "The same pulse and key",
+                 [("The same rhythm", "Thinks layering means doubling"), ("The same instrument", "Confuses texture with timbre")]),
+                ("Who keeps the groove steady in a band?", "The drums and bass together",
+                 [("The singer", "Follows the loudest part"), ("Whoever plays loudest", "Equates volume with time")])],
+        }
+        for year, rows in hinges.items():
+            for order, (question, answer, wrong) in enumerate(rows, start=1):
+                Check.objects.create(
+                    lesson_plan=units[year].lessons.get(order=order), question=question, answer=answer, threshold=80,
+                    distractors=[{"text": text, "misconception": why} for text, why in wrong],
+                )
+        units[8].check_responses = True  # one unit opts in to pupils' answers, to show the sweep's grid
+        units[8].save(update_fields=["check_responses"])
+
         last_monday = today - datetime.timedelta(days=today.weekday() + 7)
         fill_from_unit(classes["8X Mu"], units[8], from_date=last_monday)
         fill_from_unit(classes["9Y Mu"], units[9], from_date=last_monday)
+
+        # Most past lessons with a check had a decision, made partway through.
+        for session in Session.objects.filter(date__lt=today, lesson__checks__isnull=False):
+            if rng.random() < 0.75:
+                start, _ = timetable.period_times(session.period)
+                minutes = rng.randint(15, 35)
+                asked = session.lesson.checks.get().ask_in(session, decision=rng.choice(Check.DECISIONS)[0], minutes_in=minutes)
+                when = timezone.make_aware(datetime.datetime.combine(session.date, start)) + datetime.timedelta(minutes=minutes)
+                Check.objects.filter(pk=asked.pk).update(created_at=when, updated_at=when)
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

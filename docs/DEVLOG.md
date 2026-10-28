@@ -96,6 +96,8 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 | --- | --- |
 | `0bf637b` | 5.1 The frame: strands and bands, unit components with default next steps, feedback codes, criteria files to share between teachers |
 | `a597493` | 5.2 Observations from the seat: long-press, three states, default next step attached, offline through the queue, in the Log and the sweep |
+| `424721e` | The plan strip stops counting once the period has ended |
+| (this step) | 5.3 Hinge checks: written in the lesson editor with misconception-tagged wrong answers, a bank per unit, the bar's Hinge button with a timed sheet and three decisions, offline through the queue, the judgement in the sweep, and pupils' answers when a unit opts in |
 
 **Checked.** On the demo school at iPad size: a long-press opened the sheet for the unit's three components; "Partly" saved with the default next step; "Change" replaced it; the Log showed the observation; after sync the laptop's database held it with the changed step.
 
@@ -104,8 +106,14 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 
 **Documentation.** The README became a signpost to `docs/`: user stories with MoSCoW priorities and BDD scenarios, architecture, operations, development, testing, this log, and screenshots of every built journey. `tools/screenshots.py` regenerates the screenshots from the demo school. Capturing them showed that after a lesson's period ended the plan strip kept counting ("836 min in"). Lesson state now carries the period's end, and after it the strip shows the objective with nothing highlighted, as it does when there are no times.
 
+**5.3 checked.** On the demo school at iPad size: the Hinge button was greyed on a lesson without a check and live on one with; the sheet showed the question, the marked answer, each wrong answer's misconception and a running timer; "Moved on" closed it, put "Hinge · moved on" on the bar and in the Log, and reached the laptop; changing it to "Re-taught" offline queued it and synced on reconnecting; H opened the sheet; ✕ in the Log took it back; the sweep showed the room's decision with its minutes. The screenshot tool now captures the sheet.
+
+**5.3 went wrong, put right.**
+- The lesson editor's existing test posts no hinge fields, which a required threshold refused. The threshold is optional and defaults to 80%.
+- The screenshot tool's mid-lesson captures came out stamped with the real time: it had chosen a future lesson, and sync holds a device clock in the future to now. It now uses the most recent past lesson with a seating plan, cleared of the demo's history first. It had also chosen the hall lesson the demo leaves without a seating plan, so there were no seats to tap.
+- The bar's "Hinge · moved on" showed a double gap, because the button's flex gap spaced its two text nodes. The label is now one node.
+
 **Next:**
-- 5.3 Hinge checks: a question bank with misconception-tagged distractors, a timer, a three-way decision, and the class-level judgement in the sweep.
 - 5.4 Feedback: done well, develop, how, with a recording timestamp; feedback codes as a projectable list; self and peer entry; the class-by-component heat view.
 - 5.5 The exemplar bank gated by permission, and the ipsative timeline on the pupil page.
 

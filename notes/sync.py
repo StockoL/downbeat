@@ -17,6 +17,8 @@ resending after a dropped connection, changes nothing.
     observation.add {id, session, pupil, component, state, next_step, at}
     observation.update {observation, next_step, at}
     observation.remove {observation, at}
+    check.decide    {id, session, check, decision, at}
+    check.clear     {check, at}
 """
 
 import datetime
@@ -26,9 +28,9 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from assessment.models import Component, Observation
+from assessment.models import Check, Component, Observation
 from pupils.models import Group
-from timetable.models import Pupil, Session, SessionAttendance
+from timetable.models import Pupil, Session, SessionAttendance, Timetable
 
 from .models import ChecklistItem, ChecklistTick, Note, NoteType, SpokenTo
 
@@ -179,6 +181,47 @@ def observation_remove(op):
         Observation.objects.filter(pk=observation.pk).update(deleted_at=at, updated_at=at)
 
 
+def _minutes_in(session, at):
+    """How far into the period a decision was made; None if the period has no times or it was another day."""
+    start, _ = Timetable.active().period_times(session.period)
+    if start is None:
+        return None
+    minutes = (at - timezone.make_aware(datetime.datetime.combine(session.date, start))).total_seconds() // 60
+    return max(0, int(minutes)) if minutes <= 600 else None
+
+
+def check_decide(op):
+    """
+    The hinge decision. The first one copies the planned question into the session; a later one,
+    from this device or another, changes the decision if it was made later.
+    """
+    decision = op.get("decision")
+    if decision not in dict(Check.DECISIONS):
+        raise Rejected("unknown decision")
+    at = _at(op)
+    row = Check.objects.filter(pk=_uuid(op.get("id"))).first()
+    if row is None:
+        session, source = _get(Session, op.get("session")), _get(Check, op.get("check"))
+        if source.lesson_plan_id is None:
+            raise Rejected("only a planned check can be asked")
+        row = Check.objects.filter(session=session, source=source).first()
+        if row is None:
+            row = source.ask_in(session, id=_uuid(op.get("id")), decision=decision, minutes_in=_minutes_in(session, at))
+            Check.objects.filter(pk=row.pk).update(created_at=at, updated_at=at)
+            return
+    if at >= row.updated_at:
+        Check.objects.filter(pk=row.pk).update(decision=decision, updated_at=at)
+
+
+def check_clear(op):
+    """Takes a decision back. The row stays, blank, so a late resend of the decision can't revive it."""
+    row, at = _get(Check, op.get("check")), _at(op)
+    if row.session_id is None:
+        raise Rejected("a planned check has no decision")
+    if at >= row.updated_at:
+        Check.objects.filter(pk=row.pk).update(decision="", updated_at=at)
+
+
 HANDLERS = {
     "note.add": note_add,
     "note.remove": note_remove,
@@ -193,6 +236,8 @@ HANDLERS = {
     "observation.add": observation_add,
     "observation.update": observation_update,
     "observation.remove": observation_remove,
+    "check.decide": check_decide,
+    "check.clear": check_clear,
 }
 
 

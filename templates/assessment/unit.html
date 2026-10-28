@@ -1,13 +1,13 @@
 {% extends "layouts/desk.html" %}
 
-{% block title %}Components · {{ unit }} · Plan · Downbeat{% endblock %}
+{% block title %}Assessment · {{ unit }} · Plan · Downbeat{% endblock %}
 
 {% block content %}
 <p><a href="{% url 'scheme' unit.scheme.pk %}">← {{ unit.scheme }}</a></p>
 <h1>{{ unit }}</h1>
 <nav class="cluster" aria-label="{{ unit }}">
   <a href="{% url 'unit' unit.pk %}">Lessons</a>
-  <a href="{% url 'unit_assessment' unit.pk %}" aria-current="page">Components and codes</a>
+  <a href="{% url 'unit_assessment' unit.pk %}" aria-current="page">Assessment</a>
 </nav>
 
 {% if not has_strands %}
@@ -44,4 +44,21 @@
   </div>
 </div></section>
 {% endif %}
+
+<section class="flow">
+  <h2>Hinge checks</h2>
+  <p class="field__hint">This unit's bank: each lesson's check, written in the lesson editor. Any lesson can start from another's.</p>
+  {% if checks %}
+  <ol class="flow" role="list">
+    {% for check in checks %}
+    <li class="flow">
+      <a href="{% url 'lesson' check.lesson_plan.pk %}#hinge">L{{ check.lesson_plan.order }}: {{ check.question }}</a>
+      <small>Right: {{ check.answer }}{% for d in check.distractors %} · Wrong: {{ d.text }} ({{ d.misconception }}){% endfor %} · move on at {{ check.threshold }}%</small>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p>No hinge checks yet.</p>
+  {% endif %}
+</section>
 {% endblock %}

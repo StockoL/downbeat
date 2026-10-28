@@ -115,6 +115,8 @@ device's unsent captures applied on top, so it works the same with or without a 
   {% if state.register %}<button type="button" class="button" data-variant="ghost" data-action="register">Register <span class="room-bar__count" data-register-count></span></button>{% endif %}
   <button type="button" class="button" data-variant="ghost" data-action="actions">Actions <span class="room-bar__count" data-actions-count></span></button>
   <button type="button" class="button" data-action="pick">Pick</button>
+  {% comment %}Always here, greyed when the plan has no check, so its place on the bar never moves.{% endcomment %}
+  <button type="button" class="button" data-action="hinge" aria-keyshortcuts="H" {% if not state.hinge %}disabled{% endif %}><span data-hinge-label>Hinge</span></button>
   <span class="room-bar__sync" data-sync-status role="status" aria-live="polite"></span>
   <div class="dropdown-wrapper room-bar__more">
     <button type="button" class="button" data-variant="ghost" data-toggle="dropdown" aria-label="More">⋯</button>
@@ -215,6 +217,22 @@ device's unsent captures applied on top, so it works the same with or without a 
   </form>
 </template>
 
+<template id="tpl-hinge">
+  <header class="note-sheet__head cluster">
+    <h2 class="note-sheet__name">Hinge check</h2>
+    <span class="hinge__timer" data-slot="timer" role="timer" aria-label="Time since the question went up">0:00</span>
+    <button type="button" class="button note-sheet__close" data-variant="ghost" data-close-sheet aria-label="Close">✕</button>
+  </header>
+  <p class="hinge__question" data-slot="question"></p>
+  <ol class="hinge__options" role="list" data-slot="options"></ol>
+  <p class="hinge__threshold" data-slot="threshold"></p>
+  <div class="hinge__decisions">
+    {% for value, label in decisions %}
+    <button type="button" class="button" data-size="large" data-action="decide" data-decision="{{ value }}" aria-pressed="false">{{ label }}</button>
+    {% endfor %}
+  </div>
+</template>
+
 <template id="tpl-checklist">
   <header class="note-sheet__head cluster">
     <h2 class="note-sheet__name">This lesson</h2>
@@ -241,11 +259,12 @@ device's unsent captures applied on top, so it works the same with or without a 
     <dt><kbd>N</kbd></dt><dd>Next lesson</dd>
     <dt><kbd>P</kbd></dt><dd>Pick a name</dd>
     <dt><kbd>A</kbd></dt><dd>Actions</dd>
+    <dt><kbd>H</kbd></dt><dd>Hinge check</dd>
     <dt><kbd>U</kbd></dt><dd>Undo the last note change</dd>
     <dt><kbd>L</kbd></dt><dd>Show or hide the log (narrow screens)</dd>
     <dt><kbd>Tab</kbd></dt><dd>Flip between Log and Plan (when nothing else is selected)</dd>
     <dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>In a pupil's sheet: that note type</dd>
-    <dt><kbd>S</kbd> <kbd>X</kbd> <kbd>F</kbd></dt><dd>In a pupil's sheet: spoken to, absent, free text</dd>
+    <dt><kbd>S</kbd> <kbd>X</kbd> <kbd>F</kbd> <kbd>O</kbd></dt><dd>In a pupil's sheet: spoken to, absent, free text, observe</dd>
     <dt><kbd>Esc</kbd></dt><dd>Close the sheet</dd>
   </dl>
 </template>

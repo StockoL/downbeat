@@ -2,7 +2,7 @@
 
 Evidence of the user journeys and key features, captured from the demo school. Every pupil in the demo is invented (first name and initial, generated from a fixed seed), so no real pupil data appears here.
 
-Captured on 27 October 2026 at the end of step 5.2, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
+Captured on 28 October 2026 at the end of step 5.3, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
 
 Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
 
@@ -10,6 +10,7 @@ Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys 
 
 - [Journey: walk in and teach](#journey-walk-in-and-teach)
 - [Journey: catch an observation](#journey-catch-an-observation)
+- [Journey: hinge moment](#journey-hinge-moment)
 - [Journey: next lesson](#journey-next-lesson)
 - [Journey: day's end sweep](#journey-days-end-sweep)
 - [Journey: plan next week](#journey-plan-next-week)
@@ -29,7 +30,7 @@ Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys 
 
 ![Today: the day's lessons in period order](screenshots/03-today.png)
 
-**The room view on the laptop.** The canvas is on the left and the Log on the right. Seats show this lesson's badges (★ house point, ✓ great answer), coloured flag edges (US-35), group tints (US-36), the dot for an open action (US-15), and a thicker edge for pupils missed last lesson (US-18). Spoken-to seats are dimmed, and an absent pupil is struck through (US-20). The bottom bar has the goal counter "★ 3/20", the checklist "✓ 0/3" and Actions (US-23), plus Pick and Next.
+**The room view on the laptop.** The canvas is on the left and the Log on the right. Seats show this lesson's badges (★ house point, ✓ great answer), coloured flag edges (US-35), group tints (US-36), the dot for an open action (US-15), and a thicker edge for pupils missed last lesson (US-18). Spoken-to seats are dimmed, and an absent pupil is struck through (US-20). The bottom bar has the goal counter, the checklist "✓ 0/3" and Actions (US-23), then Pick, Hinge (US-17) and Next.
 
 ![Room view at laptop width with the Log](screenshots/04-room-view-laptop.png)
 
@@ -69,6 +70,16 @@ Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys 
 
 The saved observation joins the Log in time order with the notes ("Dev M · Plays a riff in time with the band: secure" in the offline shot above).
 
+## Journey: hinge moment
+
+*Hinge button → the question, the answers and a timer → tap a decision. Two taps.* (US-17, US-42)
+
+The sheet is full height: the question large, the right answer marked, each wrong answer with the misconception it shows (on the teacher's screen only), the threshold, and a timer running since it opened. One tap on Re-taught, Moved on or Paired records the decision for the class and closes the sheet. No pupil's answer is recorded (rule 3).
+
+![The hinge check sheet](screenshots/32-ipad-hinge-check.png)
+
+The decision then shows on the bar as "Hinge · moved on" and in the Log, as in the offline shot above. On a lesson whose plan has no check, the button stays in its place, greyed.
+
 ## Journey: next lesson
 
 *Room view → Next → the next session's room. One tap.* (US-21)
@@ -83,7 +94,7 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 
 ![Sweep: a day's sessions](screenshots/13-sweep-day.png)
 
-**A session's sweep** is one scroll. First, each activity's status, with "If unfinished, carry to Thu 29 Oct" ticked by default. Then the caught notes, each with a Bin tick. Then one reflection line, with Teachers' Standards tags and "Turn this into a goal".
+**A session's sweep** is one scroll. First, each activity's status, with "If unfinished, carry to …" ticked by default. Then the caught notes, each with a Bin tick. Then the hinge check, to record the decision from memory if it wasn't made in the room (US-53); this unit opts in to pupils' answers, so "Each pupil's answer" opens a table of the class (US-57). Last, one reflection line, with Teachers' Standards tags and "Turn this into a goal".
 
 ![One session's sweep](screenshots/14-session-sweep.png)
 
@@ -99,11 +110,11 @@ The bar's "Next: P5 · 10 GCSE ›" button is in every room view shot above; N d
 | --- | --- |
 | ![Plan: classes](screenshots/09-plan-classes.png) | ![A class's sessions with their lessons](screenshots/10-class-lessons.png) |
 
-**The lesson editor**: objective, activities with minutes, and resources with print flags.
+**The lesson editor**: objective, activities with minutes, resources with print flags, and the hinge check with each wrong answer's misconception.
 
 ![The lesson editor](screenshots/12-lesson-editor.png)
 
-**A unit's components and codes**: pupil-facing components, each with a strand and default next step, feedback codes, and the criteria file to download or import.
+**A unit's Assessment tab**: pupil-facing components, each with a strand and default next step, feedback codes, the criteria file to download or import, and the unit's bank of hinge checks.
 
 ![Unit components and feedback codes](screenshots/11-unit-components.png)
 
@@ -155,8 +166,9 @@ The summary reads "1 keep-apart pair side by side. 3 seats not meeting a flag's 
 
 | Rule (BUILD_ORDER) | Where to see it |
 | --- | --- |
-| 1. Capture is two taps, never a form | Note sheet, observation sheet |
+| 1. Capture is two taps, never a form | Note sheet, observation sheet, hinge sheet |
 | 2. A lesson with no input has no nags | The room view bar: plain counts, no colour, no prompts |
+| 3. Whole-class checks store the decision | The hinge sheet records a decision, never votes; pupils' answers only in the sweep, for a unit that opts in |
 | 4. An observation carries a next step | "Next step: Lock in with the drummer's snare" attached on the first tap |
 | 8. Flags are colour only | Seats show coloured edges; the label appears only on the pupil page |
 | 9. Projector and cover show names only | The projector view below: seats and names, black on white, no badges, flags, groups, dimming or absence |
@@ -168,7 +180,6 @@ The summary reads "1 keep-apart pair side by side. 3 seats not meeting a flag's 
 
 These journeys from UX.md have no screens yet:
 
-- **Hinge moment**: Phase 5, step 5.3.
 - **Report season** and **parents' evening**: Phase 6.
 
 This page will gain their screenshots as they are built.

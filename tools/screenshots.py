@@ -9,8 +9,9 @@ stops both servers. Only invented demo pupils ever appear. Run from the repo roo
     .venv\\Scripts\\python tools\\screenshots.py                     # Microsoft Edge
     .venv\\Scripts\\python tools\\screenshots.py --channel chromium   # after `playwright install chromium`
 
-The room view is captured with the browser's clock set 27 minutes into the demo's first lesson
-that has unit components, so times and the plan strip read as they would mid-lesson.
+The room view is captured with the browser's clock set 27 minutes into the demo's most recent
+past lesson that has unit components, a hinge check and a seating plan, so times and the plan
+strip read as they would mid-lesson.
 """
 
 import argparse
@@ -70,9 +71,18 @@ from timetable.models import Class, Session, Timetable
 
 today = timezone.localdate()
 units = set(Component.objects.values_list("unit_id", flat=True))
-lessons = Session.objects.filter(date__gte=today, klass__kind=Class.TIMETABLED, lesson__unit__in=units).exclude(
-    status=Session.CANCELLED).order_by("date", "period")
-observe = min(lessons, key=lambda s: (s.date, Timetable.active().period_times(s.period)[0]))
+# A lesson already under way 27 minutes in, so the faked browser clock is never in the future
+# (sync holds a device's future clock to now, which would stamp captures with the real time).
+lessons = Session.objects.filter(date__lte=today, klass__kind=Class.TIMETABLED, lesson__unit__in=units, lesson__checks__isnull=False).exclude(
+    status=Session.CANCELLED)
+def starts(s):
+    return timezone.make_aware(datetime.datetime.combine(s.date, Timetable.active().period_times(s.period)[0]))
+seated = [s for s in lessons if SeatingPlan.objects.filter(klass=s.klass, room=s.room).exists()
+          and starts(s) + datetime.timedelta(minutes=30) < timezone.now()]
+observe = max(seated, key=starts)
+# Clear what the demo recorded in it, so the room reads as a lesson under way rather than history.
+for related in (observe.notes, observe.spoken_to, observe.attendance, observe.checklist_ticks, observe.observations, observe.checks):
+    related.all().delete()
 start = Timetable.active().period_times(observe.period)[0]
 past = Session.objects.filter(date__lt=today, lesson__isnull=False).annotate(n=Count("notes")).filter(n__gt=2).order_by("-date").first()
 unit = Component.objects.order_by("unit__scheme__year_group", "unit__order").first().unit
@@ -218,6 +228,13 @@ def capture(ids, base, fresh, channel):
         page.locator("#sheet [data-action=observe][data-state=secure]").first.click()
         shot(page, "26-ipad-observation-next-step")
         page.keyboard.press("Escape")
+        sheet.wait_for(state="hidden")
+
+        page.locator("[data-action=hinge]").click()
+        sheet.wait_for(state="visible")
+        page.clock.run_for(47_000)  # the timer, as if the question has been up a while
+        shot(page, "32-ipad-hinge-check")
+        page.locator("#sheet [data-action=decide][data-decision=moved_on]").click()
         sheet.wait_for(state="hidden")
 
         for action, name in (("pick", "27-ipad-picker"), ("actions", "28-ipad-actions"), ("checklist", "29-ipad-checklist")):

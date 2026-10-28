@@ -258,6 +258,7 @@ function initPlanEditor(wrapper) {
 const UNDO_LIMIT = 10;
 const STATE_WORDS = { not_yet: "not yet", partly: "partly", secure: "secure" };
 const LONG_PRESS_MS = 500;
+const DECISION_WORDS = { re_taught: "re-taught", moved_on: "moved on", paired: "paired" };
 const ICON_FREE_TEXT = "✎";
 
 function el(tag, attributes = {}, text = "") {
@@ -331,6 +332,15 @@ function applyOp(s, op, graveyard) {
     case "observation.remove":
       s.observations = s.observations.filter((o) => o.id !== op.observation);
       break;
+    case "check.decide": {
+      const row = s.decisions.find((d) => d.id === op.id) ?? s.decisions.find((d) => d.source === op.check);
+      if (row) Object.assign(row, { decision: op.decision, at: op.at });
+      else s.decisions.push({ id: op.id, source: op.check, decision: op.decision, minutesIn: null, at: op.at });
+      break;
+    }
+    case "check.clear":
+      for (const d of s.decisions) if (d.id === op.check) d.decision = "";
+      break;
   }
 }
 
@@ -368,6 +378,7 @@ function initRoomView(root) {
   const isTicked = (s, item) => (s.ticked[item] ?? []).length > 0;
   const componentText = (s, id) => s.components.find((c) => c.id === id)?.text ?? "Component";
   const ticked = (s) => s.checklist.filter((item) => isTicked(s, item.id)).length;
+  const decisionOf = (s) => (s.hinge ? s.decisions.find((d) => d.source === s.hinge.id) : undefined);
   const describe = (s, note) => `${iconOf(s, note)} ${labelOf(s, note)}${note.type && note.text ? `: ${note.text}` : ""}`;
 
   const saving = new Set(); // captures not yet written to the queue
@@ -457,6 +468,10 @@ function initRoomView(root) {
         label: componentText(s, o.component), who: nameOf(s, o.pupil),
         remove: { "data-action": "remove-observation", "data-observation": o.id },
       })),
+      ...s.decisions.filter((d) => d.decision).map((d) => ({
+        at: d.at, text: `Hinge · ${DECISION_WORDS[d.decision]}`, label: "the hinge decision", who: "the class",
+        remove: { "data-action": "undecide", "data-check": d.id },
+      })),
     ].sort(byTime);
     log.replaceChildren(...entries.map((entry) => {
       const line = el("li", { class: "room-log__line" });
@@ -488,10 +503,15 @@ function initRoomView(root) {
     if (registerCount) registerCount.textContent = `${s.present.length}/${s.pupils.length}`;
     const checklistCount = document.querySelector("[data-checklist-count]");
     if (checklistCount) checklistCount.textContent = `${ticked(s)}/${s.checklist.length}`;
+    const hingeButton = document.querySelector("[data-action=hinge]");
+    const decided = decisionOf(s);
+    hingeButton.disabled = !s.hinge;
+    hingeButton.querySelector("[data-hinge-label]").textContent = decided?.decision ? `Hinge · ${DECISION_WORDS[decided.decision]}` : "Hinge";
     undoButton.hidden = undoStack().length === 0;
     if (sheet.open && body.dataset.sheet === "actions") fillActions(s);
     if (sheet.open && body.dataset.sheet === "checklist") fillChecklist(s);
     if (sheet.open && body.dataset.sheet === "register") fillRegister(s);
+    if (sheet.open && body.dataset.sheet === "hinge") fillDecision(s);
   }
 
   /* The panel: Log or Plan, with the strip summarising whichever isn't showing. ---------- */
@@ -708,6 +728,41 @@ function initRoomView(root) {
     fillChecklist(view());
   }
 
+  /** The hinge check: the question, the answers with their misconceptions, a timer, three decisions. */
+  let hingeTimer = null;
+
+  function openHinge() {
+    const s = view();
+    if (!s.hinge) return;
+    show("tpl-hinge", "hinge");
+    body.querySelector("[data-slot=question]").textContent = s.hinge.question;
+    body.querySelector("[data-slot=options]").replaceChildren(
+      el("li", { class: "hinge__option", "data-correct": "" }, `✓ ${s.hinge.answer}`),
+      ...s.hinge.distractors.map((d) => {
+        const item = el("li", { class: "hinge__option" }, d.text);
+        item.append(el("small", { class: "hinge__misconception" }, d.misconception));
+        return item;
+      }),
+    );
+    body.querySelector("[data-slot=threshold]").textContent = `Move on at ${s.hinge.threshold}% right`;
+    fillDecision(s);
+    const opened = Date.now();
+    const timer = body.querySelector("[data-slot=timer]");
+    const tick = () => {
+      const seconds = Math.floor((Date.now() - opened) / 1000);
+      timer.textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    };
+    clearInterval(hingeTimer);
+    hingeTimer = setInterval(tick, 1000);
+  }
+
+  function fillDecision(s) {
+    const decided = decisionOf(s)?.decision;
+    for (const button of body.querySelectorAll("[data-action=decide]")) {
+      button.setAttribute("aria-pressed", String(button.dataset.decision === decided));
+    }
+  }
+
   function openActions() {
     show("tpl-actions", "actions");
     fillActions(view());
@@ -812,6 +867,18 @@ function initRoomView(root) {
         form.querySelector("input").focus();
         break;
       }
+      case "hinge":
+        openHinge();
+        break;
+      case "decide": {
+        const s = view();
+        submit({ type: "check.decide", id: decisionOf(s)?.id ?? queue.uuid(), check: s.hinge.id, decision: target.dataset.decision });
+        close();
+        break;
+      }
+      case "undecide":
+        submit({ type: "check.clear", check: target.dataset.check });
+        break;
       case "remove-observation":
         submit({ type: "observation.remove", observation: target.dataset.observation });
         break;
@@ -924,6 +991,7 @@ function initRoomView(root) {
     if (event.target === sheet) close(); // the backdrop
   });
   sheet.addEventListener("close", () => {
+    clearInterval(hingeTimer);
     body.replaceChildren();
     delete body.dataset.sheet;
     delete body.dataset.pupil;
@@ -972,6 +1040,7 @@ function initRoomView(root) {
     n: () => root.dataset.nextUrl && window.location.assign(root.dataset.nextUrl),
     p: () => document.querySelector("[data-action=pick]").click(),
     a: () => document.querySelector("[data-action=actions]").click(),
+    h: () => document.querySelector("[data-action=hinge]").click(), // a disabled button ignores it
     u: () => undoButton.hidden || undoButton.click(),
     l: () => setPanel(panel.dataset.state !== "open"),
     "?": () => show("tpl-shortcuts", "shortcuts"),

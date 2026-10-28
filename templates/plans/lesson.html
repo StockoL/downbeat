@@ -26,8 +26,33 @@
       {% for f in resources %}{% include "partials/form_row.html" with form=f %}{% endfor %}
     </section>
   </div>
+
+  <section class="flow">
+    <h2 id="hinge">Hinge check</h2>
+    <p class="field__hint">One question at the lesson's turning point, with wrong answers that each show a misconception. In the room it is a button on the bar; what gets recorded is the decision you made, not the class's answers.</p>
+    {% if hinge.non_field_errors %}<div class="alert" data-status="danger" role="alert">{{ hinge.non_field_errors|join:" " }}</div>{% endif %}
+    {{ hinge.question.as_field_group }}
+    <div class="cluster form-row">{{ hinge.answer.as_field_group }}{{ hinge.threshold.as_field_group }}</div>
+    {% for wrong, misconception in hinge.pairs %}
+    <div class="cluster form-row">{{ wrong.as_field_group }}{{ misconception.as_field_group }}</div>
+    {% endfor %}
+  </section>
+
   <button class="button" type="submit" data-variant="primary">Save lesson</button>
 </form>
+
+{% if bank %}
+<form method="post" action="{% url 'hinge_copy' lesson.pk %}" class="cluster form-row">
+  {% csrf_token %}
+  <div class="field">
+    <label class="label" for="hinge-from">Start from another lesson's check</label>
+    <select class="select" id="hinge-from" name="from">
+      {% for check in bank %}<option value="{{ check.pk }}">L{{ check.lesson_plan.order }}: {{ check.question|truncatechars:70 }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="button" type="submit">Use it here</button>
+</form>
+{% endif %}
 
 <form method="post" action="{% url 'lesson_delete' lesson.pk %}" onsubmit="return confirm('Delete this lesson?')">
   {% csrf_token %}

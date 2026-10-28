@@ -68,8 +68,47 @@
     {% endif %}
   </section>
 
+  {% if check %}
   <section class="flow">
-    <h2>3 · Reflection</h2>
+    <h2>3 · Hinge check</h2>
+    <p><strong>{{ check.question }}</strong></p>
+    <p><small>Right: {{ check.answer }}{% for d in check.distractors %} · Wrong: {{ d.text }} ({{ d.misconception }}){% endfor %} · move on at {{ check.threshold }}%</small></p>
+    {% if asked.decision and asked.minutes_in is not None %}<p>Decided in the lesson, {{ asked.minutes_in }} min in.</p>{% endif %}
+    <fieldset class="fieldset">
+      <legend class="legend">What you decided</legend>
+      <div class="choice-group" data-variant="segmented">
+        <label class="choice"><input class="choice__input" type="radio" name="hinge_decision" value="" {% if not asked.decision %}checked{% endif %}> Not asked</label>
+        {% for value, label in decisions %}
+        <label class="choice"><input class="choice__input" type="radio" name="hinge_decision" value="{{ value }}" {% if asked.decision == value %}checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    {% if responses %}
+    <details class="accordion">
+      <summary class="accordion__trigger">Each pupil's answer</summary>
+      <div class="accordion__content">
+        <table class="table">
+          <thead><tr><th scope="col">Pupil</th><th scope="col">Answer</th></tr></thead>
+          <tbody>
+            {% for row in responses %}
+            <tr>
+              <th scope="row"><label for="response-{{ row.pupil.pk }}">{{ row.pupil }}</label></th>
+              <td><select class="select" id="response-{{ row.pupil.pk }}" name="response-{{ row.pupil.pk }}">
+                <option value="">–</option>
+                {% for index, option in options %}<option value="{{ index }}" {% if row.option == index %}selected{% endif %}>{{ option.text }}{% if index == 0 %} ✓{% endif %}</option>{% endfor %}
+              </select></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <section class="flow">
+    <h2>{% if check %}4{% else %}3{% endif %} · Reflection</h2>
     <div class="field">
       <label class="label" for="text">One line</label>
       <textarea class="textarea" id="text" name="text" rows="2">{{ reflection.text }}</textarea>

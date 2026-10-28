@@ -30,7 +30,7 @@ The laptop's SQLite database is the only source of truth. The iPad holds a cache
 | `notes` | NoteType, Note, SpokenTo, Goal, ChecklistItem, ChecklistTick | `sync.py`, `state.py`, `goals.py` |
 | `pupils` | FlagType, PupilFlag, Relationship, Group, GroupMember, LoanItem, Loan; the Pupils area | `missing_out.py` |
 | `plans` | Scheme, Unit, LessonPlan, PlanActivity, Resource, ActivityStatus, SessionReflection, PrepItem; Sweep and Prep | `services.py`, `sweep.py`, `prep.py` |
-| `assessment` | Strand, Band, Component, FeedbackCode, Observation | `criteria.py` |
+| `assessment` | Strand, Band, Component, FeedbackCode, Observation, Check, CheckResponse | `criteria.py`, `hinge.py`, `forms.py` |
 
 Areas map to tempos, not tables: Today (catch), Sweep and Prep (sweep), Plan (plan), Pupils (any time) and Settings.
 
@@ -46,7 +46,7 @@ Login, the PWA files and static files pass through. Five wrong passwords from on
 
 ## The room view
 
-The room view is one Django page that embeds the lesson as JSON (`notes/state.py`, `lesson_state`): seats, pupils, notes, spoken-to, attendance, actions, goals, checklist, plan activities, carried activities, components and observations. Sheets (note, observation, free text, picker, actions, checklist, register) are `<template>` elements rendered by Django and filled by `canvas.js`.
+The room view is one Django page that embeds the lesson as JSON (`notes/state.py`, `lesson_state`): seats, pupils, notes, spoken-to, attendance, actions, goals, checklist, plan activities with the period's start and end, carried activities, components, observations, the hinge check and its decisions. Sheets (note, observation, hinge, free text, picker, actions, checklist, register) are `<template>` elements rendered by Django and filled by `canvas.js`.
 
 `canvas.js` draws everything from that state, then replays this device's pending operations on top through `applyOp`, the same rules the server applies. So a capture appears at once, online or not, and the screen never waits on the network.
 
@@ -62,6 +62,7 @@ Every capture in the room is an **operation** with an id made on the device:
 | `attendance.set` | Absent or present |
 | `checklist.tick`, `checklist.untick` | This lesson's checklist |
 | `observation.add`, `observation.update`, `observation.remove` | An observation against a component, its next step |
+| `check.decide`, `check.clear` | The hinge decision for the class; the first copies the planned question into the session |
 
 There is one path whether the laptop is in reach or not:
 
@@ -98,6 +99,7 @@ Seating edits are not queued: they happen at the desk, online.
 | Names are first name and initial | `Pupil` has no surname field; pasted class lists are cut to the initial |
 | Flags are colour only | Flag labels are rendered on the pupil page only; lesson state, projector view and cover PDF carry no flags |
 | Bands never computed | No field or function derives a band, average or percentage |
+| Whole-class checks store the decision | Sync has no operation for a pupil's answer; answers are entered in the sweep only when the unit opts in, and kept only with a decision |
 | Observations carry a next step | Sheet attaches the default, sync rejects without one, and a database check constraint refuses a row with neither a next step nor a recording |
 | Nightly backup | `core/data.py` `backup`, scheduled by `tools/install-backup-task.ps1` |
 | Export and delete-all | `core/data.py` `export_json` and `delete_all`, over `APP_MODELS`; a test fails if a model is missing |

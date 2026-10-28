@@ -1,6 +1,7 @@
 """Settings → strands and bands; Plan → a unit's components and feedback codes."""
 
 import json
+import uuid
 
 from django import forms
 from django.contrib import messages
@@ -8,13 +9,14 @@ from django.db import transaction
 from django.db.models import ProtectedError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
-from plans.models import Unit
+from plans.models import LessonPlan, Unit
 
 from . import criteria
-from .models import Band, Component, FeedbackCode, Strand
+from .models import Band, Check, Component, FeedbackCode, Strand
 
 StrandFormSet = forms.modelformset_factory(
     Strand, fields=["order", "name"], extra=2, can_delete=True,
@@ -86,6 +88,7 @@ def unit_assessment(request, pk):
         return redirect("unit_assessment", pk=unit.pk)
     return render(request, "assessment/unit.html", {
         "nav": "plan", "unit": unit, "components": components, "codes": codes, "has_strands": Strand.objects.exists(),
+        "checks": Check.objects.filter(lesson_plan__unit=unit).select_related("lesson_plan").order_by("lesson_plan__order"),
     })
 
 
@@ -110,3 +113,19 @@ def components_import(request, pk):
     else:
         messages.success(request, f"Added {added} component{'s' if added != 1 else ''} and {codes} feedback code{'s' if codes != 1 else ''}.")
     return redirect("unit_assessment", pk=unit.pk)
+
+
+@require_POST
+def hinge_copy(request, pk):
+    """Starts a lesson's hinge check from one in the bank, replacing any it had."""
+    lesson = get_object_or_404(LessonPlan, pk=pk)
+    try:
+        source_id = uuid.UUID(request.POST.get("from", ""))
+    except ValueError:
+        source_id = None
+    source = get_object_or_404(Check, pk=source_id, lesson_plan__isnull=False)
+    Check.objects.update_or_create(lesson_plan=lesson, defaults={
+        "question": source.question, "answer": source.answer, "distractors": source.distractors, "threshold": source.threshold,
+    })
+    messages.success(request, f"Copied the hinge check from L{source.lesson_plan.order}. Change it below if this lesson needs it different.")
+    return redirect(reverse("lesson", args=[lesson.pk]) + "#hinge")
