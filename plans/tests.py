@@ -127,6 +127,7 @@ def test_room_view_carries_the_plan_and_offers_the_flip(client, timetable, klass
     assert plan["objective"] == "Blues lesson 2"
     assert [(a["text"], a["minutes"]) for a in plan["activities"]] == [("Warm-up", 5), ("Riff in pairs", 20)]
     assert plan["start"].startswith("2026-11-02T08:50")
+    assert plan["end"].startswith("2026-11-02T09:50")  # after it, the strip stops counting
 
 
 def test_a_session_without_a_lesson_has_no_plan_and_no_flip(client, timetable, klass, room):

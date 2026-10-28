@@ -504,6 +504,7 @@ function initRoomView(root) {
   /** Where the lesson has got to by the clock: the activity now, from the period's start and the minutes. */
   function whereWeAre(plan, now = Date.now()) {
     if (!plan?.start || !plan.activities.length) return null;
+    if (plan.end && now >= Date.parse(plan.end)) return null; // the period is over: nothing is "now"
     const elapsed = Math.floor((now - Date.parse(plan.start)) / 60000);
     if (elapsed < 0) return { before: true, elapsed, index: 0 };
     let total = 0;

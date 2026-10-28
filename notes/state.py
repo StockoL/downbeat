@@ -111,13 +111,17 @@ def _plan(session):
     lesson = session.lesson
     if lesson is None and not carried:
         return None
-    start, _ = Timetable.active().period_times(session.period)
-    starts_at = timezone.make_aware(datetime.datetime.combine(session.date, start)) if start else None
+    start, end = Timetable.active().period_times(session.period)
+
+    def at(time):
+        return timezone.make_aware(datetime.datetime.combine(session.date, time)).isoformat() if time else None
+
     return {
         "title": str(lesson) if lesson else "Carried forward",
         "objective": lesson.objective if lesson else "",
         "activities": [{"id": str(a.pk), "text": a.text, "minutes": a.minutes} for a in lesson.activities.all()] if lesson else [],
         "homework": lesson.homework if lesson else "",
-        "start": starts_at.isoformat() if starts_at else None,
+        "start": at(start),
+        "end": at(end),
         "carried": carried,
     }

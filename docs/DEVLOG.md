@@ -102,7 +102,7 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 **Went wrong, put right.**
 - Browser tests found by an element's accessible name broke when keyboard hints were added to button labels; they now match exact text.
 
-**Documentation.** The README became a signpost to `docs/`: user stories with MoSCoW priorities and BDD scenarios, architecture, operations, development, testing, this log, and screenshots of every built journey. `tools/screenshots.py` regenerates the screenshots from the demo school. Capturing them showed that after a lesson's period ends, the plan strip keeps counting ("836 min in"); to fix.
+**Documentation.** The README became a signpost to `docs/`: user stories with MoSCoW priorities and BDD scenarios, architecture, operations, development, testing, this log, and screenshots of every built journey. `tools/screenshots.py` regenerates the screenshots from the demo school. Capturing them showed that after a lesson's period ended the plan strip kept counting ("836 min in"). Lesson state now carries the period's end, and after it the strip shows the objective with nothing highlighted, as it does when there are no times.
 
 **Next:**
 - 5.3 Hinge checks: a question bank with misconception-tagged distractors, a timer, a three-way decision, and the class-level judgement in the sweep.
