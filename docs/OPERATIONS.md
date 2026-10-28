@@ -29,9 +29,11 @@ To start the server whenever you sign in to Windows, run once:
 
 `serve.ps1 -Port 8765` serves on another port.
 
+To have Downbeat as an app in its own window with a taskbar icon, install it from Edge: [INSTALL.md](INSTALL.md#on-the-windows-laptop).
+
 ## The iPad
 
-The iPad reaches the laptop through Tailscale, which works across school Wi-Fi that isolates devices and gives the laptop a real HTTPS certificate, without which iOS won't install an offline web app. [TAILSCALE.md](TAILSCALE.md) is the step by step. In short: install Tailscale on both, run `.\tools\tailscale-check.ps1` on the laptop, start `tailscale serve`, open the `ts.net` address on the iPad, sign in and Add to Home Screen.
+The iPad reaches the laptop through Tailscale, which works across school Wi-Fi that isolates devices and gives the laptop a real HTTPS certificate, without which iOS won't install an offline web app. [TAILSCALE.md](TAILSCALE.md) sets that up, and [INSTALL.md](INSTALL.md) installs the app on the iPad (and on the laptop) step by step.
 
 Once installed, the room view works with Wi-Fi off. Captures are saved on the iPad and sent when the laptop is reachable; the bottom bar says "3 saved on this device" while any are waiting. A session lasts 120 days, so the iPad doesn't ask for the password mid-lesson. Signing out empties the iPad's cache.
 

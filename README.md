@@ -14,7 +14,7 @@ py -3.12 -m venv .venv
 .\tools\serve.ps1
 ```
 
-Open http://127.0.0.1:8000 and follow the first-run setup. To try it with an invented school instead, see [Demo data](docs/DEVELOPMENT.md#demo-data).
+Open http://127.0.0.1:8000 and follow the first-run setup. Then install it as an app on the laptop and the iPad: [docs/INSTALL.md](docs/INSTALL.md). To try it with an invented school instead, see [Demo data](docs/DEVELOPMENT.md#demo-data).
 
 ## Documentation
 
@@ -25,6 +25,7 @@ Open http://127.0.0.1:8000 and follow the first-run setup. To try it with an inv
 | [docs/BUILD_ORDER.md](docs/BUILD_ORDER.md) | The specification: purpose, data model, the six phases and the rules the build must not break |
 | [docs/UX.md](docs/UX.md) | Navigation, user journeys, page inventory and the room view's layout |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How it fits together: apps, the gate, the offline queue and sync, the seating solver |
+| [docs/INSTALL.md](docs/INSTALL.md) | Installing it as an app: on the Windows laptop in Edge, and on the iPad from Safari's Home Screen |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | Running it day to day: the server, the iPad, backups, restore, export and delete |
 | [docs/TAILSCALE.md](docs/TAILSCALE.md) | Step by step: reaching the laptop from the iPad over HTTPS |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Working on the code: setup, demo data, conventions, theme, commits |

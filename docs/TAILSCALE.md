@@ -26,7 +26,8 @@ Downbeat itself only listens on the laptop (127.0.0.1); Tailscale is the single 
    Downbeat. `tailscale serve` puts HTTPS in front of Downbeat; `--bg` keeps it on across restarts.
    The server task starts Downbeat whenever you sign in to Windows.
 5. **On the iPad**, open `https://teacher-laptop.tail1234.ts.net` in Safari, sign in, then
-   Share → **Add to Home Screen**. Open it from the Home Screen from then on.
+   Share → **Add to Home Screen**. Open it from the Home Screen from then on. [INSTALL.md](INSTALL.md)
+   has every step, and what to do if one doesn't work.
 
 ## Checking it
 
