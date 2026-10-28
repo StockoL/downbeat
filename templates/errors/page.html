@@ -10,9 +10,11 @@ without a request: no messages, no navigation that needs the signed-in user.
 <main class="wrapper region flow center">
   <h1>{% block heading %}{% endblock %}</h1>
   {% block explanation %}{% endblock %}
+  {% block actions %}
   <p class="cluster">
     <a class="button" data-variant="primary" href="/">Today</a>
     <a class="button" href="javascript:history.back()">Go back</a>
   </p>
+  {% endblock %}
 </main>
 {% endblock %}

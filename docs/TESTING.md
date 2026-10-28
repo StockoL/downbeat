@@ -10,7 +10,7 @@ How Downbeat is tested, how to run the tests, and what each part of the suite co
 .venv\Scripts\ruff check .
 ```
 
-The suite runs in about ten seconds: 449 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
+The suite runs in about ten seconds: 451 tests pass and 4 are skipped (see [Skipped tests](#skipped-tests)). `pytest -q path/to/file.py -k name` runs one file or test.
 
 GitHub Actions (`.github/workflows/tests.yml`) runs on every push and pull request. It checks out Downbeat and LooseLeaf-UI side by side, then runs:
 
@@ -58,7 +58,7 @@ Conventions:
 | `core/tests/test_data.py` | 11 | Backup, JSON export round trip, delete-all; every model is in both lists |
 | `core/tests/test_pwa.py` | 6 | Manifest, versioned service worker, every precached file exists, offline page holds no pupil data, sign-out clears saved pages |
 | `core/tests/test_audit.py` | 87 | Every mutating endpoint refuses GET and 404s on unknown rows; seeded random seating runs; `hx-disabled-elt` everywhere |
-| `core/tests/test_errors.py` | 9 | The error pages with a way back (404, 403, 500 rendered without a request, the expired form), a malformed id answering 400, the failed-request line on every page, the form field limit |
+| `core/tests/test_errors.py` | 11 | The error pages with a way back (404, 403, 500 rendered without a request, the expired form), a malformed id answering 400, the failed-request line on every page, the form field limit, the page for a database that needs migrating (and checking only until it doesn't) |
 | `core/tests/test_records_kept.py` | 4 | Deleting a unit or a component never takes pupils' records with it: refused with the reason when observations or judgements point at it |
 | `core/tests/test_rollover.py` | 9 | The review page's defaults (no flag labels), archiving, moving up and leavers, kept and dropped flags, closed and carried actions, no rollover without a backup, the read-only archive, the working lists, bringing a class back, and pasting next year's lists (reuse, another year, a leaver, two matches) |
 | `core/tests/test_seed_demo.py` | 4 | The demo builds, and refuses the real database |

@@ -1,0 +1,16 @@
+{% extends "errors/page.html" %}
+{% comment %}Shown instead of every page while the database is behind the code (it hasn't been migrated).{% endcomment %}
+
+{% block heading_title %}Database needs updating{% endblock %}
+{% block heading %}The database needs updating{% endblock %}
+
+{% block explanation %}
+<p>Downbeat has been updated, or started with <code>manage.py runserver</code>, and its database hasn't caught up yet. Nothing is lost: it only needs its new tables.</p>
+<p>In the <code>downbeat</code> folder, run:</p>
+<pre><code>.venv\Scripts\python manage.py migrate</code></pre>
+<p>then reload this page. <code>.\tools\serve.ps1</code> does this every time it starts.</p>
+{% endblock %}
+
+{% block actions %}
+<p class="cluster"><a class="button" data-variant="primary" href="">Reload</a></p>
+{% endblock %}

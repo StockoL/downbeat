@@ -59,3 +59,25 @@ def test_every_page_carries_the_failed_request_line(client, timetable):
 
 def test_a_whole_school_fits_in_one_form():
     assert settings.DATA_UPLOAD_MAX_NUMBER_FIELDS >= 10_000
+
+
+def test_a_database_behind_the_code_says_what_to_run(client, timetable, monkeypatch):
+    from core.middleware import PendingMigrationsMiddleware
+
+    monkeypatch.setattr(PendingMigrationsMiddleware, "pending", staticmethod(lambda: True))
+    response = client.get("/")
+    page = response.content.decode()
+    assert response.status_code == 503 and "manage.py migrate" in page and "Reload" in page
+
+
+def test_an_up_to_date_database_is_checked_once(rf):
+    from django.http import HttpResponse
+
+    from core.middleware import PendingMigrationsMiddleware
+
+    calls = []
+    middleware = PendingMigrationsMiddleware(lambda request: HttpResponse("ok"))
+    middleware.pending = lambda: calls.append(1) or False
+    middleware(rf.get("/"))
+    middleware(rf.get("/"))
+    assert len(calls) == 1

@@ -63,3 +63,30 @@ class BadInputMiddleware:
         if isinstance(exception, ValidationError):
             return HttpResponseBadRequest(render_to_string("400.html"))
         return None
+
+
+class PendingMigrationsMiddleware:
+    """
+    A database behind the code (started with runserver, or after an update, without migrating) fails
+    on every page with a server error that leads nowhere. Until the migrations are in, show what to
+    run instead. Checked on each request until it passes once, then never again for this process.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.up_to_date = False
+
+    def __call__(self, request):
+        if not self.up_to_date:
+            if self.pending():
+                return HttpResponse(render_to_string("errors/migrations.html"), status=503)
+            self.up_to_date = True
+        return self.get_response(request)
+
+    @staticmethod
+    def pending():
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+
+        executor = MigrationExecutor(connection)
+        return bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))

@@ -12,7 +12,7 @@ $env:DOWNBEAT_DEBUG = "1"
 .venv\Scripts\python manage.py runserver
 ```
 
-`requirements-dev.txt` adds ruff, Hypothesis and Playwright; pytest and pytest-django are in `requirements.txt`. LooseLeaf-UI must be checked out at `../looseleaf-ui`.
+`runserver` doesn't apply migrations, so run `manage.py migrate` after pulling changes; until you do, every page says so. `tools\serve.ps1` migrates every time it starts. `requirements-dev.txt` adds ruff, Hypothesis and Playwright; pytest and pytest-django are in `requirements.txt`. LooseLeaf-UI must be checked out at `../looseleaf-ui`.
 
 ## Demo data
 
