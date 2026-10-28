@@ -1191,3 +1191,51 @@ button.room-strip {
   padding: 0;
   color: var(--color-status-warning-text);
 }
+
+/* --- Parents' evenings: big times to tap when booking, and the night's list on the iPad. --- */
+.evening__free {
+  color: var(--color-text-muted);
+}
+
+.book__times {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: var(--space-xs);
+  padding: 0;
+}
+
+.book__times .button {
+  inline-size: 100%;
+}
+
+.tonight {
+  padding: 0;
+}
+
+.tonight__slot[aria-current] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+}
+
+.tonight__time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.tonight__name {
+  color: var(--color-link);
+  font-size: var(--step-1);
+}
+
+.tonight__attended {
+  margin-inline-start: auto;
+}
+
+.tonight__attended .button {
+  min-block-size: 44px;
+}
+
+.tonight__attended .button[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}

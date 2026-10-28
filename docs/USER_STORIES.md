@@ -45,7 +45,7 @@ Status key: **Built** (with the step that built it), **Planned** (with its phase
 | Reports and evenings | US-70, 71, 72, 75 | US-73, 74 | |
 | Data and safety | US-80, 81, 82, 83, 84, 85 | US-86 | |
 
-Of the Must haves, all but reports (US-70 to 72) and rollover (US-75) are built: Phase 6 and the job before the second September.
+Of the Must haves, all but the rollover (US-75), the job before the second September, are built.
 
 ## Won't have
 
@@ -896,12 +896,22 @@ Scenario: Marked, not sent
 
 ### US-74 Run a parents' evening from the iPad
 **As** the teacher, **I want** to book slots from the class list and open each pupil's page on the night, **so that** I need no paper list.
-Should · Planned (Phase 6)
+Should · Built (Phase 6, step 6.3)
 
 ```gherkin
 Scenario: A family doesn't come
-  When I mark a slot not attended
-  Then an action "Follow up with parents" is added to that pupil
+  When I mark a slot "Didn't come"
+  Then an action "Follow up with parents" is added to that pupil, once
+  And it is in the Actions sheet of their next lesson
+
+Scenario: Booking when a pupil turns up with a sheet
+  Given a parents' evening is coming
+  When I tap "Book" beside Holly R on 9Y's list, then "17:45"
+  Then her family is booked at 17:45 and I am back on the list
+
+Scenario: The school's bookings
+  When I add the school's booking CSV to the evening
+  Then each row whose name matches one pupil is booked, and every other row is listed for me
 ```
 
 ### US-75 Roll over to a new school year

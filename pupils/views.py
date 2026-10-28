@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 from assessment.forms import FeedbackForm, RecordingForm
 from assessment.models import Feedback
 from core.data import export_pupil
+from reports.models import ParentsEvening
 from timetable.models import Class, Pupil, SessionAttendance
 
 from .forms import FlagTypeFormSet, PupilFlagForm, RelationshipForm
@@ -40,6 +41,7 @@ def class_pupils(request, pk):
             attendance[pupil_id] = (came + present, marked + 1)
     return render(request, "pupils/class.html", {
         "nav": "pupils", "klass": klass,
+        "evening_coming": ParentsEvening.objects.filter(date__gte=timezone.localdate()).exists(),
         "rows": [{"pupil": p, "flags": colours.get(p.pk, []), "attendance": attendance.get(p.pk)} for p in pupils],
     })
 

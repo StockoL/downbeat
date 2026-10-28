@@ -1,0 +1,36 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}On the night · {{ evening }} · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'evening' evening.pk %}">← {{ evening }}</a></p>
+<h1>{{ evening.name }}</h1>
+<p>Tap a name for the pupil page. Mark each family as they come; one that doesn't becomes a follow-up action in the pupil's lessons.</p>
+
+{% if slots %}
+<ol class="flow tonight" role="list">
+  {% for slot in slots %}
+  <li class="card tonight__slot" id="slot-{{ slot.pk }}"{% if slot == current %} aria-current="time"{% endif %}><div class="card__body flow">
+    <div class="cluster">
+      <span class="tonight__time">{{ slot.start_time|time:"H:i" }}</span>
+      <a class="tonight__name" href="{% url 'pupil_page' slot.pupil.pk %}">{{ slot.pupil }}</a>
+      <form method="post" action="{% url 'tonight_mark' evening.pk slot.pk %}" class="cluster tonight__attended">
+        {% csrf_token %}
+        <button class="button" type="submit" name="attended" value="yes" aria-pressed="{% if slot.attended %}true{% else %}false{% endif %}">Came</button>
+        <button class="button" type="submit" name="attended" value="no" aria-pressed="{% if slot.attended is False %}true{% else %}false{% endif %}">Didn't come</button>
+      </form>
+    </div>
+    <form method="post" action="{% url 'tonight_mark' evening.pk slot.pk %}" class="cluster form-row">
+      {% csrf_token %}
+      <label class="visually-hidden" for="note-{{ slot.pk }}">Note about {{ slot.pupil }}</label>
+      <input class="input" type="text" id="note-{{ slot.pk }}" name="note" value="{{ slot.on_the_night_note }}" placeholder="A note from the conversation">
+      <button class="button" type="submit" data-variant="ghost">Save note</button>
+    </form>
+    {% if slot.follow_up_note %}<p><small>Action added: {{ slot.follow_up_note }}</small></p>{% endif %}
+  </div></li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>No families are booked yet. They are booked on the <a href="{% url 'evening' evening.pk %}">evening's page</a> or from a class's list.</p>
+{% endif %}
+{% endblock %}

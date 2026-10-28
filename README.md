@@ -34,4 +34,4 @@ Open http://127.0.0.1:8000 and follow the first-run setup. To try it with an inv
 
 ## Status
 
-Phases 1 to 5 are complete: the room, the iPad offline, flags and groups, plans and the sweep, and assessment. Phase 6 (summative judgements, reports and parents' evenings) is next. See [docs/DEVLOG.md](docs/DEVLOG.md).
+All six phases are built: the room, the iPad offline, flags and groups, plans and the sweep, assessment, and reports and parents' evenings. Still to come are the September rollover and the checks that need a real iPad and real lessons. See [docs/DEVLOG.md](docs/DEVLOG.md).

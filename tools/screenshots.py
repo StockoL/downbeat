@@ -65,6 +65,7 @@ import datetime, json
 from django.db.models import Count
 from django.utils import timezone
 from assessment.models import Component, Feedback
+from reports.models import ParentsEvening
 from pupils.models import PupilFlag
 from rooms.models import Room, SeatingPlan
 from timetable.models import Class, Session, Timetable
@@ -102,6 +103,8 @@ print(json.dumps({
     "recorded": str(Feedback.objects.exclude(recording_path="").first().pupil_id),
     "nine_y": str(Class.objects.get(name="9Y Mu").pk),
     "codes_unit": str(Component.objects.filter(unit__feedback_codes__isnull=False).first().unit_id),
+    "evening": str(ParentsEvening.objects.first().pk),
+    "unbooked": str(Class.objects.get(name="9Y Mu").pupils.filter(evening_slots__isnull=True).first().pk),
 }))
 """
     env = environment(DEMO_DB)
@@ -212,6 +215,7 @@ def capture(ids, base, fresh, channel):
         visit(page, f"/pupils/class/{ids['nine_y']}/judgements/", "38-class-judgements")
         visit(page, f"/pupils/class/{ids['nine_y']}/reports/", "39-class-reports", full=False)
         visit(page, "/settings/reports/", "40-report-settings", full=False)
+        visit(page, f"/pupils/evenings/{ids['evening']}/", "41-parents-evening")
         ctx.close()
 
         ctx, page = signed_in(browser, LAPTOP, color_scheme="dark")
@@ -273,6 +277,18 @@ def capture(ids, base, fresh, channel):
         page.locator("[data-action=register]").click()
         sheet.wait_for(state="visible")
         shot(page, "31-ipad-ensemble-register")
+        page.keyboard.press("Escape")
+
+        page.goto(f"{base}/pupils/{ids['unbooked']}/book/?back=/pupils/class/{ids['nine_y']}/")
+        page.wait_for_load_state("networkidle")
+        shot(page, "42-ipad-book-a-family")
+        page.goto(f"{base}/pupils/evenings/{ids['evening']}/tonight/")
+        page.wait_for_load_state("networkidle")
+        page.get_by_role("button", name="Came").first.click()
+        page.wait_for_load_state("networkidle")
+        page.goto(f"{base}/pupils/evenings/{ids['evening']}/tonight/")  # from the top, not the marked slot
+        page.wait_for_load_state("networkidle")
+        shot(page, "43-ipad-parents-evening-night")
         ctx.close()
         browser.close()
     return errors

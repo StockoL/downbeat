@@ -25,7 +25,8 @@ from notes.models import ChecklistItem, Goal, Note, NoteType, SpokenTo
 from plans.models import LessonPlan, PlanActivity, Resource, Scheme, Unit
 from plans.services import fill_from_unit
 from pupils.models import FlagType, Group, GroupMember, Loan, LoanItem, PupilFlag, Relationship
-from reports.models import ReportSentence, ReportStyle, SummativeJudgement
+from reports import evenings
+from reports.models import ParentsEvening, ReportSentence, ReportStyle, SummativeJudgement
 from rooms.adjacency import adjacent
 from rooms.models import Room, Seat, SeatAssignment, SeatingPlan
 from rooms.seating import create_plan, move
@@ -433,6 +434,14 @@ class Command(BaseCommand):
         for strand in Strand.objects.all():
             for band, text in zip(Band.objects.order_by("order"), words[strand.name], strict=True):
                 ReportSentence.objects.create(band=band, strand=strand, text=text)
+
+        # A parents' evening next week, half booked, so booking and the night have something to show.
+        evening = ParentsEvening.objects.create(name="Year 9 parents' evening", date=today + datetime.timedelta(days=7),
+                                                start=datetime.time(16, 30), end=datetime.time(18, 30), slot_minutes=5,
+                                                location="Music block", break_times=[["17:30", "17:40"]])
+        evenings.generate_slots(evening)
+        for slot, pupil in zip(evening.slots.all()[::2], list(classes["9Y Mu"].pupils.all())[:9], strict=False):
+            evenings.book(slot, pupil)
 
         return {
             "pupils": Pupil.objects.count(), "classes": Class.objects.count(), "rooms": Room.objects.count(),

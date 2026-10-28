@@ -1,0 +1,32 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Book {{ pupil }} · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{{ back|default:'/pupils/' }}">← Back</a></p>
+<h1>Book {{ pupil }}'s family</h1>
+{% for item in evenings %}
+<section class="flow">
+  <h2>{{ item.evening }}</h2>
+  {% if item.booked %}
+  <p>Booked at <strong>{{ item.booked.start_time|time:"H:i" }}</strong>.</p>
+  {% elif item.free %}
+  <ul class="book__times" role="list">
+    {% for slot in item.free %}
+    <li><form method="post" action="{% url 'evening_book' item.evening.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="slot" value="{{ slot.pk }}">
+      <input type="hidden" name="pupil" value="{{ pupil.pk }}">
+      <input type="hidden" name="next" value="{{ back }}">
+      <button class="button" type="submit" data-size="large">{{ slot.start_time|time:"H:i" }}</button>
+    </form></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>Every time is booked.</p>
+  {% endif %}
+</section>
+{% empty %}
+<p>No parents' evening is coming up. Evenings are made in <a href="{% url 'evening_list' %}">Pupils → Parents' evenings</a>.</p>
+{% endfor %}
+{% endblock %}

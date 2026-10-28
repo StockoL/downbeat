@@ -149,7 +149,9 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 | --- | --- |
 | `2cfa26a` | 6.1 Summative judgements: a band per strand per unit on the class's Judgements tab, with each pupil's evidence and the unit's exemplars in view and nothing suggested; judgements on the pupil page; an optional UPN for the export |
 
-| (this step) | 6.2 Reports: the comment bank and house style in Settings, each pupil's comment drafted from their bands and feedback, edited and kept, with a live count, house-style warnings and Copy; CSV export; promote-a-note |
+| `35b5bce` | 6.2 Reports: the comment bank and house style in Settings, each pupil's comment drafted from their bands and feedback, edited and kept, with a live count, house-style warnings and Copy; CSV export; promote-a-note |
+
+| (this step) | 6.3 Parents' evenings: an evening's slots from its times, booking from the class list in two taps or the school's CSV, and the night on the iPad with came or didn't, a note, and a follow-up action for a family who didn't come |
 
 **6.1 checked.** The screenshot tool loaded 9Y's Judgements tab with the demo's judgements: evidence above each choice, "Not judged" where none was made. Saving, removing, keeping the date on an unchanged save, and the per-pupil export now including judgements are covered by the tests.
 
@@ -159,3 +161,19 @@ Each step ends with ruff and the full test suite passing locally and in CI, and 
 - **Rollover**, before the second September.
 
 **6.2 checked.** In Edge on the demo school: 9Y's Reports tab drafted Ada M's comment from her three bands and her feedback (221 of 600 characters); typing updated the count; Copy put the text on the clipboard and the button said so; Save kept it. On a pupil page, "Copy for the school system" copied the note's words and marked it "promoted 28 Oct". Drafting, the house-style checks, the CSV and settings are covered by the tests.
+
+**6.3 checked.** The screenshot tool loaded the demo's coming evening (22 times, 9 booked), Holly R's booking page from 9Y's list at iPad size, and the night, where "Came" was tapped for the first family, without a script error; each was checked by eye. Making slots, booking rules, the CSV import, the follow-up action and the return-address guard are covered by the tests.
+
+**6.3 went wrong, put right.**
+- The night's pupil names showed in the browser's default blue: LooseLeaf styles only links without a class, so the name link takes the theme's link colour itself.
+
+### Phase 6 review
+
+*Done when: a class's reports are drafted in one sitting from the app and pasted into the school system without rewriting, and a parents' evening is run from the iPad with no paper list.*
+
+- **Judgements are the teacher's.** The grid puts each pupil's latest state on each strand's components beside the band choices and the unit's exemplars, and every choice starts at "Not judged".
+- **Reports come from the teacher's own words.** The comment bank's sentence for each band judged, then the pupil's latest feedback; edited in place with a live count against the school's limit and house-style warnings; copied one by one, or downloaded as CSV with name, UPN, bands and comment. Nothing writes to the school's system, and nothing produces an overall figure.
+- **The evening needs no paper.** Slots from the times, booking from the class list or the school's file, and the night as one list with the pupil page a tap away; a family who didn't come becomes an action in the next lesson.
+- **Not yet proven:** both halves of "Done when" are about a real sitting and a real evening, and are checked against the demo school until then. Booking and the night need the laptop reachable; if the school's Wi-Fi fails on the evening, the iPad shows the last copy it saved but can't record.
+
+**Still to come:** the rollover job before the second September, and the outstanding real-device and real-lesson checks.

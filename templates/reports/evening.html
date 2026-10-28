@@ -1,0 +1,62 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}{{ evening }} · Parents' evenings · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'evening_list' %}">← Parents' evenings</a></p>
+<div class="cluster">
+  <h1>{{ evening }}</h1>
+  <a class="button" data-variant="primary" href="{% url 'tonight' evening.pk %}">On the night</a>
+</div>
+<p>{{ evening.start|time:"H:i" }}–{{ evening.end|time:"H:i" }}, {{ evening.slot_minutes }} minutes each{% if evening.location %}, {{ evening.location }}{% endif %}. {{ free|length }} of {{ slots|length }} times free.</p>
+
+<div class="switcher">
+  <section class="flow">
+    <h2>Times</h2>
+    <ol class="flow sheet-list" role="list">
+      {% for slot in slots %}
+      <li class="cluster">
+        <span class="sheet-list__when">{{ slot.start_time|time:"H:i" }}</span>
+        {% if slot.pupil %}
+        <a href="{% url 'pupil_page' slot.pupil.pk %}">{{ slot.pupil }}</a>
+        <form method="post" action="{% url 'evening_unbook' evening.pk slot.pk %}">
+          {% csrf_token %}
+          <button class="button" type="submit" data-variant="ghost" data-size="small">Free it</button>
+        </form>
+        {% else %}<span class="evening__free">free</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <div class="flow">
+    {% if free and classes %}
+    <form method="post" action="{% url 'evening_book' evening.pk %}" class="flow">
+      {% csrf_token %}
+      <h2>Book a family</h2>
+      <div class="field"><label class="label" for="book-pupil">Pupil</label>
+        <select class="select" id="book-pupil" name="pupil" required>
+          {% for klass, pupils in classes %}<optgroup label="{{ klass }}">{% for p in pupils %}<option value="{{ p.pk }}">{{ p }}</option>{% endfor %}</optgroup>{% endfor %}
+        </select></div>
+      <div class="field"><label class="label" for="book-slot">Time</label>
+        <select class="select" id="book-slot" name="slot" required>{% for slot in free %}<option value="{{ slot.pk }}">{{ slot.start_time|time:"H:i" }}</option>{% endfor %}</select></div>
+      <button class="button" type="submit" data-variant="primary">Book</button>
+    </form>
+    <p class="field__hint">Families can also be booked from a class's list in Pupils: tap the pupil's "Book", then a time.</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'evening_import' evening.pk %}" enctype="multipart/form-data" class="flow">
+      {% csrf_token %}
+      <h2>From the school's booking system</h2>
+      <p class="field__hint">A CSV with the time and the pupil's name on each row (17:05, Ada Mistry). Names are matched by first name and initial; any row that can't be booked is listed.</p>
+      <input class="input" type="file" name="file" accept=".csv,text/csv">
+      <button class="button" type="submit">Book from the file</button>
+    </form>
+
+    <form method="post" action="{% url 'evening_delete' evening.pk %}" onsubmit="return confirm('Delete this evening and its bookings?')">
+      {% csrf_token %}
+      <button class="button" type="submit" data-variant="danger">Delete evening</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

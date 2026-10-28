@@ -2,7 +2,7 @@
 
 Evidence of the user journeys and key features, captured from the demo school. Every pupil in the demo is invented (first name and initial, generated from a fixed seed), so no real pupil data appears here.
 
-Captured on 28 October 2026 at the end of Phase 5, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
+Captured on 28 October 2026 at the end of Phase 6, in Microsoft Edge. Laptop shots are 1440 × 900; iPad shots are 820 × 1180, an iPad Air in portrait. The room view shots were taken with the browser's clock at 10:17, inside 9Y's P2 lesson. To capture them again after a change, run `.venv\Scripts\python tools\screenshots.py` (see [DEVELOPMENT.md](DEVELOPMENT.md#screenshots)).
 
 Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys are those in [UX.md](UX.md#user-journeys).
 
@@ -18,7 +18,7 @@ Story numbers (US-nn) refer to [USER_STORIES.md](USER_STORIES.md), and journeys 
 - [Pupils](#pupils)
 - [Setting up and looking after the data](#setting-up-and-looking-after-the-data)
 - [Rules made visible](#rules-made-visible)
-- [Not yet built](#not-yet-built)
+- [Still to come](#still-to-come)
 
 ---
 
@@ -176,6 +176,14 @@ Further down the page, **their feedback and observations**, then **recordings ov
 
 ![Report settings](screenshots/40-report-settings.png)
 
+**A parents' evening** (US-74): its times from the start, end, slot length and break, who is booked, booking a family, and the school's booking file.
+
+![A parents' evening](screenshots/41-parents-evening.png)
+
+| Booking from the class list: two taps | On the night, on the iPad |
+| --- | --- |
+| ![Booking a family](screenshots/42-ipad-book-a-family.png) | ![The night's list](screenshots/43-ipad-parents-evening-night.png) |
+
 **The ensemble register** for a choir rehearsal (US-24).
 
 ![The choir register](screenshots/31-ipad-ensemble-register.png)
@@ -209,10 +217,6 @@ Further down the page, **their feedback and observations**, then **recordings ov
 
 ![The projector-safe view](screenshots/06-projector-view.png)
 
-## Not yet built
+## Still to come
 
-These journeys from UX.md have no screens yet:
-
-- **Report season** and **parents' evening**: Phase 6.
-
-This page will gain their screenshots as they are built.
+Every journey in UX.md now has its screens. Still to come is the rollover before the second September, which is a job rather than a journey.

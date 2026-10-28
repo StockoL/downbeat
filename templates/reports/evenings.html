@@ -1,0 +1,28 @@
+{% extends "layouts/desk.html" %}
+
+{% block title %}Parents' evenings · Pupils · Downbeat{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'pupils_home' %}">← Pupils</a></p>
+<h1>Parents' evenings</h1>
+<div class="switcher">
+  <section class="flow">
+    <h2>Evenings</h2>
+    {% if evenings %}
+    <ul class="flow" role="list">
+      {% for e in evenings %}
+      <li class="cluster"><a href="{% url 'evening' e.pk %}">{{ e }}</a> <small>{{ e.start|time:"H:i" }}–{{ e.end|time:"H:i" }}{% if e.location %} · {{ e.location }}{% endif %}</small> <a href="{% url 'tonight' e.pk %}">On the night</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>None yet.</p>
+    {% endif %}
+  </section>
+  <form method="post" class="flow">
+    {% csrf_token %}
+    <h2>New evening</h2>
+    {{ form }}
+    <button class="button" type="submit" data-variant="primary">Make the evening</button>
+  </form>
+</div>
+{% endblock %}

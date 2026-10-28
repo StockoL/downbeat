@@ -64,3 +64,43 @@ class ReportStyle(Base):
     @classmethod
     def current(cls):
         return cls.objects.first() or cls()
+
+
+class ParentsEvening(Base):
+    """An evening the teacher defines; its slots are generated from the times and the slot length."""
+
+    name = models.CharField(max_length=80)
+    date = models.DateField()
+    start = models.TimeField()
+    end = models.TimeField()
+    slot_minutes = models.PositiveSmallIntegerField(default=5)
+    location = models.CharField(max_length=80, blank=True)
+    break_times = models.JSONField(default=list, blank=True, help_text='[["18:00", "18:15"]]: times with no appointments.')
+
+    class Meta:
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"{self.name}, {self.date:%a} {self.date.day} {self.date:%b}"
+
+
+class EveningSlot(Base):
+    """One appointment time, free or booked for a pupil's family, with what happened on the night."""
+
+    evening = models.ForeignKey(ParentsEvening, on_delete=models.CASCADE, related_name="slots")
+    start_time = models.TimeField()
+    pupil = models.ForeignKey("timetable.Pupil", on_delete=models.SET_NULL, null=True, blank=True, related_name="evening_slots")
+    booked_at = models.DateTimeField(null=True, blank=True)
+    attended = models.BooleanField(null=True, blank=True)
+    on_the_night_note = models.TextField(blank=True)
+    follow_up_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["start_time"]
+        constraints = [
+            models.UniqueConstraint(fields=["evening", "start_time"], name="one_slot_per_time"),
+            models.UniqueConstraint(fields=["evening", "pupil"], condition=models.Q(pupil__isnull=False), name="one_slot_per_family"),
+        ]
+
+    def __str__(self):
+        return f"{self.start_time:%H:%M} {self.pupil or 'free'}"
